@@ -113,6 +113,22 @@ window.FLIGHT_INFO = {
     date: "8/11 (一)",
     duration: "2h30m",
   },
+  baggage: {
+    cabin: "經濟艙",
+    checkedPerPerson: "2件 × 23kg",
+    checkedSizeLimit: "三邊總和 ≤ 158cm",
+    carryOnPerPerson: "手提1件 + 個人物品1件，共 ≤ 7kg",
+    carryOnSizeLimit: "55×40×20cm",
+    family: [
+      { type: "成人", count: 4, checkedPieces: 8, checkedKg: 184 },
+      { type: "兒童(佔位)", count: 2, checkedPieces: 4, checkedKg: 92 },
+    ],
+    totalCheckedPieces: 12,
+    totalCheckedKg: 276,
+    totalCarryOnKg: 42,
+    note: "同訂位代號旅客可共享託運額度。回程 BOOKOFF 戰利品記得預留空間！",
+    source: "星宇航空官網 2026 年規定",
+  },
 };
 
 // 6. 住宿資訊
