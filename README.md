@@ -8,3 +8,4 @@
 - 記帳 + 拍照辨識收據
 - 願望清單 + 一鍵導航
 - PWA 離線支援
+- - PWA offline support
