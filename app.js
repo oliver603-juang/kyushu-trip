@@ -1331,6 +1331,52 @@ const InfoTab = () => {
         </div>
       </div>
 
+      {/* 行李限額 */}
+      {flightInfo.baggage && (
+      <div className="glass-panel p-6 rounded-3xl bg-white border-gray-100 shadow-lg">
+        <h3 className="font-bold text-lg mb-4 text-gray-800 flex items-center gap-2">
+          <Icons.ShoppingBag size={20} className="text-[#A2C4C9]" /> 行李限額
+        </h3>
+        <div className="space-y-3">
+          <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+            <div className="text-xs font-bold text-blue-700 mb-2">每人託運額度（{flightInfo.baggage.cabin}）</div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-700">託運行李</span>
+              <span className="font-black text-gray-900">{flightInfo.baggage.checkedPerPerson}</span>
+            </div>
+            <div className="flex justify-between items-center mt-1">
+              <span className="text-sm text-gray-700">尺寸限制</span>
+              <span className="text-xs text-gray-500">{flightInfo.baggage.checkedSizeLimit}</span>
+            </div>
+            <div className="flex justify-between items-center mt-1">
+              <span className="text-sm text-gray-700">隨身行李</span>
+              <span className="text-xs text-gray-500">{flightInfo.baggage.carryOnPerPerson}</span>
+            </div>
+          </div>
+          <div className="bg-green-50 p-4 rounded-xl border border-green-100">
+            <div className="text-xs font-bold text-green-700 mb-2">全家行李總額（{flightInfo.baggage.family?.reduce((s,f)=>s+f.count,0)}人）</div>
+            {flightInfo.baggage.family?.map((f, i) => (
+              <div key={i} className="flex justify-between items-center mt-1">
+                <span className="text-sm text-gray-700">{f.type} ×{f.count}</span>
+                <span className="font-bold text-gray-800">{f.checkedPieces}件 {f.checkedKg}kg</span>
+              </div>
+            ))}
+            <div className="border-t border-green-200 mt-2 pt-2 flex justify-between items-center">
+              <span className="font-bold text-green-800">託運合計</span>
+              <span className="font-black text-lg text-green-800">{flightInfo.baggage.totalCheckedPieces}件 {flightInfo.baggage.totalCheckedKg}kg</span>
+            </div>
+            <div className="flex justify-between items-center mt-1">
+              <span className="text-sm text-gray-600">隨身合計</span>
+              <span className="font-bold text-gray-600">{flightInfo.baggage.totalCarryOnKg}kg</span>
+            </div>
+          </div>
+          {flightInfo.baggage.note && (
+            <div className="text-xs text-gray-400 italic px-1">{flightInfo.baggage.note}</div>
+          )}
+        </div>
+      </div>
+      )}
+
       <div className="glass-panel p-6 rounded-3xl bg-white border-gray-100 shadow-lg">
         <h3 className="font-bold text-lg mb-4 text-gray-800 flex items-center gap-2">
           <Icons.Hotel size={20} className="text-[#E8D595]" /> 住宿安排
