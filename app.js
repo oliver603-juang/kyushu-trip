@@ -1080,6 +1080,20 @@ const ItineraryTab = ({
                           </div>
                         )}
 
+                        {/* 購物提醒徽章 */}
+                        {getMatchingItems(spot.name).length > 0 && (
+                          <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-3 mb-4 animate-pulse">
+                            <div className="text-xs font-bold text-amber-700 mb-1">🛒 這裡可以買！</div>
+                            <div className="flex flex-wrap gap-1">
+                              {getMatchingItems(spot.name).map(item => (
+                                <span key={item.id} className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs font-bold">
+                                  {item.icon} {item.name}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
                         <div className="flex gap-2">
                           <a
                             href={spot.gmapLink}
@@ -1092,6 +1106,12 @@ const ItineraryTab = ({
                             />{" "}
                             地圖
                           </a>
+                          <button
+                            onClick={() => triggerNearbyScan(spot.lat, spot.lon, spot.name)}
+                            className="flex-1 bg-amber-50 text-amber-700 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 active:bg-amber-100 transition border-2 border-amber-200"
+                          >
+                            <Icons.Search size={14} /> 附近買
+                          </button>
                           <button
                             onClick={() => openExpenseModal(spot)}
                             className="flex-1 bg-gray-100 text-gray-700 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 active:bg-gray-200 transition border-2 border-gray-200"
@@ -1860,6 +1880,123 @@ function App() {
     JSON.parse(localStorage.getItem("ticket_overrides") || "{}")
   );
 
+  // --- Shopping List ---
+  const [shoppingList, setShoppingList] = useState(() => {
+    const saved = localStorage.getItem("shopping_list");
+    return saved ? JSON.parse(saved) : (window.SHOPPING_LIST || []);
+  });
+  const [showShoppingPanel, setShowShoppingPanel] = useState(false);
+  const [shoppingAlert, setShoppingAlert] = useState(null);
+  const [nearbyResults, setNearbyResults] = useState(null);
+  const [scanningNearby, setScanningNearby] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem("shopping_list", JSON.stringify(shoppingList));
+  }, [shoppingList]);
+
+  const toggleBought = (id) => {
+    setShoppingList(prev => prev.map(item =>
+      item.id === id ? { ...item, bought: !item.bought } : item
+    ));
+  };
+
+  const addShoppingItem = (name, category, keywords, icon, note) => {
+    const newItem = {
+      id: "s" + Date.now(),
+      name, category,
+      keywords: keywords.split(",").map(k => k.trim()),
+      icon: icon || "🛒",
+      note: note || "",
+      bought: false,
+    };
+    setShoppingList(prev => [...prev, newItem]);
+  };
+
+  const removeShoppingItem = (id) => {
+    setShoppingList(prev => prev.filter(item => item.id !== id));
+  };
+
+  // Match shopping items to a spot name
+  const getMatchingItems = (spotName) => {
+    if (!spotName || !shoppingList) return [];
+    const name = spotName.toLowerCase();
+    return shoppingList.filter(item =>
+      !item.bought && item.keywords?.some(kw => name.toLowerCase().includes(kw.toLowerCase()))
+    );
+  };
+
+  // AI Nearby Shopping Scanner
+  const scanNearbyShops = async (lat, lon, spotName) => {
+    const apiKey = localStorage.getItem("gemini_api_key");
+    if (!apiKey) { alert("請先設定 Gemini API Key"); return; }
+
+    const unbought = shoppingList.filter(i => !i.bought);
+    if (unbought.length === 0) { alert("購物清單已全部買完！"); return; }
+
+    setScanningNearby(true);
+    setNearbyResults(null);
+
+    const itemList = unbought.map(i => i.icon + " " + i.name + "（找：" + i.keywords?.slice(0,3).join("/") + "）").join("\n");
+
+    const prompt = "我現在在日本九州，位置座標 " + lat + "," + lon + "（" + spotName + " 附近）。\n\n" +
+      "我的購物清單（還沒買的）：\n" + itemList + "\n\n" +
+      "請用 Google Search 搜尋我目前位置 500 公尺內可能買到清單物品的商店。\n\n" +
+      "⚠️ 回覆格式要求（嚴格遵守）：\n" +
+      "每間商店用以下格式，一行一項：\n" +
+      "STORE|商店名稱|步行距離（公尺）|可買物品（用逗號分隔）\n\n" +
+      "範例：\nSTORE|サンドラッグ箱崎店|225|太田胃散,DARIYA SALON de PRO\n" +
+      "STORE|BOOKOFF福岡東店|0|LEGO Ninjago 70654,二手BALMUDA\n\n" +
+      "最後如果有找不到的物品，加一行：\nNOTE|找不到的說明\n\n" +
+      "只輸出 STORE| 和 NOTE| 開頭的行，不要其他文字。";
+
+    try {
+      const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          tools: [{ google_search: {} }],
+        }),
+      });
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+      // Parse structured response
+      const lines = text.split("\n").filter(l => l.trim());
+      const stores = [];
+      const notes = [];
+      lines.forEach(line => {
+        const sm = line.match(/STORE\|(.+?)\|(\d+)\|(.+)/);
+        if (sm) stores.push({ name: sm[1], dist: parseInt(sm[2]), items: sm[3].split(",").map(s=>s.trim()), navUrl: "https://www.google.com/maps/dir/?api=1&origin=" + lat + "," + lon + "&destination=" + encodeURIComponent(sm[1]) + "&travelmode=walking" });
+        const nm = line.match(/NOTE\|(.+)/);
+        if (nm) notes.push(nm[1]);
+      });
+
+      if (stores.length > 0) {
+        setNearbyResults({ stores, notes, raw: null });
+      } else {
+        // Fallback: show raw text + generic map search link
+        setNearbyResults({ stores: [], notes: [], raw: text, fallbackUrl: "https://www.google.com/maps/search/藥妝+ドラッグストア/@" + lat + "," + lon + ",16z" });
+      }
+    } catch (e) {
+      setNearbyResults({ stores: [], notes: [], raw: "搜尋失敗：" + e.message, fallbackUrl: null });
+    }
+    setScanningNearby(false);
+  };
+
+  // GPS + Scan
+  const triggerNearbyScan = (fallbackLat, fallbackLon, spotName) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => scanNearbyShops(pos.coords.latitude, pos.coords.longitude, spotName || "目前位置"),
+        () => scanNearbyShops(fallbackLat, fallbackLon, spotName || "目前位置"),
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    } else {
+      scanNearbyShops(fallbackLat, fallbackLon, spotName || "目前位置");
+    }
+  };
+
   // --- States (AI & Feature) ---
   const [selectedCurrency, setSelectedCurrency] = useState(() => {
     const saved = localStorage.getItem("2026_currency") || window.DEFAULT_CURRENCY || "TWD";
@@ -2529,6 +2666,121 @@ ${JSON.stringify(hotelWithDates)}
           />
         )}
       </main>
+      {/* 購物清單浮動按鈕 */}
+      <button
+        onClick={() => setShowShoppingPanel(!showShoppingPanel)}
+        className="fixed bottom-20 right-4 z-50 w-14 h-14 bg-amber-500 text-white rounded-full shadow-lg flex items-center justify-center text-2xl active:scale-90 transition-transform"
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      >
+        🛒
+        {shoppingList.filter(i => !i.bought).length > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+            {shoppingList.filter(i => !i.bought).length}
+          </span>
+        )}
+      </button>
+
+      {/* 購物清單面板 */}
+      {showShoppingPanel && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center" onClick={() => { setShowShoppingPanel(false); setNearbyResults(null); }}>
+          <div className="bg-white w-full max-w-lg rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-black text-gray-900">🛒 購物清單</h2>
+              <button onClick={() => { setShowShoppingPanel(false); setNearbyResults(null); }} className="p-2 text-gray-400"><Icons.X size={24} /></button>
+            </div>
+
+            {/* 清單項目 */}
+            <div className="space-y-2 mb-4">
+              {shoppingList.map(item => (
+                <div key={item.id} className={`flex items-center gap-3 p-3 rounded-xl border-2 transition ${item.bought ? "bg-gray-50 border-gray-100 opacity-50" : "bg-white border-gray-200"}`}>
+                  <button onClick={() => toggleBought(item.id)} className="text-xl flex-shrink-0">
+                    {item.bought ? "✅" : "⬜"}
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    <div className={`font-bold text-sm ${item.bought ? "line-through text-gray-400" : "text-gray-900"}`}>
+                      {item.icon} {item.name}
+                    </div>
+                    {item.note && <div className="text-xs text-gray-400 truncate">{item.note}</div>}
+                    <div className="text-xs text-blue-400 mt-0.5">{item.keywords?.join(" / ")}</div>
+                  </div>
+                  <button onClick={() => removeShoppingItem(item.id)} className="text-gray-300 hover:text-red-400 p-1 flex-shrink-0">
+                    <Icons.X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* 新增項目 */}
+            <details className="mb-4">
+              <summary className="text-sm font-bold text-indigo-600 cursor-pointer">+ 新增購物項目</summary>
+              <div className="mt-2 space-y-2 bg-gray-50 p-3 rounded-xl">
+                <input id="shop-name" placeholder="商品名稱" className="w-full p-2 rounded-lg border text-sm" />
+                <input id="shop-keywords" placeholder="關鍵字（逗號分隔，如：BOOKOFF,Hard Off）" className="w-full p-2 rounded-lg border text-sm" />
+                <input id="shop-note" placeholder="備註（選填）" className="w-full p-2 rounded-lg border text-sm" />
+                <button onClick={() => {
+                  const n = document.getElementById("shop-name").value;
+                  const k = document.getElementById("shop-keywords").value;
+                  const note = document.getElementById("shop-note").value;
+                  if (n && k) {
+                    addShoppingItem(n, "custom", k, "🛒", note);
+                    document.getElementById("shop-name").value = "";
+                    document.getElementById("shop-keywords").value = "";
+                    document.getElementById("shop-note").value = "";
+                  }
+                }} className="w-full py-2 bg-indigo-600 text-white rounded-lg font-bold text-sm">新增</button>
+              </div>
+            </details>
+
+            {/* AI 附近掃描 */}
+            <button
+              onClick={() => triggerNearbyScan(33.59, 130.40, "目前位置")}
+              disabled={scanningNearby}
+              className="w-full py-4 bg-amber-500 text-white rounded-xl font-black text-lg shadow-lg active:scale-95 transition-transform disabled:opacity-50 mb-3"
+            >
+              {scanningNearby ? "🔍 AI 掃描中..." : "📡 AI 購物雷達（GPS 定位）"}
+            </button>
+
+            {/* AI 結果 */}
+            {nearbyResults && (
+              <div className="space-y-3">
+                <div className="font-bold text-blue-700 text-sm">🤖 AI 搜尋結果</div>
+                {nearbyResults.stores?.map((store, i) => (
+                  <div key={i} className="bg-white border-2 border-gray-200 rounded-xl p-3">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-bold text-sm text-gray-900">{store.name}</span>
+                      <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-bold">🚶 {store.dist}m</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {store.items?.map((item, j) => (
+                        <span key={j} className="bg-amber-50 text-amber-800 px-2 py-0.5 rounded-full text-xs font-bold border border-amber-200">{item}</span>
+                      ))}
+                    </div>
+                    <a href={store.navUrl} target="_blank" rel="noreferrer"
+                      className="block w-full py-3 bg-gray-900 text-white text-center rounded-xl font-bold text-sm">
+                      🚶 步行導航（{store.dist}m）
+                    </a>
+                  </div>
+                ))}
+                {nearbyResults.notes?.map((note, i) => (
+                  <div key={i} className="text-xs text-gray-500 px-1">{note}</div>
+                ))}
+                {nearbyResults.raw && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-gray-700 whitespace-pre-wrap">
+                    {nearbyResults.raw}
+                    {nearbyResults.fallbackUrl && (
+                      <a href={nearbyResults.fallbackUrl} target="_blank" rel="noreferrer"
+                        className="block mt-3 py-3 bg-gray-900 text-white text-center rounded-xl font-bold text-sm">
+                        🔍 在 Google Maps 搜附近藥妝店
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="fixed bottom-0 w-full bg-white/95 backdrop-blur-md border-t-2 border-gray-200 pb-safe z-40 flex justify-around py-3 text-xs font-bold text-gray-500">
         <button
           onClick={() => setActiveTab("itinerary")}
