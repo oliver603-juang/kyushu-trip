@@ -843,6 +843,8 @@ const ItineraryTab = ({
   getTicketCounts,
   updateSpotTicketCount,
   STAY_OPTIONS,
+  getMatchingItems,
+  triggerNearbyScan,
   ticketOverrides,
   handleManualTicketEdit,
   isTicketEstimating,
@@ -2632,6 +2634,8 @@ ${JSON.stringify(hotelWithDates)}
             ticketOverrides={ticketOverrides}
             handleManualTicketEdit={handleManualTicketEdit}
             isTicketEstimating={isTicketEstimating}
+            getMatchingItems={getMatchingItems}
+            triggerNearbyScan={triggerNearbyScan}
           />
         )}
         {activeTab === "info" && <InfoTab />}
