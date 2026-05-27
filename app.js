@@ -845,6 +845,7 @@ const ItineraryTab = ({
   STAY_OPTIONS,
   getMatchingItems,
   scanSpotNearby,
+  openChainFinder,
   ticketOverrides,
   handleManualTicketEdit,
   isTicketEstimating,
@@ -1177,6 +1178,19 @@ const ItineraryTab = ({
                               {isWalk
                                 ? spot.nextStop.walkTime
                                 : spot.nextStop.driveTime}
+                            </button>
+                            <button
+                              onClick={() => {
+                                const curSpot = spot;
+                                const nextData = spot.nextStop;
+                                openChainFinder(
+                                  { name: curSpot.name, lat: curSpot.lat, lon: curSpot.lon },
+                                  { name: nextData.name, lat: nextData.lat, lon: nextData.lon }
+                                );
+                              }}
+                              className="flex items-center gap-1 bg-orange-50 text-orange-600 px-3 py-2.5 rounded-xl font-bold active:scale-95 transition-transform text-sm border-2 border-orange-200"
+                            >
+                              🍚
                             </button>
                             <a
                               href={spot.nextStop.navLink}
@@ -1892,6 +1906,53 @@ function App() {
   const [nearbyResults, setNearbyResults] = useState(null);
   const [scanningNearby, setScanningNearby] = useState(false);
 
+  // --- Chain Store Finder ---
+  const [showChainPanel, setShowChainPanel] = useState(false);
+  const [chainMidpoint, setChainMidpoint] = useState(null);
+  const [chainAIResult, setChainAIResult] = useState(null);
+  const [chainAIScanning, setChainAIScanning] = useState(false);
+  const chains = window.CHAIN_STORES || [];
+
+  const openChainFinder = (spotA, spotB) => {
+    const midLat = ((spotA.lat || 0) + (spotB.lat || 0)) / 2;
+    const midLon = ((spotA.lon || 0) + (spotB.lon || 0)) / 2;
+    setChainMidpoint({ midLat, midLon, fromName: spotA.name, toName: spotB.name, fromLat: spotA.lat, fromLon: spotA.lon, toLat: spotB.lat, toLon: spotB.lon });
+    setChainAIResult(null);
+    setShowChainPanel(true);
+  };
+
+  const chainMapUrl = (query, midLat, midLon) =>
+    "https://www.google.com/maps/search/" + encodeURIComponent(query) + "/@" + midLat + "," + midLon + ",14z";
+
+  const chainAIRecommend = async () => {
+    const apiKey = localStorage.getItem("gemini_api_key");
+    if (!apiKey || !chainMidpoint) return;
+    setChainAIScanning(true);
+    setChainAIResult(null);
+    const names = chains.map(c => c.icon + c.name).join("、");
+    const prompt = "我正在日本九州自駕旅行。從「" + chainMidpoint.fromName + "」(" + chainMidpoint.fromLat + "," + chainMidpoint.fromLon + ") 開車前往「" + chainMidpoint.toName + "」(" + chainMidpoint.toLat + "," + chainMidpoint.toLon + ")。\n\n以下是我想找的連鎖店：" + names + "\n\n請用 Google Search 搜尋這條路線沿途（不繞路或繞路最少）有哪些分店。\n\n回覆格式（嚴格遵守）：\n每間店一行：STORE|店名（含分店名）|離路線偏離距離（公尺）|類型（丼飯/超市）\n最後加 NOTE|綜合建議\n\n只輸出 STORE| 和 NOTE| 開頭的行。";
+    try {
+      const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }], tools: [{ google_search: {} }] }),
+      });
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      const lines = text.split("\n").filter(l => l.trim());
+      const stores = []; const notes = [];
+      lines.forEach(line => {
+        const sm = line.match(/STORE\|(.+?)\|(\d+)\|(.+)/);
+        if (sm) stores.push({ name: sm[1], detour: parseInt(sm[2]), type: sm[3], navUrl: "https://www.google.com/maps/dir/?api=1&origin=" + chainMidpoint.fromLat + "," + chainMidpoint.fromLon + "&destination=" + encodeURIComponent(sm[1]) + "&waypoints=" + chainMidpoint.toLat + "," + chainMidpoint.toLon + "&travelmode=driving" });
+        const nm = line.match(/NOTE\|(.+)/);
+        if (nm) notes.push(nm[1]);
+      });
+      setChainAIResult(stores.length > 0 ? { stores, notes, raw: null } : { stores: [], notes: [], raw: text });
+    } catch (e) {
+      setChainAIResult({ stores: [], notes: [], raw: "搜尋失敗：" + e.message });
+    }
+    setChainAIScanning(false);
+  };
+
   useEffect(() => {
     localStorage.setItem("shopping_list", JSON.stringify(shoppingList));
   }, [shoppingList]);
@@ -2165,6 +2226,8 @@ function App() {
           nextArrivalTimeStr = minutesToTimeStr(currentMinutes);
           nextStopInfo = {
             name: nextSpot.name,
+            lat: nextSpot.lat,
+            lon: nextSpot.lon,
             distance: `${dist} km`,
             driveTime: Math.round((dist / 40) * 60 + 10) + "m",
             walkTime: Math.round((dist / 4) * 60) + "m",
@@ -2643,6 +2706,7 @@ ${JSON.stringify(hotelWithDates)}
             isTicketEstimating={isTicketEstimating}
             getMatchingItems={getMatchingItems}
             scanSpotNearby={scanSpotNearby}
+            openChainFinder={openChainFinder}
           />
         )}
         {activeTab === "info" && <InfoTab />}
@@ -2677,6 +2741,71 @@ ${JSON.stringify(hotelWithDates)}
           />
         )}
       </main>
+      {/* 連鎖店搜尋面板 */}
+      {showChainPanel && chainMidpoint && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center" onClick={() => setShowChainPanel(false)}>
+          <div className="bg-white w-full max-w-lg rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-lg font-black text-gray-900">🍚 沿途連鎖店</h2>
+              <button onClick={() => setShowChainPanel(false)} className="p-2 text-gray-400"><Icons.X size={24} /></button>
+            </div>
+            <div className="text-xs text-gray-400 mb-4">{chainMidpoint.fromName} → {chainMidpoint.toName}</div>
+
+            {/* 丼飯 */}
+            <div className="text-xs font-bold text-orange-600 mb-2">🍚 丼飯連鎖</div>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {chains.filter(c => c.cat === "丼飯").map((c, i) => (
+                <a key={i} href={chainMapUrl(c.query, chainMidpoint.midLat, chainMidpoint.midLon)} target="_blank" rel="noreferrer"
+                  className="flex items-center gap-2 p-3 bg-orange-50 rounded-xl border border-orange-200 text-sm font-bold text-orange-800 active:bg-orange-100 transition">
+                  <span className="text-lg">{c.icon}</span> {c.name}
+                </a>
+              ))}
+            </div>
+
+            {/* 超市 */}
+            <div className="text-xs font-bold text-green-600 mb-2">🛒 超市連鎖</div>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {chains.filter(c => c.cat === "超市").map((c, i) => (
+                <a key={i} href={chainMapUrl(c.query, chainMidpoint.midLat, chainMidpoint.midLon)} target="_blank" rel="noreferrer"
+                  className="flex items-center gap-2 p-3 bg-green-50 rounded-xl border border-green-200 text-sm font-bold text-green-800 active:bg-green-100 transition">
+                  <span className="text-lg">{c.icon}</span> {c.name}
+                </a>
+              ))}
+            </div>
+
+            {/* AI 推薦 */}
+            <button onClick={chainAIRecommend} disabled={chainAIScanning}
+              className="w-full py-4 bg-indigo-600 text-white rounded-xl font-black text-base shadow-lg active:scale-95 transition-transform disabled:opacity-50 mb-3">
+              {chainAIScanning ? "🔍 AI 分析路線中..." : "🤖 AI 推薦最順路的店"}
+            </button>
+
+            {chainAIResult && (
+              <div className="space-y-2">
+                {chainAIResult.stores?.map((store, i) => (
+                  <div key={i} className="bg-white border-2 border-gray-200 rounded-xl p-3">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-bold text-sm text-gray-900">{store.name}</span>
+                      <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-xs font-bold">偏離 {store.detour}m</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mb-2">{store.type}</div>
+                    <a href={store.navUrl} target="_blank" rel="noreferrer"
+                      className="block w-full py-3 bg-gray-900 text-white text-center rounded-xl font-bold text-sm">
+                      🚗 開車導航（經過此店）
+                    </a>
+                  </div>
+                ))}
+                {chainAIResult.notes?.map((note, i) => (
+                  <div key={i} className="text-xs text-gray-500 px-1">{note}</div>
+                ))}
+                {chainAIResult.raw && (
+                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm text-gray-700 whitespace-pre-wrap">{chainAIResult.raw}</div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* 購物清單浮動按鈕 */}
       <button
         onClick={() => setShowShoppingPanel(!showShoppingPanel)}
