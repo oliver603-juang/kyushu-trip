@@ -73,6 +73,10 @@ const { useState, useEffect, useMemo, useCallback, useRef } = React;
     window.Icons.Edit = iconDef([
       "M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z",
     ]);
+  if (!window.Icons.Download)
+    window.Icons.Download = iconDef(["M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4","M7 10l5 5 5-5","M12 15V3"]);
+  if (!window.Icons.Upload)
+    window.Icons.Upload = iconDef(["M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4","M17 8l-5-5-5 5","M12 3v12"]);
 })();
 
 // ==========================================
