@@ -1451,11 +1451,98 @@ const InfoTab = () => {
           })}
         </div>
       </div>
+
+      {/* 資料備份/還原 */}
+      <div className="glass-panel p-6 rounded-3xl bg-white border-gray-100 shadow-lg">
+        <h3 className="font-bold text-lg mb-4 text-gray-800 flex items-center gap-2">
+          <Icons.Download size={20} className="text-[#4ECDC4]" /> 資料備份 / 還原
+        </h3>
+        <div className="space-y-3">
+          <button
+            onClick={() => {
+              const tripId = window.TRIP_ID || "unknown";
+              const keysToExport = ["shopping_list","expenses","trip_spot_tickets","ticket_overrides","start_times","departures","stays","modes","2026_currency","gemini_api_key","themeIndex","user_email"];
+              const data = { _meta: { tripId, exportedAt: new Date().toISOString(), device: navigator.userAgent.substring(0,80), version: 1 } };
+              keysToExport.forEach(key => { const v = localStorage.getItem(key); if (v !== null) data[key] = v; });
+              const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              const ts = new Date().toISOString().replace(/[T:]/g,"-").substring(0,16);
+              a.href = url; a.download = tripId + "-backup-" + ts + ".json"; a.click();
+              URL.revokeObjectURL(url);
+              alert("✅ 備份完成！\n\n檔案：" + a.download + "\n\n請存到 Google Drive 或分享到 LINE，其他裝置就能匯入。");
+            }}
+            className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-base shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2"
+          >
+            <Icons.Download size={18} /> 📤 匯出全部資料（備份）
+          </button>
+
+          <div className="relative">
+            <input
+              type="file"
+              accept=".json"
+              id="import-file-input"
+              className="absolute inset-0 opacity-0 cursor-pointer z-10"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                  try {
+                    const imported = JSON.parse(evt.target.result);
+                    const meta = imported._meta;
+                    if (!meta) { alert("❌ 無效的備份檔案（缺少 _meta）"); return; }
+
+                    const localTripId = window.TRIP_ID || "unknown";
+                    if (meta.tripId !== localTripId) {
+                      if (!confirm("⚠️ 行程不一致！\n\n備份行程：" + meta.tripId + "\n本機行程：" + localTripId + "\n\n確定要匯入不同行程的資料嗎？")) return;
+                    }
+
+                    const exportTime = new Date(meta.exportedAt).toLocaleString("zh-TW");
+                    const keysToImport = Object.keys(imported).filter(k => k !== "_meta");
+
+                    let diffReport = "📋 匯入預覽：\n\n";
+                    diffReport += "行程：" + meta.tripId + "\n";
+                    diffReport += "備份時間：" + exportTime + "\n";
+                    diffReport += "備份裝置：" + (meta.device || "未知").substring(0,40) + "\n\n";
+
+                    keysToImport.forEach(key => {
+                      const local = localStorage.getItem(key);
+                      const remote = imported[key];
+                      if (local === null) {
+                        diffReport += "🆕 " + key + "（本機無 ← 匯入新增）\n";
+                      } else if (local !== remote) {
+                        diffReport += "🔄 " + key + "（將覆蓋）\n";
+                      } else {
+                        diffReport += "✅ " + key + "（相同，不變）\n";
+                      }
+                    });
+
+                    diffReport += "\n共 " + keysToImport.length + " 項資料。確定匯入？";
+
+                    if (confirm(diffReport)) {
+                      keysToImport.forEach(key => { localStorage.setItem(key, imported[key]); });
+                      alert("✅ 匯入完成！頁面將重新載入。");
+                      window.location.reload();
+                    }
+                  } catch (err) {
+                    alert("❌ 檔案解析失敗：" + err.message);
+                  }
+                };
+                reader.readAsText(file);
+                e.target.value = "";
+              }}
+            />
+            <button className="w-full py-4 bg-gray-100 text-gray-700 rounded-xl font-bold text-base border-2 border-gray-200 flex items-center justify-center gap-2 pointer-events-none">
+              <Icons.Upload size={18} /> 📥 匯入資料（還原）
+            </button>
+          </div>
+          <p className="text-xs text-gray-400 text-center">匯入前會顯示差異比對，確認後才覆蓋。不同行程的資料會額外警告。</p>
+        </div>
+      </div>
     </div>
   );
 };
-
-// --- StatsTab ---
 const StatsTab = ({
   dailyStats,
   handleOpenDailyDetail,
