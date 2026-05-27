@@ -231,3 +231,19 @@ window.SHOPPING_LIST = [
   { id: "s3", name: "DARIYA SALON de PRO 5號 白髮染髮霜", category: "cosmetics", keywords: ["藥妝","ドラッグストア","マツモトキヨシ","ウエルシア","サンドラッグ","コスモス","ツルハ","スギ薬局","ダイコクドラッグ"], icon: "💇", note: "快速染髮系列，5號自然棕", bought: false },
   { id: "s4", name: "二手 BALMUDA 微波烤箱", category: "electronics", keywords: ["Hard Off","BOOKOFF","ハードオフ","ブックオフ","Off House","オフハウス","SUPER BAZAAR","Mina天神","リサイクル","セカンドストリート"], icon: "🔌", note: "The Range 或 The Toaster，看品相再買", bought: false },
 ];
+
+// 10. 沿途連鎖店快速搜尋
+window.CHAIN_STORES = [
+  { cat: "丼飯", name: "すき家", icon: "🥩", query: "すき家" },
+  { cat: "丼飯", name: "吉野家", icon: "🐂", query: "吉野家" },
+  { cat: "丼飯", name: "松屋", icon: "🍛", query: "松屋+牛丼" },
+  { cat: "丼飯", name: "なか卯", icon: "🐔", query: "なか卯" },
+  { cat: "超市", name: "AEON", icon: "🛒", query: "イオン+AEON+MaxValu" },
+  { cat: "超市", name: "OK超市", icon: "🏷️", query: "オーケーストア+OK" },
+  { cat: "超市", name: "ロピア", icon: "🥩", query: "ロピア+LOPIA" },
+  { cat: "超市", name: "業務超市", icon: "📦", query: "業務スーパー" },
+  { cat: "超市", name: "LIFE", icon: "🏪", query: "ライフ+LIFE+スーパー" },
+  { cat: "超市", name: "SEIYU", icon: "🟢", query: "西友+SEIYU" },
+  { cat: "超市", name: "ヤオコー", icon: "🍎", query: "ヤオコー+YAOKO" },
+  { cat: "超市", name: "イトーヨーカドー", icon: "🏬", query: "イトーヨーカドー" },
+];
