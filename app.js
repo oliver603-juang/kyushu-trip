@@ -1988,6 +1988,7 @@ function App() {
 
   // GPS + Scan
   const triggerNearbyScan = (fallbackLat, fallbackLon, spotName) => {
+    setShowShoppingPanel(true);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => scanNearbyShops(pos.coords.latitude, pos.coords.longitude, spotName || "目前位置"),
