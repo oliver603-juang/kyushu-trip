@@ -844,7 +844,7 @@ const ItineraryTab = ({
   updateSpotTicketCount,
   STAY_OPTIONS,
   getMatchingItems,
-  triggerNearbyScan,
+  scanSpotNearby,
   ticketOverrides,
   handleManualTicketEdit,
   isTicketEstimating,
@@ -1109,7 +1109,7 @@ const ItineraryTab = ({
                             地圖
                           </a>
                           <button
-                            onClick={() => triggerNearbyScan(spot.lat, spot.lon, spot.name)}
+                            onClick={() => scanSpotNearby(spot.lat, spot.lon, spot.name)}
                             className="flex-1 bg-amber-50 text-amber-700 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 active:bg-amber-100 transition border-2 border-amber-200"
                           >
                             <Icons.Search size={14} /> 附近買
@@ -1986,17 +1986,23 @@ function App() {
     setScanningNearby(false);
   };
 
-  // GPS + Scan
-  const triggerNearbyScan = (fallbackLat, fallbackLon, spotName) => {
+  // 「附近買」= 用景點座標偵察（不需 GPS）
+  const scanSpotNearby = (spotLat, spotLon, spotName) => {
+    setShowShoppingPanel(true);
+    scanNearbyShops(spotLat, spotLon, spotName);
+  };
+
+  // 「AI 購物雷達」= 用 GPS 即時定位掃描
+  const triggerGPSRadar = () => {
     setShowShoppingPanel(true);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => scanNearbyShops(pos.coords.latitude, pos.coords.longitude, spotName || "目前位置"),
-        () => scanNearbyShops(fallbackLat, fallbackLon, spotName || "目前位置"),
-        { enableHighAccuracy: true, timeout: 5000 }
+        (pos) => scanNearbyShops(pos.coords.latitude, pos.coords.longitude, "📍 GPS 即時定位"),
+        () => { alert("GPS 定位失敗，請確認已授權位置權限"); setScanningNearby(false); },
+        { enableHighAccuracy: true, timeout: 8000 }
       );
     } else {
-      scanNearbyShops(fallbackLat, fallbackLon, spotName || "目前位置");
+      alert("此裝置不支援 GPS 定位");
     }
   };
 
@@ -2636,7 +2642,7 @@ ${JSON.stringify(hotelWithDates)}
             handleManualTicketEdit={handleManualTicketEdit}
             isTicketEstimating={isTicketEstimating}
             getMatchingItems={getMatchingItems}
-            triggerNearbyScan={triggerNearbyScan}
+            scanSpotNearby={scanSpotNearby}
           />
         )}
         {activeTab === "info" && <InfoTab />}
@@ -2738,11 +2744,11 @@ ${JSON.stringify(hotelWithDates)}
 
             {/* AI 附近掃描 */}
             <button
-              onClick={() => triggerNearbyScan(33.59, 130.40, "目前位置")}
+              onClick={() => triggerGPSRadar()}
               disabled={scanningNearby}
               className="w-full py-4 bg-amber-500 text-white rounded-xl font-black text-lg shadow-lg active:scale-95 transition-transform disabled:opacity-50 mb-3"
             >
-              {scanningNearby ? "🔍 AI 掃描中..." : "📡 AI 購物雷達（GPS 定位）"}
+              {scanningNearby ? "🔍 AI 掃描中..." : "📡 AI 購物雷達（GPS 即時定位）"}
             </button>
 
             {/* AI 結果 */}
