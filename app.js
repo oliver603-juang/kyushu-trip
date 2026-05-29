@@ -2021,7 +2021,7 @@ function App() {
     setChainAIScanning(true);
     setChainAIResult(null);
     const names = chains.map(c => c.icon + c.name).join("、");
-    const prompt = "我正在日本九州自駕旅行。從「" + chainMidpoint.fromName + "」(" + chainMidpoint.fromLat + "," + chainMidpoint.fromLon + ") 開車前往「" + chainMidpoint.toName + "」(" + chainMidpoint.toLat + "," + chainMidpoint.toLon + ")。\n\n以下是我想找的連鎖店：" + names + "\n\n請用 Google Search 搜尋這條路線沿途（不繞路或繞路最少）有哪些分店。\n\n回覆格式（嚴格遵守）：\n每間店一行：STORE|店名（含分店名）|離路線偏離距離（公尺）|類型（丼飯/超市）\n最後加 NOTE|綜合建議\n\n只輸出 STORE| 和 NOTE| 開頭的行。";
+    const prompt = "我正在日本九州自駕旅行。\n起點：「" + chainMidpoint.fromName + "」(" + chainMidpoint.fromLat + "," + chainMidpoint.fromLon + ")\n終點：「" + chainMidpoint.toName + "」(" + chainMidpoint.toLat + "," + chainMidpoint.toLon + ")\n\n以下是我想找的連鎖店：" + names + "\n\n請用 Google Search 搜尋這條路線沿途有哪些分店。\n\n⚠️ 繞路距離計算方式（務必遵守）：\n步驟 1：估算「起點直接開到終點」的開車距離 = D1\n步驟 2：對每間找到的店，估算「起點 → 該店 → 終點」的開車距離 = D2\n步驟 3：繞路距離 = D2 - D1（單位：公尺）\n如果 D2 ≈ D1（差距在 500m 以內），繞路距離寫 0。\n\n回覆格式（嚴格遵守）：\n第一行寫直達距離：DIRECT|D1公尺\n每間店一行：STORE|店名（含分店名）|繞路距離（公尺）|類型（丼飯/超市）\n按繞路距離由小到大排列。\n最後加 NOTE|綜合建議（推薦哪間最順路、是否可以一次吃飯加購物）\n\n只輸出 DIRECT|、STORE|、NOTE| 開頭的行，不要其他文字。";
     try {
       const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey, {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -2030,14 +2030,16 @@ function App() {
       const data = await res.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
       const lines = text.split("\n").filter(l => l.trim());
-      const stores = []; const notes = [];
+      const stores = []; const notes = []; let directDist = null;
       lines.forEach(line => {
+        const dm = line.match(/DIRECT\|(\d+)/);
+        if (dm) directDist = parseInt(dm[1]);
         const sm = line.match(/STORE\|(.+?)\|(\d+)\|(.+)/);
-        if (sm) stores.push({ name: sm[1], detour: parseInt(sm[2]), type: sm[3], navUrl: "https://www.google.com/maps/dir/?api=1&origin=" + chainMidpoint.fromLat + "," + chainMidpoint.fromLon + "&destination=" + encodeURIComponent(sm[1]) + "&waypoints=" + chainMidpoint.toLat + "," + chainMidpoint.toLon + "&travelmode=driving" });
+        if (sm) stores.push({ name: sm[1], detour: parseInt(sm[2]), type: sm[3], navUrl: "https://www.google.com/maps/dir/?api=1&origin=" + chainMidpoint.fromLat + "," + chainMidpoint.fromLon + "&destination=" + chainMidpoint.toLat + "," + chainMidpoint.toLon + "&waypoints=" + encodeURIComponent(sm[1]) + "&travelmode=driving" });
         const nm = line.match(/NOTE\|(.+)/);
         if (nm) notes.push(nm[1]);
       });
-      setChainAIResult(stores.length > 0 ? { stores, notes, raw: null } : { stores: [], notes: [], raw: text });
+      setChainAIResult(stores.length > 0 ? { stores, notes, raw: null, directDist } : { stores: [], notes: [], raw: text, directDist });
     } catch (e) {
       setChainAIResult({ stores: [], notes: [], raw: "搜尋失敗：" + e.message });
     }
@@ -2872,11 +2874,19 @@ ${JSON.stringify(hotelWithDates)}
 
             {chainAIResult && (
               <div className="space-y-2">
+                <div className="font-bold text-indigo-700 text-sm">🤖 AI 分析結果</div>
+                {chainAIResult.directDist && (
+                  <div className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 text-center">
+                    📏 起點直達終點：{chainAIResult.directDist >= 1000 ? (chainAIResult.directDist/1000).toFixed(1)+"km" : chainAIResult.directDist+"m"}
+                  </div>
+                )}
                 {chainAIResult.stores?.map((store, i) => (
                   <div key={i} className="bg-white border-2 border-gray-200 rounded-xl p-3">
                     <div className="flex justify-between items-center mb-2">
                       <span className="font-bold text-sm text-gray-900">{store.name}</span>
-                      <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-xs font-bold">偏離 {store.detour}m</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${store.detour === 0 ? "bg-green-100 text-green-700" : store.detour <= 2000 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}`}>
+                        {store.detour === 0 ? "✅ 不繞路" : "🔄 +" + (store.detour >= 1000 ? (store.detour/1000).toFixed(1)+"km" : store.detour+"m")}
+                      </span>
                     </div>
                     <div className="text-xs text-gray-500 mb-2">{store.type}</div>
                     <a href={store.navUrl} target="_blank" rel="noreferrer"
