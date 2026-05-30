@@ -2000,19 +2000,22 @@ function App() {
   // --- Chain Store Finder ---
   const [showChainPanel, setShowChainPanel] = useState(false);
   const [chainMidpoint, setChainMidpoint] = useState(null);
+  const [chainStores, setChainStores] = useState([]);
   const chains = window.CHAIN_STORES || [];
 
   const openChainFinder = (spotA, spotB) => {
     const midLat = ((spotA.lat || 0) + (spotB.lat || 0)) / 2;
     const midLon = ((spotA.lon || 0) + (spotB.lon || 0)) / 2;
-    const d1km = parseFloat(getDistanceFromLatLonInKm(spotA.lat, spotA.lon, spotB.lat, spotB.lon));
-    const d1drive = Math.round(d1km * 1.3);
-    setChainMidpoint({ midLat, midLon, fromName: spotA.name, toName: spotB.name, fromLat: spotA.lat, fromLon: spotA.lon, toLat: spotB.lat, toLon: spotB.lon, d1km, d1drive });
+    const routeKey = spotA.name + "→" + spotB.name;
+    const preCalc = window.CHAIN_ROUTES?.[routeKey];
+    const d1 = preCalc?.d1 || null;
+    const d1km = d1 ? (d1 / 1000).toFixed(1) : parseFloat(getDistanceFromLatLonInKm(spotA.lat, spotA.lon, spotB.lat, spotB.lon));
+    setChainMidpoint({ midLat, midLon, fromName: spotA.name, toName: spotB.name, fromLat: spotA.lat, fromLon: spotA.lon, toLat: spotB.lat, toLon: spotB.lon, d1km, hasPreCalc: !!preCalc });
+    // Use pre-calculated stores if available, filter out huge detours (>30km = not in area)
+    const preStores = preCalc?.stores?.filter(s => s.detour != null && s.detour < 30000) || [];
+    setChainStores(preStores);
     setShowChainPanel(true);
   };
-
-  const chainMapUrl = (query, midLat, midLon) =>
-    "https://www.google.com/maps/search/" + encodeURIComponent(query) + "/@" + midLat + "," + midLon + ",14z";
 
   const chainNavUrl = (storeName, mp) =>
     "https://www.google.com/maps/dir/?api=1&origin=" + mp.fromLat + "," + mp.fromLon + "&destination=" + mp.toLat + "," + mp.toLon + "&waypoints=" + encodeURIComponent(storeName) + "&travelmode=driving";
@@ -2814,50 +2817,56 @@ ${JSON.stringify(hotelWithDates)}
               <button onClick={() => setShowChainPanel(false)} className="p-2 text-gray-400"><Icons.X size={24} /></button>
             </div>
             <div className="text-xs text-gray-400 mb-1">{chainMidpoint.fromName} → {chainMidpoint.toName}</div>
-            <div className="bg-gray-50 rounded-lg px-3 py-2 mb-4 text-center text-sm">
-              📏 直達距離 <span className="font-black text-gray-900">{chainMidpoint.d1km} km</span>
-              <span className="text-gray-400 ml-1">（開車約 {chainMidpoint.d1drive} km）</span>
+            <div className="bg-gray-50 rounded-lg px-3 py-2 mb-3 text-center text-sm">
+              📏 直達 <span className="font-black text-gray-900">{chainMidpoint.d1km} km</span>
             </div>
 
-            {/* 丼飯 */}
-            <div className="text-xs font-bold text-orange-600 mb-2">🍚 丼飯連鎖</div>
-            <div className="space-y-2 mb-4">
-              {chains.filter(c => c.cat === "丼飯").map((c, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <a href={chainMapUrl(c.query, chainMidpoint.midLat, chainMidpoint.midLon)} target="_blank" rel="noreferrer"
-                    className="flex-1 flex items-center gap-2 p-3 bg-orange-50 rounded-xl border border-orange-200 text-sm font-bold text-orange-800 active:bg-orange-100 transition">
-                    <span className="text-lg">{c.icon}</span> {c.name}
-                    <span className="ml-auto text-xs text-orange-400">🔍</span>
-                  </a>
-                  <a href={chainNavUrl(c.name, chainMidpoint)} target="_blank" rel="noreferrer"
-                    className="flex-shrink-0 p-3 bg-gray-900 rounded-xl text-white text-sm font-bold active:scale-95 transition">
-                    🚗
-                  </a>
+            {chainStores.length > 0 ? (
+              <div className="space-y-2">
+                {chainStores.map((store, i) => {
+                  const detourKm = store.detour >= 1000 ? (store.detour / 1000).toFixed(1) + "km" : store.detour + "m";
+                  const colorClass = store.detour <= 500 ? "bg-green-50 border-green-300 text-green-800" : store.detour <= 2000 ? "bg-green-50 border-green-200 text-green-800" : store.detour <= 5000 ? "bg-amber-50 border-amber-200 text-amber-800" : "bg-red-50 border-red-200 text-red-800";
+                  const badgeClass = store.detour <= 500 ? "bg-green-100 text-green-700" : store.detour <= 2000 ? "bg-green-100 text-green-700" : store.detour <= 5000 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700";
+                  const catIcon = store.cat === "丼飯" ? "🍚" : "🛒";
+                  return (
+                    <a key={i} href={chainNavUrl(store.branch || store.name, chainMidpoint)} target="_blank" rel="noreferrer"
+                      className={`block p-3 rounded-xl border-2 ${colorClass} active:scale-[0.98] transition`}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold text-sm">{store.icon} {store.name}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${badgeClass}`}>
+                          {store.detour <= 500 ? "✅ 不繞路" : "🔄 +" + detourKm}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500">{catIcon} {store.branch || store.name}</span>
+                        <span className="text-xs font-bold">🚗 導航</span>
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="text-xs font-bold text-orange-600 mb-2">🍚 丼飯連鎖</div>
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  {chains.filter(c => c.cat === "丼飯").map((c, i) => (
+                    <a key={i} href={chainNavUrl(c.name, chainMidpoint)} target="_blank" rel="noreferrer"
+                      className="flex items-center gap-2 p-3 bg-orange-50 rounded-xl border-2 border-orange-200 text-sm font-bold text-orange-800 active:scale-95 transition">
+                      <span className="text-lg">{c.icon}</span><span className="flex-1">{c.name}</span><span className="text-xs">🚗</span>
+                    </a>
+                  ))}
                 </div>
-              ))}
-            </div>
-
-            {/* 超市 */}
-            <div className="text-xs font-bold text-green-600 mb-2">🛒 超市連鎖</div>
-            <div className="space-y-2 mb-4">
-              {chains.filter(c => c.cat === "超市").map((c, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <a href={chainMapUrl(c.query, chainMidpoint.midLat, chainMidpoint.midLon)} target="_blank" rel="noreferrer"
-                    className="flex-1 flex items-center gap-2 p-3 bg-green-50 rounded-xl border border-green-200 text-sm font-bold text-green-800 active:bg-green-100 transition">
-                    <span className="text-lg">{c.icon}</span> {c.name}
-                    <span className="ml-auto text-xs text-green-400">🔍</span>
-                  </a>
-                  <a href={chainNavUrl(c.name, chainMidpoint)} target="_blank" rel="noreferrer"
-                    className="flex-shrink-0 p-3 bg-gray-900 rounded-xl text-white text-sm font-bold active:scale-95 transition">
-                    🚗
-                  </a>
+                <div className="text-xs font-bold text-green-600 mb-2">🛒 超市連鎖</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {chains.filter(c => c.cat === "超市").map((c, i) => (
+                    <a key={i} href={chainNavUrl(c.name, chainMidpoint)} target="_blank" rel="noreferrer"
+                      className="flex items-center gap-2 p-3 bg-green-50 rounded-xl border-2 border-green-200 text-sm font-bold text-green-800 active:scale-95 transition">
+                      <span className="text-lg">{c.icon}</span><span className="flex-1">{c.name}</span><span className="text-xs">🚗</span>
+                    </a>
+                  ))}
                 </div>
-              ))}
-            </div>
-
-            <div className="text-xs text-gray-400 text-center">
-              🔍 搜附近分店　🚗 導航經過此店到終點
-            </div>
+              </div>
+            )}
           </div>
         </div>
       )}
