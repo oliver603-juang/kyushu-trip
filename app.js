@@ -2017,8 +2017,8 @@ function App() {
     setShowChainPanel(true);
   };
 
-  const chainNavUrl = (storeName, mp) =>
-    "https://www.google.com/maps/dir/?api=1&origin=" + mp.fromLat + "," + mp.fromLon + "&destination=" + mp.toLat + "," + mp.toLon + "&waypoints=" + encodeURIComponent(storeName) + "&travelmode=driving";
+  const chainNavUrl = (storeName, mp, storeLat, storeLng) =>
+    "https://www.google.com/maps/dir/?api=1&origin=" + mp.fromLat + "," + mp.fromLon + "&destination=" + mp.toLat + "," + mp.toLon + "&waypoints=" + (storeLat ? storeLat + "," + storeLng : encodeURIComponent(storeName)) + "&travelmode=driving";
 
   useEffect(() => {
     localStorage.setItem("shopping_list", JSON.stringify(shoppingList));
@@ -2829,7 +2829,7 @@ ${JSON.stringify(hotelWithDates)}
                   const badgeClass = store.detour <= 500 ? "bg-green-100 text-green-700" : store.detour <= 2000 ? "bg-green-100 text-green-700" : store.detour <= 5000 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700";
                   const catIcon = store.cat === "丼飯" ? "🍚" : "🛒";
                   return (
-                    <a key={i} href={chainNavUrl(store.branch || store.name, chainMidpoint)} target="_blank" rel="noreferrer"
+                    <a key={i} href={chainNavUrl(store.branch && store.branch.match(/[\u3000-\u9fff]/) ? store.branch : store.name + " " + (store.branch || ""), chainMidpoint, store.lat, store.lng)} target="_blank" rel="noreferrer"
                       className={`block p-3 rounded-xl border-2 ${colorClass} active:scale-[0.98] transition`}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-bold text-sm">{store.icon} {store.name}</span>
