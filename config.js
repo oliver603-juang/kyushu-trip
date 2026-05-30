@@ -247,3 +247,1208 @@ window.CHAIN_STORES = [
   { cat: "超市", name: "ヤオコー", icon: "🍎", query: "ヤオコー+YAOKO" },
   { cat: "超市", name: "イトーヨーカドー", icon: "🏬", query: "イトーヨーカドー" },
 ];
+
+// 11. 預計算連鎖店繞路距離（由 chain-calculator v2 產生）
+// 產生時間：2026/5/30 上午9:52:19
+window.CHAIN_ROUTES = {
+  "福岡國際機場→Yamaya Factory Terrace": {
+    "d1": null,
+    "stores": []
+  },
+  "Yamaya Factory Terrace→BOOKOFF + Hard Off": {
+    "d1": null,
+    "stores": []
+  },
+  "BOOKOFF + Hard Off→ハードオフ福岡中間店": {
+    "d1": 37457,
+    "stores": [
+      {
+        "name": "業務スーパー",
+        "icon": "📦",
+        "cat": "超市",
+        "branch": "Gyomu Super Shin-munakata",
+        "d2": 42243,
+        "detour": 4786
+      },
+      {
+        "name": "ロピア",
+        "icon": "🥩",
+        "cat": "超市",
+        "branch": "LOPIA 福岡新宮店",
+        "d2": 42631,
+        "detour": 5174
+      },
+      {
+        "name": "ライフ",
+        "icon": "🏪",
+        "cat": "超市",
+        "branch": "Life Garden Shinguchuo",
+        "d2": 43117,
+        "detour": 5660
+      },
+      {
+        "name": "すき家",
+        "icon": "🥩",
+        "cat": "丼飯",
+        "branch": "すき家Sukiya 200號直方店",
+        "d2": 49582,
+        "detour": 12125
+      },
+      {
+        "name": "松屋",
+        "icon": "🍛",
+        "cat": "丼飯",
+        "branch": "松屋（松のや併設）飯塚片島店",
+        "d2": 50599,
+        "detour": 13142
+      },
+      {
+        "name": "イトーヨーカドー",
+        "icon": "🏬",
+        "cat": "超市",
+        "branch": "Doris",
+        "d2": 75782,
+        "detour": 38325
+      },
+      {
+        "name": "なか卯",
+        "icon": "🐔",
+        "cat": "丼飯",
+        "branch": "Nakau Fukuoka Kotabe",
+        "d2": 83265,
+        "detour": 45808
+      },
+      {
+        "name": "オーケーストア",
+        "icon": "🏷️",
+        "cat": "超市",
+        "branch": "Gyomu Super Fukuoka Matoba",
+        "d2": 84316,
+        "detour": 46859
+      },
+      {
+        "name": "ヤオコー",
+        "icon": "🍎",
+        "cat": "超市",
+        "branch": "やお屋",
+        "d2": 88991,
+        "detour": 51534
+      }
+    ]
+  },
+  "ハードオフ福岡中間店→ART 新田川小倉酒店": {
+    "d1": 20210,
+    "stores": [
+      {
+        "name": "ヤオコー",
+        "icon": "🍎",
+        "cat": "超市",
+        "branch": "Maxvalu Jono Ekimae Shop",
+        "d2": 22090,
+        "detour": 1880
+      },
+      {
+        "name": "松屋",
+        "icon": "🍛",
+        "cat": "丼飯",
+        "branch": "松屋 穴生店",
+        "d2": 23204,
+        "detour": 2994
+      },
+      {
+        "name": "吉野家",
+        "icon": "🐂",
+        "cat": "丼飯",
+        "branch": "Yoshinoya",
+        "d2": 23535,
+        "detour": 3325
+      },
+      {
+        "name": "ロピア",
+        "icon": "🥩",
+        "cat": "超市",
+        "branch": "ロピア 八幡東ナフコ店",
+        "d2": 27121,
+        "detour": 6911
+      },
+      {
+        "name": "ライフ",
+        "icon": "🏪",
+        "cat": "超市",
+        "branch": "Honda Shop Life Kokuraminami",
+        "d2": 27209,
+        "detour": 6999
+      },
+      {
+        "name": "業務スーパー",
+        "icon": "📦",
+        "cat": "超市",
+        "branch": "Gyomu Super Kokura Minamigata",
+        "d2": 29249,
+        "detour": 9039
+      },
+      {
+        "name": "イトーヨーカドー",
+        "icon": "🏬",
+        "cat": "超市",
+        "branch": "ゆめタウン長府１Ｆエステール",
+        "d2": 83486,
+        "detour": 63276
+      },
+      {
+        "name": "なか卯",
+        "icon": "🐔",
+        "cat": "丼飯",
+        "branch": "Nakau",
+        "d2": 128577,
+        "detour": 108367
+      }
+    ]
+  },
+  "TOTO博物館→Hard Off Fukuoka Yukuhashi": {
+    "d1": 30880,
+    "stores": [
+      {
+        "name": "業務スーパー",
+        "icon": "📦",
+        "cat": "超市",
+        "branch": "Gyomu Super Shimosone",
+        "d2": 23127,
+        "detour": -7753
+      },
+      {
+        "name": "吉野家",
+        "icon": "🐂",
+        "cat": "丼飯",
+        "branch": "Yoshinoya",
+        "d2": 32275,
+        "detour": 1395
+      },
+      {
+        "name": "イオン",
+        "icon": "🛒",
+        "cat": "超市",
+        "branch": "AEON MALL Nogata",
+        "d2": 60117,
+        "detour": 29237
+      },
+      {
+        "name": "西友",
+        "icon": "🟢",
+        "cat": "超市",
+        "branch": "SUNNY",
+        "d2": 65653,
+        "detour": 34773
+      }
+    ]
+  },
+  "Hard Off Fukuoka Yukuhashi→撒隆巴斯藥物博物館": {
+    "d1": 102494,
+    "stores": [
+      {
+        "name": "すき家",
+        "icon": "🥩",
+        "cat": "丼飯",
+        "branch": "すき家Sukiya 200號飯塚嘉穗店",
+        "d2": 66010,
+        "detour": -36484
+      },
+      {
+        "name": "松屋",
+        "icon": "🍛",
+        "cat": "丼飯",
+        "branch": "松屋（松のや併設）飯塚片島店",
+        "d2": 67481,
+        "detour": -35013
+      },
+      {
+        "name": "イトーヨーカドー",
+        "icon": "🏬",
+        "cat": "超市",
+        "branch": "イオン甘木店ウーノ・ピュー",
+        "d2": 69511,
+        "detour": -32983
+      },
+      {
+        "name": "イオン",
+        "icon": "🛒",
+        "cat": "超市",
+        "branch": "永旺夢樂城 筑紫野",
+        "d2": 103896,
+        "detour": 1402
+      },
+      {
+        "name": "西友",
+        "icon": "🟢",
+        "cat": "超市",
+        "branch": "24小時超市 SEIYU 春日店",
+        "d2": 104840,
+        "detour": 2346
+      },
+      {
+        "name": "なか卯",
+        "icon": "🐔",
+        "cat": "丼飯",
+        "branch": "Nakau",
+        "d2": 115169,
+        "detour": 12675
+      },
+      {
+        "name": "オーケーストア",
+        "icon": "🏷️",
+        "cat": "超市",
+        "branch": "& Gyomusupa Botoruwarudo OK Kurumehigashikushiharaten",
+        "d2": 119008,
+        "detour": 16514
+      }
+    ]
+  },
+  "撒隆巴斯藥物博物館→BOOKOFF上津久留米店": {
+    "d1": 19848,
+    "stores": [
+      {
+        "name": "オーケーストア",
+        "icon": "🏷️",
+        "cat": "超市",
+        "branch": "& Gyomusupa Botoruwarudo OK Kurumehigashikushiharaten",
+        "d2": 14686,
+        "detour": -5162
+      },
+      {
+        "name": "業務スーパー",
+        "icon": "📦",
+        "cat": "超市",
+        "branch": "& Gyomusupa Botoruwarudo OK Kurumehigashikushiharaten",
+        "d2": 14686,
+        "detour": -5162
+      },
+      {
+        "name": "ライフ",
+        "icon": "🏪",
+        "cat": "超市",
+        "branch": "Direx",
+        "d2": 15064,
+        "detour": -4784
+      },
+      {
+        "name": "西友",
+        "icon": "🟢",
+        "cat": "超市",
+        "branch": "Sunny Tosu",
+        "d2": 15446,
+        "detour": -4402
+      },
+      {
+        "name": "すき家",
+        "icon": "🥩",
+        "cat": "丼飯",
+        "branch": "すき家Sukiya 西鐵久留米站前店",
+        "d2": 16731,
+        "detour": -3117
+      },
+      {
+        "name": "イオン",
+        "icon": "🛒",
+        "cat": "超市",
+        "branch": "永旺夢樂城 筑紫野",
+        "d2": 39615,
+        "detour": 19767
+      },
+      {
+        "name": "イトーヨーカドー",
+        "icon": "🏬",
+        "cat": "超市",
+        "branch": "イオン甘木店ウーノ・ピュー",
+        "d2": 43151,
+        "detour": 23303
+      },
+      {
+        "name": "なか卯",
+        "icon": "🐔",
+        "cat": "丼飯",
+        "branch": "Nakau Fukuoka Kotabe",
+        "d2": 96464,
+        "detour": 76616
+      }
+    ]
+  },
+  "BOOKOFF上津久留米店→Hard Off 佐賀店": {
+    "d1": null,
+    "stores": []
+  },
+  "Hard Off 佐賀店→APA酒店 佐賀站南口": {
+    "d1": 5300,
+    "stores": [
+      {
+        "name": "西友",
+        "icon": "🟢",
+        "cat": "超市",
+        "branch": "Com Box Saga Ekimae",
+        "d2": 5422,
+        "detour": 122
+      },
+      {
+        "name": "松屋",
+        "icon": "🍛",
+        "cat": "丼飯",
+        "branch": "松屋 佐賀大財店（松のや併設）",
+        "d2": 5712,
+        "detour": 412
+      },
+      {
+        "name": "なか卯",
+        "icon": "🐔",
+        "cat": "丼飯",
+        "branch": "松屋 佐賀大財店（松のや併設）",
+        "d2": 5712,
+        "detour": 412
+      },
+      {
+        "name": "すき家",
+        "icon": "🥩",
+        "cat": "丼飯",
+        "branch": "すき家Sukiya 佐賀本庄店",
+        "d2": 7083,
+        "detour": 1783
+      },
+      {
+        "name": "ライフ",
+        "icon": "🏪",
+        "cat": "超市",
+        "branch": "Life Pharmacy Kihara",
+        "d2": 8321,
+        "detour": 3021
+      },
+      {
+        "name": "吉野家",
+        "icon": "🐂",
+        "cat": "丼飯",
+        "branch": "Yoshinoya",
+        "d2": 8582,
+        "detour": 3282
+      },
+      {
+        "name": "オーケーストア",
+        "icon": "🏷️",
+        "cat": "超市",
+        "branch": "& Gyomusupa Botoruwarudo OK Yanagawamitsuhashiten",
+        "d2": 29189,
+        "detour": 23889
+      },
+      {
+        "name": "ロピア",
+        "icon": "🥩",
+        "cat": "超市",
+        "branch": "ロピア 筑紫野シュロアモール店",
+        "d2": 83669,
+        "detour": 78369
+      },
+      {
+        "name": "ヤオコー",
+        "icon": "🍎",
+        "cat": "超市",
+        "branch": "DAISO",
+        "d2": 2372693,
+        "detour": 2367393
+      },
+      {
+        "name": "イトーヨーカドー",
+        "icon": "🏬",
+        "cat": "超市",
+        "branch": "Ario 市原",
+        "d2": 2375642,
+        "detour": 2370342
+      }
+    ]
+  },
+  "佐賀熱氣球博物館→BOOKOFF PLUS 佐賀南部繞道店": {
+    "d1": 2689,
+    "stores": [
+      {
+        "name": "西友",
+        "icon": "🟢",
+        "cat": "超市",
+        "branch": "Com Box Saga Ekimae",
+        "d2": 5122,
+        "detour": 2433
+      },
+      {
+        "name": "なか卯",
+        "icon": "🐔",
+        "cat": "丼飯",
+        "branch": "松屋 佐賀大財店（松のや併設）",
+        "d2": 5724,
+        "detour": 3035
+      },
+      {
+        "name": "吉野家",
+        "icon": "🐂",
+        "cat": "丼飯",
+        "branch": "Yoshinoya",
+        "d2": 6025,
+        "detour": 3336
+      },
+      {
+        "name": "イオン",
+        "icon": "🛒",
+        "cat": "超市",
+        "branch": "イオン佐賀店",
+        "d2": 7580,
+        "detour": 4891
+      },
+      {
+        "name": "ライフ",
+        "icon": "🏪",
+        "cat": "超市",
+        "branch": "らいふ薬局 佐賀県医療センター好生館前店",
+        "d2": 8209,
+        "detour": 5520
+      },
+      {
+        "name": "オーケーストア",
+        "icon": "🏷️",
+        "cat": "超市",
+        "branch": "& Gyomusupa Botoruwarudo OK Yanagawamitsuhashiten",
+        "d2": 31895,
+        "detour": 29206
+      },
+      {
+        "name": "ヤオコー",
+        "icon": "🍎",
+        "cat": "超市",
+        "branch": "Yaoko",
+        "d2": 2326838,
+        "detour": 2324149
+      }
+    ]
+  },
+  "BOOKOFF PLUS 佐賀南部繞道店→BOOKOFF Saga Nabeshima": {
+    "d1": 5996,
+    "stores": [
+      {
+        "name": "吉野家",
+        "icon": "🐂",
+        "cat": "丼飯",
+        "branch": "Yoshinoya",
+        "d2": 6099,
+        "detour": 103
+      },
+      {
+        "name": "西友",
+        "icon": "🟢",
+        "cat": "超市",
+        "branch": "The Big Tafuse",
+        "d2": 6210,
+        "detour": 214
+      },
+      {
+        "name": "松屋",
+        "icon": "🍛",
+        "cat": "丼飯",
+        "branch": "松屋 佐賀大財店（松のや併設）",
+        "d2": 7285,
+        "detour": 1289
+      },
+      {
+        "name": "なか卯",
+        "icon": "🐔",
+        "cat": "丼飯",
+        "branch": "松屋 佐賀大財店（松のや併設）",
+        "d2": 7285,
+        "detour": 1289
+      },
+      {
+        "name": "業務スーパー",
+        "icon": "📦",
+        "cat": "超市",
+        "branch": "Gyomu Super Otakara",
+        "d2": 8620,
+        "detour": 2624
+      },
+      {
+        "name": "すき家",
+        "icon": "🥩",
+        "cat": "丼飯",
+        "branch": "すき家Sukiya 佐賀本庄店",
+        "d2": 8832,
+        "detour": 2836
+      },
+      {
+        "name": "イオン",
+        "icon": "🛒",
+        "cat": "超市",
+        "branch": "イオン佐賀店",
+        "d2": 9548,
+        "detour": 3552
+      },
+      {
+        "name": "ライフ",
+        "icon": "🏪",
+        "cat": "超市",
+        "branch": "らいふ薬局 佐賀県医療センター好生館前店",
+        "d2": 11162,
+        "detour": 5166
+      },
+      {
+        "name": "オーケーストア",
+        "icon": "🏷️",
+        "cat": "超市",
+        "branch": "& Gyomusupa Botoruwarudo OK Yanagawamitsuhashiten",
+        "d2": 33782,
+        "detour": 27786
+      },
+      {
+        "name": "ロピア",
+        "icon": "🥩",
+        "cat": "超市",
+        "branch": "ロピア 筑紫野シュロアモール店",
+        "d2": 81844,
+        "detour": 75848
+      },
+      {
+        "name": "ヤオコー",
+        "icon": "🍎",
+        "cat": "超市",
+        "branch": "Yaoko",
+        "d2": 2326235,
+        "detour": 2320239
+      },
+      {
+        "name": "イトーヨーカドー",
+        "icon": "🏬",
+        "cat": "超市",
+        "branch": "Ario 市原",
+        "d2": 2373816,
+        "detour": 2367820
+      }
+    ]
+  },
+  "BOOKOFF Saga Nabeshima→佐賀縣立宇宙科學館 夢銀河": {
+    "d1": 28823,
+    "stores": [
+      {
+        "name": "イオン",
+        "icon": "🛒",
+        "cat": "超市",
+        "branch": "Aeon",
+        "d2": 28955,
+        "detour": 132
+      },
+      {
+        "name": "松屋",
+        "icon": "🍛",
+        "cat": "丼飯",
+        "branch": "松屋 佐賀大財店（松のや併設）",
+        "d2": 45172,
+        "detour": 16349
+      },
+      {
+        "name": "オーケーストア",
+        "icon": "🏷️",
+        "cat": "超市",
+        "branch": "& Gyomusupa Botoruwarudo OK Yanagawamitsuhashiten",
+        "d2": 60567,
+        "detour": 31744
+      },
+      {
+        "name": "ロピア",
+        "icon": "🥩",
+        "cat": "超市",
+        "branch": "ロピア 筑紫野シュロアモール店",
+        "d2": 103017,
+        "detour": 74194
+      },
+      {
+        "name": "西友",
+        "icon": "🟢",
+        "cat": "超市",
+        "branch": "24小時超市 SEIYU 春日店",
+        "d2": 132151,
+        "detour": 103328
+      },
+      {
+        "name": "ヤオコー",
+        "icon": "🍎",
+        "cat": "超市",
+        "branch": "Yaoko",
+        "d2": 2347407,
+        "detour": 2318584
+      },
+      {
+        "name": "イトーヨーカドー",
+        "icon": "🏬",
+        "cat": "超市",
+        "branch": "Ario 市原",
+        "d2": 2394989,
+        "detour": 2366166
+      }
+    ]
+  },
+  "佐賀縣立宇宙科學館 夢銀河→Hard Off Sasebo": {
+    "d1": 31616,
+    "stores": [
+      {
+        "name": "吉野家",
+        "icon": "🐂",
+        "cat": "丼飯",
+        "branch": "Yoshinoya",
+        "d2": 31616,
+        "detour": 0
+      },
+      {
+        "name": "業務スーパー",
+        "icon": "📦",
+        "cat": "超市",
+        "branch": "業務スーパー 波佐見店",
+        "d2": 34511,
+        "detour": 2895
+      },
+      {
+        "name": "松屋",
+        "icon": "🍛",
+        "cat": "丼飯",
+        "branch": "松屋 大村店/松のや 大村店",
+        "d2": 96735,
+        "detour": 65119
+      },
+      {
+        "name": "ロピア",
+        "icon": "🥩",
+        "cat": "超市",
+        "branch": "ロピア長浜店",
+        "d2": 213504,
+        "detour": 181888
+      },
+      {
+        "name": "イトーヨーカドー",
+        "icon": "🏬",
+        "cat": "超市",
+        "branch": "Ario 市原",
+        "d2": 2450150,
+        "detour": 2418534
+      }
+    ]
+  },
+  "Hard Off Sasebo→佐世保中央飯店": {
+    "d1": 6517,
+    "stores": [
+      {
+        "name": "ライフ",
+        "icon": "🏪",
+        "cat": "超市",
+        "branch": "Life Care Orthopedic Clinic",
+        "d2": 6517,
+        "detour": 0
+      },
+      {
+        "name": "すき家",
+        "icon": "🥩",
+        "cat": "丼飯",
+        "branch": "すき家Sukiya 35號佐世保大和店",
+        "d2": 6537,
+        "detour": 20
+      },
+      {
+        "name": "吉野家",
+        "icon": "🐂",
+        "cat": "丼飯",
+        "branch": "吉野家 佐世保下京店",
+        "d2": 6566,
+        "detour": 49
+      },
+      {
+        "name": "イオン",
+        "icon": "🛒",
+        "cat": "超市",
+        "branch": "Aeon Sasebo Shiratake",
+        "d2": 7337,
+        "detour": 820
+      },
+      {
+        "name": "業務スーパー",
+        "icon": "📦",
+        "cat": "超市",
+        "branch": "Gyomu Super Ehonmachi store",
+        "d2": 7831,
+        "detour": 1314
+      },
+      {
+        "name": "西友",
+        "icon": "🟢",
+        "cat": "超市",
+        "branch": "Sunny Roadside Shop",
+        "d2": 113345,
+        "detour": 106828
+      },
+      {
+        "name": "なか卯",
+        "icon": "🐔",
+        "cat": "丼飯",
+        "branch": "Nakau Fukuoka Kotabe",
+        "d2": 180703,
+        "detour": 174186
+      },
+      {
+        "name": "ロピア",
+        "icon": "🥩",
+        "cat": "超市",
+        "branch": "ロピア長浜店",
+        "d2": 248704,
+        "detour": 242187
+      },
+      {
+        "name": "イトーヨーカドー",
+        "icon": "🏬",
+        "cat": "超市",
+        "branch": "Ario 市原",
+        "d2": 2485348,
+        "detour": 2478831
+      }
+    ]
+  },
+  "九十九島水族館 海洋kirara→BOOKOFF AcrossPlaza佐世保": {
+    "d1": 7778,
+    "stores": [
+      {
+        "name": "吉野家",
+        "icon": "🐂",
+        "cat": "丼飯",
+        "branch": "吉野家 佐世保下京店",
+        "d2": 7818,
+        "detour": 40
+      },
+      {
+        "name": "すき家",
+        "icon": "🥩",
+        "cat": "丼飯",
+        "branch": "すき家Sukiya 35號佐世保大和店",
+        "d2": 9711,
+        "detour": 1933
+      },
+      {
+        "name": "イオン",
+        "icon": "🛒",
+        "cat": "超市",
+        "branch": "Aeon Sasebo Shiratake Shopping Centre",
+        "d2": 10868,
+        "detour": 3090
+      },
+      {
+        "name": "業務スーパー",
+        "icon": "📦",
+        "cat": "超市",
+        "branch": "Gyomu Super Ehonmachi store",
+        "d2": 18163,
+        "detour": 10385
+      },
+      {
+        "name": "ライフ",
+        "icon": "🏪",
+        "cat": "超市",
+        "branch": "Life Style Market",
+        "d2": 26029,
+        "detour": 18251
+      },
+      {
+        "name": "西友",
+        "icon": "🟢",
+        "cat": "超市",
+        "branch": "Sunny Roadside Shop",
+        "d2": 123468,
+        "detour": 115690
+      },
+      {
+        "name": "松屋",
+        "icon": "🍛",
+        "cat": "丼飯",
+        "branch": "松屋 大村店/松のや 大村店",
+        "d2": 128912,
+        "detour": 121134
+      },
+      {
+        "name": "なか卯",
+        "icon": "🐔",
+        "cat": "丼飯",
+        "branch": "Nakau Fukuoka Kotabe",
+        "d2": 190645,
+        "detour": 182867
+      },
+      {
+        "name": "ロピア",
+        "icon": "🥩",
+        "cat": "超市",
+        "branch": "ロピア長浜店",
+        "d2": 258645,
+        "detour": 250867
+      },
+      {
+        "name": "イトーヨーカドー",
+        "icon": "🏬",
+        "cat": "超市",
+        "branch": "Ario 市原",
+        "d2": 2495291,
+        "detour": 2487513
+      }
+    ]
+  },
+  "BOOKOFF AcrossPlaza佐世保→伊萬里夢Misaki公園（滑草）": {
+    "d1": 38029,
+    "stores": [
+      {
+        "name": "吉野家",
+        "icon": "🐂",
+        "cat": "丼飯",
+        "branch": "Yoshinoya",
+        "d2": 36532,
+        "detour": -1497
+      },
+      {
+        "name": "すき家",
+        "icon": "🥩",
+        "cat": "丼飯",
+        "branch": "すき家Sukiya 202號伊萬里店",
+        "d2": 38030,
+        "detour": 1
+      },
+      {
+        "name": "オーケーストア",
+        "icon": "🏷️",
+        "cat": "超市",
+        "branch": "OK Home & Garden Hino shop",
+        "d2": 51895,
+        "detour": 13866
+      },
+      {
+        "name": "ライフ",
+        "icon": "🏪",
+        "cat": "超市",
+        "branch": "Life Style Market",
+        "d2": 52904,
+        "detour": 14875
+      },
+      {
+        "name": "イオン",
+        "icon": "🛒",
+        "cat": "超市",
+        "branch": "イオン唐津ショッピングセンター",
+        "d2": 81570,
+        "detour": 43541
+      },
+      {
+        "name": "西友",
+        "icon": "🟢",
+        "cat": "超市",
+        "branch": "Sunny Roadside Shop",
+        "d2": 150202,
+        "detour": 112173
+      },
+      {
+        "name": "なか卯",
+        "icon": "🐔",
+        "cat": "丼飯",
+        "branch": "Nakau Fukuoka Kotabe",
+        "d2": 154812,
+        "detour": 116783
+      },
+      {
+        "name": "ロピア",
+        "icon": "🥩",
+        "cat": "超市",
+        "branch": "ロピア長浜店",
+        "d2": 198514,
+        "detour": 160485
+      },
+      {
+        "name": "ヤオコー",
+        "icon": "🍎",
+        "cat": "超市",
+        "branch": "DAISO",
+        "d2": 2447095,
+        "detour": 2409066
+      },
+      {
+        "name": "イトーヨーカドー",
+        "icon": "🏬",
+        "cat": "超市",
+        "branch": "Ario 市原",
+        "d2": 2450043,
+        "detour": 2412014
+      }
+    ]
+  },
+  "伊萬里夢Misaki公園（滑草）→BOOKOFF Karatsu Store": {
+    "d1": 23432,
+    "stores": [
+      {
+        "name": "吉野家",
+        "icon": "🐂",
+        "cat": "丼飯",
+        "branch": "Yoshinoya",
+        "d2": 27256,
+        "detour": 3824
+      },
+      {
+        "name": "すき家",
+        "icon": "🥩",
+        "cat": "丼飯",
+        "branch": "すき家 唐津栄町店",
+        "d2": 28762,
+        "detour": 5330
+      },
+      {
+        "name": "イオン",
+        "icon": "🛒",
+        "cat": "超市",
+        "branch": "イオン唐津ショッピングセンター",
+        "d2": 32256,
+        "detour": 8824
+      },
+      {
+        "name": "業務スーパー",
+        "icon": "📦",
+        "cat": "超市",
+        "branch": "Gyomu Super Taku",
+        "d2": 63139,
+        "detour": 39707
+      },
+      {
+        "name": "松屋",
+        "icon": "🍛",
+        "cat": "丼飯",
+        "branch": "Matsuya",
+        "d2": 85610,
+        "detour": 62178
+      },
+      {
+        "name": "ライフ",
+        "icon": "🏪",
+        "cat": "超市",
+        "branch": "Life Style Market",
+        "d2": 101375,
+        "detour": 77943
+      },
+      {
+        "name": "オーケーストア",
+        "icon": "🏷️",
+        "cat": "超市",
+        "branch": "OK Home & Garden Hino shop",
+        "d2": 103590,
+        "detour": 80158
+      },
+      {
+        "name": "なか卯",
+        "icon": "🐔",
+        "cat": "丼飯",
+        "branch": "Nakau Fukuoka Kotabe",
+        "d2": 113439,
+        "detour": 90007
+      },
+      {
+        "name": "西友",
+        "icon": "🟢",
+        "cat": "超市",
+        "branch": "24小時超市 SUNNY 重留店",
+        "d2": 122868,
+        "detour": 99436
+      },
+      {
+        "name": "ロピア",
+        "icon": "🥩",
+        "cat": "超市",
+        "branch": "ロピア長浜店",
+        "d2": 132838,
+        "detour": 109406
+      },
+      {
+        "name": "ヤオコー",
+        "icon": "🍎",
+        "cat": "超市",
+        "branch": "Yaoko",
+        "d2": 2351282,
+        "detour": 2327850
+      },
+      {
+        "name": "イトーヨーカドー",
+        "icon": "🏬",
+        "cat": "超市",
+        "branch": "Ario 市原",
+        "d2": 2398863,
+        "detour": 2375431
+      }
+    ]
+  },
+  "BOOKOFF Karatsu Store→博多新大谷飯店": {
+    "d1": 52438,
+    "stores": [
+      {
+        "name": "吉野家",
+        "icon": "🐂",
+        "cat": "丼飯",
+        "branch": "Yoshinoya",
+        "d2": 49957,
+        "detour": -2481
+      },
+      {
+        "name": "ライフ",
+        "icon": "🏪",
+        "cat": "超市",
+        "branch": "ライフ姪浜店",
+        "d2": 52669,
+        "detour": 231
+      },
+      {
+        "name": "なか卯",
+        "icon": "🐔",
+        "cat": "丼飯",
+        "branch": "Nakau Fukuoka Kotabe",
+        "d2": 53187,
+        "detour": 749
+      },
+      {
+        "name": "イオン",
+        "icon": "🛒",
+        "cat": "超市",
+        "branch": "AEON MALL Fukuoka-Ito",
+        "d2": 53217,
+        "detour": 779
+      },
+      {
+        "name": "イトーヨーカドー",
+        "icon": "🏬",
+        "cat": "超市",
+        "branch": "Doris",
+        "d2": 53616,
+        "detour": 1178
+      },
+      {
+        "name": "ロピア",
+        "icon": "🥩",
+        "cat": "超市",
+        "branch": "ロピア長浜店",
+        "d2": 55118,
+        "detour": 2680
+      },
+      {
+        "name": "松屋",
+        "icon": "🍛",
+        "cat": "丼飯",
+        "branch": "Matsuya",
+        "d2": 56587,
+        "detour": 4149
+      },
+      {
+        "name": "業務スーパー",
+        "icon": "📦",
+        "cat": "超市",
+        "branch": "Gyomu Super",
+        "d2": 58188,
+        "detour": 5750
+      },
+      {
+        "name": "ヤオコー",
+        "icon": "🍎",
+        "cat": "超市",
+        "branch": "やお屋",
+        "d2": 58687,
+        "detour": 6249
+      },
+      {
+        "name": "西友",
+        "icon": "🟢",
+        "cat": "超市",
+        "branch": "24小時超市 SEIYU 春日店",
+        "d2": 68750,
+        "detour": 16312
+      }
+    ]
+  },
+  "Times停車場（BOOKOFF旁）→BOOKOFF SUPER BAZAAR Mina天神": {
+    "d1": null,
+    "stores": []
+  },
+  "BOOKOFF SUPER BAZAAR Mina天神→福岡國際機場": {
+    "d1": 7582,
+    "stores": [
+      {
+        "name": "松屋",
+        "icon": "🍛",
+        "cat": "丼飯",
+        "branch": "松屋 博多站前店",
+        "d2": 6352,
+        "detour": -1230
+      },
+      {
+        "name": "ロピア",
+        "icon": "🥩",
+        "cat": "超市",
+        "branch": "LOPIA 博多友都八喜店",
+        "d2": 6476,
+        "detour": -1106
+      },
+      {
+        "name": "ライフ",
+        "icon": "🏪",
+        "cat": "超市",
+        "branch": "Life station cafe alpha plus",
+        "d2": 6674,
+        "detour": -908
+      },
+      {
+        "name": "業務スーパー",
+        "icon": "📦",
+        "cat": "超市",
+        "branch": "業務超市 博多Senshou店",
+        "d2": 6765,
+        "detour": -817
+      },
+      {
+        "name": "すき家",
+        "icon": "🥩",
+        "cat": "丼飯",
+        "branch": "すき家Sukiya 博多站前四丁目店",
+        "d2": 7053,
+        "detour": -529
+      },
+      {
+        "name": "吉野家",
+        "icon": "🐂",
+        "cat": "丼飯",
+        "branch": "吉野家 博多巴士轉運站店",
+        "d2": 7124,
+        "detour": -458
+      },
+      {
+        "name": "西友",
+        "icon": "🟢",
+        "cat": "超市",
+        "branch": "24小時超市 Sunny",
+        "d2": 7460,
+        "detour": -122
+      },
+      {
+        "name": "イオン",
+        "icon": "🛒",
+        "cat": "超市",
+        "branch": "Aeon Shoppers Fukuoka",
+        "d2": 8008,
+        "detour": 426
+      },
+      {
+        "name": "なか卯",
+        "icon": "🐔",
+        "cat": "丼飯",
+        "branch": "Nakau",
+        "d2": 8748,
+        "detour": 1166
+      },
+      {
+        "name": "イトーヨーカドー",
+        "icon": "🏬",
+        "cat": "超市",
+        "branch": "Doris",
+        "d2": 16975,
+        "detour": 9393
+      }
+    ]
+  }
+};
