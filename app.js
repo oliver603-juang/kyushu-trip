@@ -2664,7 +2664,7 @@ ${JSON.stringify(hotelWithDates)}
     if (selectedDay === "all") {
       tripData.forEach((day) => {
         day.spots.forEach((spot) => {
-          if (spot.lat && spot.lon) {
+          if (spot.lat && spot.lon && spot.lat > 30) {
             points.push(`${spot.lat},${spot.lon}`);
           }
         });
@@ -2672,7 +2672,7 @@ ${JSON.stringify(hotelWithDates)}
     } else {
       const currentDay = tripData.find((d) => d.dayId === selectedDay);
       if (currentDay) {
-        points = currentDay.spots.map((s) => `${s.lat},${s.lon}`);
+        points = currentDay.spots.filter((s) => s.lat && s.lon && s.lat > 30).map((s) => `${s.lat},${s.lon}`);
       }
     }
 
