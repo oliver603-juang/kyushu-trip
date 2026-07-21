@@ -56,8 +56,9 @@ window.RAW_KML_DATA = [
       { name: "BOOKOFF Saga Nabeshima", lat: 33.2652133, lon: 130.2718048, desc: "鍋島 BOOKOFF。", mapCode: "87 347 386*40", driveTime: "11分", ticket: { adult: 0, child: 0 } },
       { name: "佐賀縣立宇宙科學館 夢銀河", lat: 33.1791421, lon: 130.035404, desc: "互動體驗型宇宙科學館。", mapCode: "104 349 105*75", driveTime: "37分", ticket: { adult: 0, child: 0 } },
       { name: "Hard Off Sasebo", lat: 33.1586631, lon: 129.7642449, desc: "佐世保 Hard Off。", mapCode: "307 556 599*63", driveTime: "32分", ticket: { adult: 0, child: 0 } },
-      { name: "未確認生物UMA展（島瀬美術センター）", lat: 33.1745, lon: 129.7216, desc: "UMA 未確認生物展 8/1~8/31 無休。10:00-18:00（17:30 最後入館）。大人當日1,500円/前售1,300円、國高中生1,000円、小學生以下免費。等身大模型+拍照區，可手機拍照。距飯店步行5分。", mapCode: "", driveTime: "10分", ticket: { adult: 1500, child: 0 } },
+      { name: "未確認生物UMA展（島瀬美術センター）", lat: 33.17277, lon: 129.72066, desc: "UMA 未確認生物展 8/1~8/31 無休。10:00-18:00（17:30 最後入館）。大人當日1,500円/前售1,300円、國高中生1,000円、小學生以下免費。等身大模型+拍照區，可手機拍照。距飯店步行5分。", mapCode: "", driveTime: "10分", ticket: { adult: 1500, child: 0 } },
       { name: "佐世保中央飯店", lat: 33.1702927, lon: 129.7231849, desc: "佐世保市區住宿。", mapCode: "89 027 031*61", driveTime: "步行5分", ticket: { adult: 0, child: 0 } },
+      { name: "おもちゃのあおき 四ヶ町アーケード本島店", lat: 33.17091, lon: 129.72166, desc: "老字號玩具店，四ヶ町商店街拱廊內，飯店旁。晚餐後散步順逛。", mapCode: "", driveTime: "步行2分", ticket: { adult: 0, child: 0 } },
     ],
   },
   {
@@ -65,6 +66,7 @@ window.RAW_KML_DATA = [
     spots: [
       { name: "九十九島水族館 海洋kirara", lat: 33.1614464, lon: 129.6790753, desc: "以水母聞名的九十九島水族館。", mapCode: "307 546 892*73", driveTime: "13分", ticket: { adult: 0, child: 0 } },
       { name: "BOOKOFF AcrossPlaza佐世保", lat: 33.1595916, lon: 129.74322, desc: "佐世保大型 BOOKOFF。", mapCode: "307 554 673*13", driveTime: "16分", ticket: { adult: 0, child: 0 } },
+      { name: "すき家 35號佐世保大和店", lat: 33.1590673, lon: 129.7513796, desc: "午餐：すき家牛丼，AcrossPlaza 旁。", mapCode: "", driveTime: "3分", ticket: { adult: 0, child: 0 } },
       { name: "伊萬里夢Misaki公園（滑草）", lat: 33.3469052, lon: 129.8502744, desc: "伊萬里滑草親子設施。", mapCode: "458 357 219*57", driveTime: "50分", ticket: { adult: 0, child: 0 } },
       { name: "BOOKOFF Karatsu Store", lat: 33.4400913, lon: 129.9643643, desc: "唐津 BOOKOFF。", mapCode: "182 370 389*11", driveTime: "27分", ticket: { adult: 0, child: 0 } },
       { name: "Times停車場（BOOKOFF旁）", lat: 33.5942146, lon: 130.3988619, desc: "13 318 784*18 再往前。停車後步行至天神 BOOKOFF。", mapCode: "13 318 784*18", driveTime: "約60分", ticket: { adult: 0, child: 0 } },
@@ -1303,7 +1305,15 @@ window.CHAIN_ROUTES = {
       }
     ]
   },
-  "BOOKOFF AcrossPlaza佐世保→伊萬里夢Misaki公園（滑草）": {
+  "佐世保中央飯店→おもちゃのあおき 四ヶ町アーケード本島店": {
+    "d1": null,
+    "stores": []
+  },
+  "BOOKOFF AcrossPlaza佐世保→すき家 35號佐世保大和店": {
+    "d1": null,
+    "stores": []
+  },
+  "すき家 35號佐世保大和店→伊萬里夢Misaki公園（滑草）": {
     "d1": 38029,
     "stores": [
       {
