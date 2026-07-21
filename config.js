@@ -22,10 +22,9 @@ window.STAY_OPTIONS = ["0 min","30 min","1 hr","1.5 hr","2 hr","2.5 hr","3 hr","
 // 2. 主行程資料
 window.RAW_KML_DATA = [
   {
-    dayId: "day1", date: "8/7 (四)", title: "福岡→北九州", themeColor: "bg-[#E4C2C1]",
+    dayId: "day1", date: "8/7 (四)", title: "福岡→北九州", themeColor: "bg-[#E4C2C1]", defaultStart: "13:05",
     spots: [
-      { name: "臺灣桃園國際機場", lat: 25.0804884, lon: 121.2311579, desc: "JX840 星宇航空 09:35 出發", mapCode: "", driveTime: "", ticket: { adult: 0, child: 0 } },
-      { name: "福岡國際機場", lat: 33.5849988, lon: 130.4490906, desc: "JX840 抵達 13:05，入境後前往 ORIX 取車", mapCode: "", driveTime: "", ticket: { adult: 0, child: 0 } },
+      { name: "福岡國際機場", lat: 33.5849988, lon: 130.4490906, desc: "JX840 星宇航空 桃園09:35出發 → 13:05抵達福岡。入境+領行李後前往 ORIX 取車。", mapCode: "", driveTime: "", ticket: { adult: 0, child: 0 } },
       { name: "ＯＲＩＸ國際線店", lat: 33.582242, lon: 130.442429, desc: "ORIX 租車福岡機場國際線店，取車出發。", mapCode: "", driveTime: "接駁/步行", ticket: { adult: 0, child: 0 } },
       { name: "Yamaya Factory Terrace", lat: 33.6319684, lon: 130.5209968, desc: "明太子工廠見學＋直賣所。營業 10:00~17:00", mapCode: "55 752 414*52", driveTime: "國道19分、縣道22分", ticket: { adult: 0, child: 0 } },
       { name: "BOOKOFF + Hard Off", lat: 33.6545076, lon: 130.4923254, desc: "福岡挖寶第一站。", mapCode: "13 569 130*24", driveTime: "9分", ticket: { adult: 0, child: 0 } },
