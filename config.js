@@ -56,7 +56,8 @@ window.RAW_KML_DATA = [
       { name: "BOOKOFF Saga Nabeshima", lat: 33.2652133, lon: 130.2718048, desc: "鍋島 BOOKOFF。", mapCode: "87 347 386*40", driveTime: "11分", ticket: { adult: 0, child: 0 } },
       { name: "佐賀縣立宇宙科學館 夢銀河", lat: 33.1791421, lon: 130.035404, desc: "互動體驗型宇宙科學館。", mapCode: "104 349 105*75", driveTime: "37分", ticket: { adult: 0, child: 0 } },
       { name: "Hard Off Sasebo", lat: 33.1586631, lon: 129.7642449, desc: "佐世保 Hard Off。", mapCode: "307 556 599*63", driveTime: "32分", ticket: { adult: 0, child: 0 } },
-      { name: "佐世保中央飯店", lat: 33.1702927, lon: 129.7231849, desc: "佐世保市區住宿。", mapCode: "89 027 031*61", driveTime: "", ticket: { adult: 0, child: 0 } },
+      { name: "未確認生物UMA展（島瀬美術センター）", lat: 33.1745, lon: 129.7216, desc: "UMA 未確認生物展 8/1~8/31 無休。10:00-18:00（17:30 最後入館）。大人當日1,500円/前售1,300円、國高中生1,000円、小學生以下免費。等身大模型+拍照區，可手機拍照。距飯店步行5分。", mapCode: "", driveTime: "10分", ticket: { adult: 1500, child: 0 } },
+      { name: "佐世保中央飯店", lat: 33.1702927, lon: 129.7231849, desc: "佐世保市區住宿。", mapCode: "89 027 031*61", driveTime: "步行5分", ticket: { adult: 0, child: 0 } },
     ],
   },
   {
@@ -1208,7 +1209,11 @@ window.CHAIN_ROUTES = {
       }
     ]
   },
-  "Hard Off Sasebo→佐世保中央飯店": {
+  "未確認生物UMA展（島瀬美術センター）→佐世保中央飯店": {
+    "d1": null,
+    "stores": []
+  },
+  "Hard Off Sasebo→未確認生物UMA展（島瀬美術センター）": {
     "d1": 6517,
     "stores": [
       {
