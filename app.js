@@ -2276,9 +2276,11 @@ function App() {
 
   // --- 核心運算：行程瀑布流 ---
   const tripData = useMemo(() => {
-    return window.RAW_KML_DATA.map((day) => {
-      // 各天可在 config 設 defaultStart（如 day1 依班機抵達 13:05），未設則 09:00
-      let currentMinutes = timeToMinutes(dayStartTimes[day.dayId] || day.defaultStart || "09:00");
+    return window.RAW_KML_DATA.map((day, dayIdx) => {
+      // 出發時間優先序：使用者手動設定 > config 的 day.defaultStart >
+      // 第一天自動採用去程班機抵達時間（FLIGHT_INFO.outbound.arr，未來行程通用）> 09:00
+      const resolvedStart = day.defaultStart || (dayIdx === 0 && window.FLIGHT_INFO?.outbound?.arr) || "09:00";
+      let currentMinutes = timeToMinutes(dayStartTimes[day.dayId] || resolvedStart);
       const newSpots = day.spots.map((spot, idx) => {
         const spotId = `${day.dayId}-s${idx}`;
         // 停車場類景點預設停留 0 分鐘（僅停車/取車，不佔行程時間）
@@ -2342,7 +2344,7 @@ function App() {
           ticket: spot.ticket || null,
         };
       });
-      return { ...day, spots: newSpots };
+      return { ...day, defaultStart: resolvedStart, spots: newSpots };
     });
   }, [dayStartTimes, actualDepartures, stays, transportModes]);
 

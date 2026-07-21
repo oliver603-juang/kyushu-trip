@@ -22,7 +22,7 @@ window.STAY_OPTIONS = ["0 min","30 min","1 hr","1.5 hr","2 hr","2.5 hr","3 hr","
 // 2. 主行程資料
 window.RAW_KML_DATA = [
   {
-    dayId: "day1", date: "8/7 (四)", title: "福岡→北九州", themeColor: "bg-[#E4C2C1]", defaultStart: "13:05",
+    dayId: "day1", date: "8/7 (四)", title: "福岡→北九州", themeColor: "bg-[#E4C2C1]",
     spots: [
       { name: "福岡國際機場", lat: 33.5849988, lon: 130.4490906, desc: "JX840 星宇航空 桃園09:35出發 → 13:05抵達福岡。入境+領行李後前往 ORIX 取車。", mapCode: "", driveTime: "", ticket: { adult: 0, child: 0 } },
       { name: "ＯＲＩＸ國際線店", lat: 33.582242, lon: 130.442429, desc: "ORIX 租車福岡機場國際線店，取車出發。", mapCode: "", driveTime: "接駁/步行", ticket: { adult: 0, child: 0 } },
