@@ -2068,14 +2068,17 @@ function App() {
 
     const itemList = unbought.map(i => i.icon + " " + i.name + "（找：" + i.keywords?.slice(0,3).join("/") + "）").join("\n");
 
-    const prompt = "我現在在日本九州，位置座標 " + lat + "," + lon + "（" + spotName + " 附近）。\n\n" +
+    const prompt = "我目前的 GPS 座標是 " + lat + "," + lon + "（" + spotName + "）。\n" +
+      "請先依座標判斷我所在的城市/區域（不要假設國家），再用 Google Search 搜尋我步行範圍（約 1 公里內）可能買到清單物品的實體商店。\n\n" +
       "我的購物清單（還沒買的）：\n" + itemList + "\n\n" +
-      "請用 Google Search 搜尋我目前位置 500 公尺內可能買到清單物品的商店。\n\n" +
       "⚠️ 回覆格式要求（嚴格遵守）：\n" +
-      "每間商店用以下格式，一行一項：\n" +
-      "STORE|商店名稱|步行距離（公尺）|可買物品（用逗號分隔）\n\n" +
-      "範例：\nSTORE|サンドラッグ箱崎店|225|太田胃散,DARIYA SALON de PRO\n" +
-      "STORE|BOOKOFF福岡東店|0|LEGO Ninjago 70654,二手BALMUDA\n\n" +
+      "每間商店一行，格式：\n" +
+      "STORE|商店名稱|完整地址|緯度,經度|可買物品（用逗號分隔）\n" +
+      "緯度經度請從搜尋結果取得；若真的查不到，該欄填 ?\n" +
+      "❌ 不要自行估計或輸出距離——距離會由我方程式用座標計算。\n" +
+      "最多列 6 間，只列你有把握真實存在的商店，不確定的不要列。\n\n" +
+      "範例：\nSTORE|サンドラッグ箱崎店|福岡県福岡市東区箱崎1-2-3|33.6169,130.4235|太田胃散,DARIYA SALON de PRO\n" +
+      "STORE|BOOKOFF福岡東店|福岡県福岡市東区二又瀬新町1-1|?|LEGO Ninjago 70654,二手BALMUDA\n\n" +
       "最後如果有找不到的物品，加一行：\nNOTE|找不到的說明\n\n" +
       "只輸出 STORE| 和 NOTE| 開頭的行，不要其他文字。";
 
@@ -2096,11 +2099,26 @@ function App() {
       const stores = [];
       const notes = [];
       lines.forEach(line => {
-        const sm = line.match(/STORE\|(.+?)\|(\d+)\|(.+)/);
-        if (sm) stores.push({ name: sm[1], dist: parseInt(sm[2]), items: sm[3].split(",").map(s=>s.trim()), navUrl: "https://www.google.com/maps/dir/?api=1&origin=" + lat + "," + lon + "&destination=" + encodeURIComponent(sm[1]) + "&travelmode=walking" });
+        const sm = line.match(/STORE\|(.+?)\|(.+?)\|(.+?)\|(.+)/);
+        if (sm) {
+          const name = sm[1].trim();
+          const addr = sm[2].trim();
+          const cm = sm[3].match(/(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)/);
+          // 距離一律由 App 用座標自己算（haversine），不信任 AI 的數字
+          let dist = null;
+          if (cm) {
+            const km = parseFloat(getDistanceFromLatLonInKm(lat, lon, parseFloat(cm[1]), parseFloat(cm[2])));
+            if (isFinite(km)) dist = Math.round(km * 1000);
+          }
+          // 導航目的地優先用「店名+地址」（最不易導錯），沒地址才用座標/店名
+          const dest = addr && addr !== "?" ? name + " " + addr : (cm ? cm[1] + "," + cm[2] : name);
+          stores.push({ name, addr, dist, items: sm[4].split(",").map(s=>s.trim()), navUrl: "https://www.google.com/maps/dir/?api=1&origin=" + lat + "," + lon + "&destination=" + encodeURIComponent(dest) + "&travelmode=walking" });
+        }
         const nm = line.match(/NOTE\|(.+)/);
         if (nm) notes.push(nm[1]);
       });
+      // 依實算距離排序（不明距離排最後）
+      stores.sort((a, b) => (a.dist ?? Infinity) - (b.dist ?? Infinity));
 
       if (stores.length > 0) {
         setNearbyResults({ stores, notes, raw: null });
@@ -2949,12 +2967,18 @@ ${JSON.stringify(hotelWithDates)}
             {nearbyResults && (
               <div className="space-y-3">
                 <div className="font-bold text-blue-700 text-sm">🤖 AI 搜尋結果</div>
-                {nearbyResults.stores?.map((store, i) => (
+                {nearbyResults.stores?.map((store, i) => {
+                  const dLabel = store.dist == null ? "距離不明" : store.dist >= 1000 ? "約 " + (store.dist / 1000).toFixed(1) + " km" : "約 " + store.dist + " m";
+                  const badgeCls = store.dist == null ? "bg-gray-100 text-gray-500" : store.dist <= 1000 ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700";
+                  return (
                   <div key={i} className="bg-white border-2 border-gray-200 rounded-xl p-3">
                     <div className="flex justify-between items-center mb-2">
                       <span className="font-bold text-sm text-gray-900">{store.name}</span>
-                      <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-bold">🚶 {store.dist}m</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${badgeCls}`}>🚶 {dLabel}</span>
                     </div>
+                    {store.addr && store.addr !== "?" && (
+                      <div className="text-[10px] text-gray-400 mb-2">{store.addr}</div>
+                    )}
                     <div className="flex flex-wrap gap-1 mb-2">
                       {store.items?.map((item, j) => (
                         <span key={j} className="bg-amber-50 text-amber-800 px-2 py-0.5 rounded-full text-xs font-bold border border-amber-200">{item}</span>
@@ -2962,10 +2986,11 @@ ${JSON.stringify(hotelWithDates)}
                     </div>
                     <a href={store.navUrl} target="_blank" rel="noreferrer"
                       className="block w-full py-3 bg-gray-900 text-white text-center rounded-xl font-bold text-sm">
-                      🚶 步行導航（{store.dist}m）
+                      🚶 步行導航（{dLabel}）
                     </a>
                   </div>
-                ))}
+                  );
+                })}
                 {nearbyResults.notes?.map((note, i) => (
                   <div key={i} className="text-xs text-gray-500 px-1">{note}</div>
                 ))}
