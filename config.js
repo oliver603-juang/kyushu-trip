@@ -17,7 +17,7 @@ window.CURRENCY_OPTIONS = [
   { code: "USD", symbol: "$", label: "美金" },
 ];
 
-window.STAY_OPTIONS = ["30 min","1 hr","1.5 hr","2 hr","2.5 hr","3 hr","4 hr","5 hr","Overnight","-"];
+window.STAY_OPTIONS = ["0 min","30 min","1 hr","1.5 hr","2 hr","2.5 hr","3 hr","4 hr","5 hr","Overnight","-"];
 
 // 2. 主行程資料
 window.RAW_KML_DATA = [

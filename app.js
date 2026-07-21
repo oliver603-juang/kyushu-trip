@@ -2280,7 +2280,9 @@ function App() {
       let currentMinutes = timeToMinutes(dayStartTimes[day.dayId] || "09:00");
       const newSpots = day.spots.map((spot, idx) => {
         const spotId = `${day.dayId}-s${idx}`;
-        const stayStr = stays[spotId] || "1.5 hr";
+        // 停車場類景點預設停留 0 分鐘（僅停車/取車，不佔行程時間）
+        const isParkingSpot = /停車場|駐車場|[Pp]arking/.test(spot.name);
+        const stayStr = stays[spotId] || (isParkingSpot ? "0 min" : "1.5 hr");
         const stayMinutes = parseStayDuration(stayStr);
         const arrivalTimeStr = minutesToTimeStr(currentMinutes);
         let departureMinutes;
