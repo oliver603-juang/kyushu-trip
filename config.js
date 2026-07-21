@@ -1,6 +1,8 @@
 // ==========================================
 // config.js - 2026 暑假九州初體驗
 // Generated from: 2026暑假九州初體驗.kmz
+// Updated: 2026-07-21 依新版 KMZ 更新行程（新增 ORIX 取車、小倉駿河屋/薩莉亞、
+//          大野城/春日白水挖寶、Mina天神移至 Day4、Day5 駿河屋博多丸井店）
 // ==========================================
 
 // 1. APP 基本設定
@@ -23,22 +25,27 @@ window.RAW_KML_DATA = [
     dayId: "day1", date: "8/7 (四)", title: "福岡→北九州", themeColor: "bg-[#E4C2C1]",
     spots: [
       { name: "臺灣桃園國際機場", lat: 25.0804884, lon: 121.2311579, desc: "JX840 星宇航空 09:35 出發", mapCode: "", driveTime: "", ticket: { adult: 0, child: 0 } },
-      { name: "福岡國際機場", lat: 33.5849988, lon: 130.4490906, desc: "JX840 抵達 13:05，入境＋取車", mapCode: "", driveTime: "", ticket: { adult: 0, child: 0 } },
-      { name: "Yamaya Factory Terrace", lat: 33.6319684, lon: 130.5209968, desc: "明太子工廠見學＋直賣所。營業 10:00~17:00", mapCode: "55 752 414*52", driveTime: "國道19分", ticket: { adult: 0, child: 0 } },
+      { name: "福岡國際機場", lat: 33.5849988, lon: 130.4490906, desc: "JX840 抵達 13:05，入境後前往 ORIX 取車", mapCode: "", driveTime: "", ticket: { adult: 0, child: 0 } },
+      { name: "ＯＲＩＸ國際線店", lat: 33.582242, lon: 130.442429, desc: "ORIX 租車福岡機場國際線店，取車出發。", mapCode: "", driveTime: "接駁/步行", ticket: { adult: 0, child: 0 } },
+      { name: "Yamaya Factory Terrace", lat: 33.6319684, lon: 130.5209968, desc: "明太子工廠見學＋直賣所。營業 10:00~17:00", mapCode: "55 752 414*52", driveTime: "國道19分、縣道22分", ticket: { adult: 0, child: 0 } },
       { name: "BOOKOFF + Hard Off", lat: 33.6545076, lon: 130.4923254, desc: "福岡挖寶第一站。", mapCode: "13 569 130*24", driveTime: "9分", ticket: { adult: 0, child: 0 } },
-      { name: "ハードオフ福岡中間店", lat: 33.8180129, lon: 130.7158762, desc: "Hard Off 福岡中間店。", mapCode: "68 536 695*78", driveTime: "40分", ticket: { adult: 0, child: 0 } },
+      { name: "ハードオフ福岡中間店", lat: 33.8180129, lon: 130.7162195, desc: "Hard Off 福岡中間店。", mapCode: "68 536 695*78", driveTime: "40分", ticket: { adult: 0, child: 0 } },
       { name: "ART 新田川小倉酒店", lat: 33.879354, lon: 130.880973, desc: "北九州小倉住宿。", mapCode: "16 466 090*23", driveTime: "27分", ticket: { adult: 0, child: 0 } },
     ],
   },
   {
-    dayId: "day2", date: "8/8 (五)", title: "久留米→佐賀", themeColor: "bg-[#A9BFA8]",
+    dayId: "day2", date: "8/8 (五)", title: "小倉→久留米→佐賀", themeColor: "bg-[#A9BFA8]",
     spots: [
       { name: "TOTO博物館", lat: 33.8722021, lon: 130.8721104, desc: "TOTO 衛浴品牌博物館。營業 10:00-17:00", mapCode: "16 434 268*63", driveTime: "9分", ticket: { adult: 0, child: 0 } },
-      { name: "Hard Off Fukuoka Yukuhashi", lat: 33.7296929, lon: 130.9658656, desc: "行橋 Hard Off。", mapCode: "96 836 155*78", driveTime: "35分", ticket: { adult: 0, child: 0 } },
-      { name: "撒隆巴斯藥物博物館", lat: 33.3978309, lon: 130.5111389, desc: "久光製藥歷史博物館。", mapCode: "37 826 318*07", driveTime: "1小時18分", ticket: { adult: 0, child: 0 } },
+      { name: "有的有的停車場", lat: 33.8879913, lon: 130.885649, desc: "あるあるCity 停車場，營業 11:00 開始。", mapCode: "16 496 103*00", driveTime: "9分", ticket: { adult: 0, child: 0 } },
+      { name: "駿河屋 小倉AruaruCity店", lat: 33.8876455, lon: 130.884624, desc: "🧸 絕版 LEGO 救星！中古動漫/絕版模型霸主，AruaruCity 2F/4F，小倉站前步行可達。", mapCode: "", driveTime: "步行1分", ticket: { adult: 0, child: 0 } },
+      { name: "薩莉亞 小倉站前AruaruCity店", lat: 33.8874016, lon: 130.884736, desc: "午餐：Saizeriya 小倉站前 AruaruCity 店。", mapCode: "", driveTime: "同棟", ticket: { adult: 0, child: 0 } },
+      { name: "BOOKOFF 大野城三笠川店", lat: 33.5468162, lon: 130.4828346, desc: "大野城 BOOKOFF，旁邊有超市。", mapCode: "13 178 249*77", driveTime: "1小時", ticket: { adult: 0, child: 0 } },
+      { name: "Hard Off & Hobby Off 春日白水店", lat: 33.5092061, lon: 130.4496045, desc: "春日白水 Hard Off + Hobby Off，有樂高！", mapCode: "13 024 636*17", driveTime: "16分", ticket: { adult: 0, child: 0 } },
+      { name: "撒隆巴斯藥物博物館", lat: 33.3978309, lon: 130.5111389, desc: "久光製藥歷史博物館。", mapCode: "37 826 318*07", driveTime: "27分", ticket: { adult: 0, child: 0 } },
       { name: "BOOKOFF上津久留米店", lat: 33.2849572, lon: 130.5110566, desc: "久留米 BOOKOFF。", mapCode: "37 406 708*24", driveTime: "25分", ticket: { adult: 0, child: 0 } },
       { name: "Hard Off 佐賀店", lat: 33.2212552, lon: 130.3077721, desc: "佐賀 Hard Off。", mapCode: "87 202 126*02", driveTime: "37分", ticket: { adult: 0, child: 0 } },
-      { name: "APA酒店 佐賀站南口", lat: 33.2629778, lon: 130.2996529, desc: "佐賀站旁住宿。", mapCode: "87 351 127*20", driveTime: "10分", ticket: { adult: 0, child: 0 } },
+      { name: "APA酒店 佐賀站南口", lat: 33.2629778, lon: 130.2996529, desc: "佐賀站旁住宿。旁邊停車場1泊1,000円(41 532 501*11)", mapCode: "87 351 127*20", driveTime: "10分", ticket: { adult: 0, child: 0 } },
     ],
   },
   {
@@ -59,34 +66,39 @@ window.RAW_KML_DATA = [
       { name: "BOOKOFF AcrossPlaza佐世保", lat: 33.1595916, lon: 129.74322, desc: "佐世保大型 BOOKOFF。", mapCode: "307 554 673*13", driveTime: "16分", ticket: { adult: 0, child: 0 } },
       { name: "伊萬里夢Misaki公園（滑草）", lat: 33.3469052, lon: 129.8502744, desc: "伊萬里滑草親子設施。", mapCode: "458 357 219*57", driveTime: "50分", ticket: { adult: 0, child: 0 } },
       { name: "BOOKOFF Karatsu Store", lat: 33.4400913, lon: 129.9643643, desc: "唐津 BOOKOFF。", mapCode: "182 370 389*11", driveTime: "27分", ticket: { adult: 0, child: 0 } },
-      { name: "博多新大谷飯店", lat: 33.5830614, lon: 130.4063095, desc: "博多站旁高級飯店。特約停車場：Grand Parking", mapCode: "13 289 511*86", driveTime: "64分", ticket: { adult: 0, child: 0 } },
+      { name: "Times停車場（BOOKOFF旁）", lat: 33.5942146, lon: 130.3988619, desc: "13 318 784*18 再往前。停車後步行至天神 BOOKOFF。", mapCode: "13 318 784*18", driveTime: "約60分", ticket: { adult: 0, child: 0 } },
+      { name: "BOOKOFF SUPER BAZAAR Mina天神", lat: 33.5929742, lon: 130.3983736, desc: "九州最大 BOOKOFF，天神挖寶！", mapCode: "", driveTime: "步行1分", ticket: { adult: 0, child: 0 } },
+      { name: "新大谷特約停車場 Grand Parking", lat: 33.5835175, lon: 130.4066823, desc: "博多新大谷飯店特約停車場（Tsukigime Parking）。", mapCode: "", driveTime: "12分", ticket: { adult: 0, child: 0 } },
+      { name: "博多新大谷飯店", lat: 33.5830614, lon: 130.4063095, desc: "博多站旁高級飯店。特約停車場：Grand Parking", mapCode: "13 289 511*86", driveTime: "步行4分", ticket: { adult: 0, child: 0 } },
     ],
   },
   {
     dayId: "day5", date: "8/11 (一)", title: "博多→回家", themeColor: "bg-[#D4A5A5]",
     spots: [
-      { name: "Times停車場（BOOKOFF旁）", lat: 33.5942146, lon: 130.3988619, desc: "停車後步行至天神 BOOKOFF。", mapCode: "13 318 784*18", driveTime: "12分", ticket: { adult: 0, child: 0 } },
-      { name: "BOOKOFF SUPER BAZAAR Mina天神", lat: 33.5942146, lon: 130.3988619, desc: "九州最大 BOOKOFF，最後挖寶！", mapCode: "", driveTime: "", ticket: { adult: 0, child: 0 } },
-      { name: "福岡國際機場", lat: 33.5849988, lon: 130.4490906, desc: "還車 → JX841 14:15 出發 → 15:45 抵達桃園", mapCode: "", driveTime: "", ticket: { adult: 0, child: 0 } },
+      { name: "駿河屋 博多丸井店", lat: 33.5888254, lon: 130.4199115, desc: "🧸 市區最後補刀！動漫/模型/玩具地毯式二手店，博多站正對面 OIOI 6F。", mapCode: "", driveTime: "步行", ticket: { adult: 0, child: 0 } },
+      { name: "福岡國際機場", lat: 33.5849988, lon: 130.4490906, desc: "還車 → JX841 14:25 出發 → 15:45 抵達桃園", mapCode: "", driveTime: "", ticket: { adult: 0, child: 0 } },
     ],
   },
 ];
 
-// 3. 願望清單
+// 3. 願望清單（pocket_list + 二手玩具隱藏店）
 window.WISHLIST_DATA = [
-  { name: "BOOKOFF SUPER BAZAAR Mina Tenjin", lat: 33.5942146, lon: 130.3988619, desc: "天神地下街旁的大型 BOOKOFF SUPER BAZAAR。", mapCode: "" },
-  { name: "BOOKOFF PLUS 佐賀南部繞道店", lat: 33.2390376, lon: 130.3007156, desc: "佐賀大型 BOOKOFF。", mapCode: "87 261 250*14" },
-  { name: "BOOKOFF Onojyo Mikasagawa", lat: 33.5346, lon: 130.4761, desc: "大野城三笠川 BOOKOFF。", mapCode: "" },
-  { name: "Hard Off & Hobby Off 春日白水", lat: 33.5261, lon: 130.4691, desc: "春日白水 Hard Off + Hobby Off。", mapCode: "" },
-  { name: "九州鐵道紀念館", lat: 33.8902, lon: 130.8831, desc: "門司港旁，九州鐵路歷史展示。", mapCode: "" },
-  { name: "BOOKOFF (其他)", lat: 33.59, lon: 130.40, desc: "其他待確認 BOOKOFF 分店。", mapCode: "" },
+  { name: "BOOKOFF SUPER BAZAAR Mina Tenjin", lat: 33.5929742, lon: 130.3983736, desc: "九州最大 BOOKOFF（已排入 8/10 行程）。", mapCode: "" },
+  { name: "BOOKOFF PLUS 佐賀南部繞道店", lat: 33.2390376, lon: 130.3007156, desc: "佐賀大型 BOOKOFF（已排入 8/9 行程）。", mapCode: "87 261 250*14" },
+  { name: "BOOKOFF 大野城三笠川店", lat: 33.5468162, lon: 130.4828346, desc: "大野城三笠川 BOOKOFF（已排入 8/8 行程），旁邊有超市。", mapCode: "13 178 249*77" },
+  { name: "BOOKOFF（北九州）", lat: 33.8870499, lon: 130.8417523, desc: "北九州備選 BOOKOFF 分店。", mapCode: "" },
+  { name: "BOOKOFF Iizuka（飯塚）", lat: 33.6247411, lon: 130.66996, desc: "飯塚 BOOKOFF，旁邊有すき家。", mapCode: "" },
+  { name: "超級 2nd STREET 箱崎店", lat: 33.6201387, lon: 130.4178439, desc: "🧸 隱藏店：BALMUDA 二手家電機率極高！全日本少數 Super 級旗艦店，龐大生活/廚房家電專區。機場→北九州必經（東區）。", mapCode: "" },
+  { name: "BOOKOFF SUPER BAZAAR 樂市街道久留米店", lat: 33.319644, lon: 130.5427305, desc: "🧸🔌 隱藏店：雙料重裝！最高規格綜合百貨型巨型店，二手樂高積木牆＋家電專區數倍大。久留米市區，往上津店順路。", mapCode: "" },
+  { name: "マンガ倉庫 佐賀店", lat: 33.2560195, lon: 130.3177367, desc: "🧸 隱藏店：九州最強複合二手店！巨大玩具/公仔/懷舊盒組專區。佐賀市區國道208旁，非常順路。", mapCode: "" },
+  { name: "Mandarake 福岡店", lat: 33.5901007, lon: 130.3940327, desc: "🧸 隱藏店：骨董/絕版玩具終極聖殿。天神大名區，最後一天市區步行可到。", mapCode: "" },
 ];
 
 // 4. 備用餐廳（すき家）
 window.BACKUP_RESTAURANTS = [
-  { name: "すき家 小倉北神岳店", lat: 33.879, lon: 130.881, mapCode: "" },
-  { name: "すき家 佐賀本庄店", lat: 33.263, lon: 130.300, mapCode: "" },
-  { name: "すき家 35號佐世保大和店", lat: 33.170, lon: 129.723, mapCode: "" },
+  { name: "すき家 小倉北神岳店", lat: 33.8722504, lon: 130.892075, mapCode: "" },
+  { name: "すき家 佐賀本庄店", lat: 33.2391727, lon: 130.2991893, mapCode: "" },
+  { name: "すき家 35號佐世保大和店", lat: 33.1590673, lon: 129.7513796, mapCode: "" },
 ];
 
 // 5. 航班資訊
@@ -108,7 +120,7 @@ window.FLIGHT_INFO = {
     aircraft: "A330-900neo",
     from: "FUK 福岡 國際航廈",
     to: "TPE 桃園 T1",
-    dep: "14:15",
+    dep: "14:25",
     arr: "15:45",
     date: "8/11 (一)",
     duration: "2h30m",
@@ -141,13 +153,13 @@ window.HOTEL_INFO = [
 
 // 7. 租車資訊
 window.CAR_RENTAL_INFO = {
-  company: "待確認",
+  company: "ORIX 租車（オリックスレンタカー）",
   pickupDate: "8/7 (四)",
   pickupTime: "13:30",
-  pickupLocation: "福岡機場國際航廈",
+  pickupLocation: "ＯＲＩＸ國際線店（福岡機場國際航廈旁）",
   returnDate: "8/11 (一)",
   returnTime: "12:00",
-  returnLocation: "福岡機場國際航廈",
+  returnLocation: "ＯＲＩＸ國際線店（福岡機場國際航廈旁）",
   carType: "待確認",
   note: "導航請使用 MapCode",
 };
@@ -247,8 +259,17 @@ window.CHAIN_STORES = [
 // 11. 預計算連鎖店繞路距離（由 chain-calculator v3 產生）
 // 產生時間：2026/5/30 上午11:56:33
 // 優化：language=ja, type過濾, 動態分段搜尋, 負數修正, 座標導航
+// 2026-07-21 依新版 KMZ 重新對應路段 key：
+//   - 福岡國際機場→Yamaya 改為 ＯＲＩＸ國際線店→Yamaya（ORIX 在機場旁，路線相同）
+//   - 移除行橋 Hard Off 兩段（行程已刪）
+//   - Karatsu→博多新大谷 改為 Karatsu→Times停車場（終點由博多站移至天神，路線幾乎相同）
+//   - Mina天神→機場 改為 駿河屋博多丸井店→機場（沿線店家皆在博多站周邊，仍適用）
+// ⚠️ 以下新路段尚無預計算資料（面板會顯示舊版快速搜尋按鈕），路線確定後請重跑 chain-calculator v3：
+//   薩莉亞 小倉站前AruaruCity店→BOOKOFF 大野城三笠川店（約70km，午後長途段）
+//   BOOKOFF 大野城三笠川店→Hard Off & Hobby Off 春日白水店
+//   Hard Off & Hobby Off 春日白水店→撒隆巴斯藥物博物館（約55km）
 window.CHAIN_ROUTES = {
-  "福岡國際機場→Yamaya Factory Terrace": {
+  "ＯＲＩＸ國際線店→Yamaya Factory Terrace": {
     "d1": 19085,
     "stores": [
       {"name":"すき家","icon":"🥩","cat":"丼飯","branch":"すき家 粕屋仲原店","d2":13057,"detour":0,"lat":33.6109439,"lng":130.4589404},
@@ -288,27 +309,6 @@ window.CHAIN_ROUTES = {
       {"name":"西友","icon":"🟢","cat":"超市","branch":"西鉄ストア スピナ戸畑店","d2":23895,"detour":3685,"lat":33.899002,"lng":130.83996},
       {"name":"ロピア","icon":"🥩","cat":"超市","branch":"ロピア 八幡東ナフコ店","d2":27121,"detour":6911,"lat":33.8702451,"lng":130.8004596},
       {"name":"業務スーパー","icon":"📦","cat":"超市","branch":"業務スーパー 小倉南方店","d2":29249,"detour":9039,"lat":33.8322603,"lng":130.8624109}
-    ]
-  },
-  "TOTO博物館→Hard Off Fukuoka Yukuhashi": {
-    "d1": 30880,
-    "stores": [
-      {"name":"松屋","icon":"🍛","cat":"丼飯","branch":"松屋 苅田店（松のや併設）","d2":23064,"detour":0,"lat":33.7886866,"lng":130.9820367},
-      {"name":"吉野家","icon":"🐂","cat":"丼飯","branch":"吉野家 １０号線片野店","d2":32275,"detour":1395,"lat":33.865779,"lng":130.882698},
-      {"name":"業務スーパー","icon":"📦","cat":"超市","branch":"業務スーパー 小倉南方店","d2":33752,"detour":2872,"lat":33.8322603,"lng":130.8624109},
-      {"name":"すき家","icon":"🥩","cat":"丼飯","branch":"すき家 北九州空港通り店","d2":34405,"detour":3525,"lat":33.8041285,"lng":130.9740339}
-    ]
-  },
-  "Hard Off Fukuoka Yukuhashi→撒隆巴斯藥物博物館": {
-    "d1": 102494,
-    "stores": [
-      {"name":"すき家","icon":"🥩","cat":"丼飯","branch":"すき家 201号田川店","d2":64073,"detour":0,"lat":33.6541709,"lng":130.8099077},
-      {"name":"吉野家","icon":"🐂","cat":"丼飯","branch":"吉野家 ２００号線飯塚店","d2":66010,"detour":0,"lat":33.624948,"lng":130.6693862},
-      {"name":"松屋","icon":"🍛","cat":"丼飯","branch":"松屋（松のや併設）飯塚片島店","d2":67481,"detour":0,"lat":33.6446045,"lng":130.6850202},
-      {"name":"イオン","icon":"🛒","cat":"超市","branch":"イオン穂波店","d2":68635,"detour":0,"lat":33.6370709,"lng":130.6738584},
-      {"name":"業務スーパー","icon":"📦","cat":"超市","branch":"業務スーパー 桂川店","d2":64073,"detour":0,"lat":33.5891829,"lng":130.6723712},
-      {"name":"西友","icon":"🟢","cat":"超市","branch":"サニー鳥栖店","d2":107871,"detour":5377,"lat":33.3739395,"lng":130.5096822},
-      {"name":"なか卯","icon":"🐔","cat":"丼飯","branch":"なか卯 福岡半道橋店","d2":115169,"detour":12675,"lat":33.5818374,"lng":130.4389876}
     ]
   },
   "撒隆巴斯藥物博物館→BOOKOFF上津久留米店": {
@@ -415,7 +415,7 @@ window.CHAIN_ROUTES = {
       {"name":"業務スーパー","icon":"📦","cat":"超市","branch":"業務スーパー 伊万里店","d2":35023,"detour":11591,"lat":33.2749939,"lng":129.8920494}
     ]
   },
-  "BOOKOFF Karatsu Store→博多新大谷飯店": {
+  "BOOKOFF Karatsu Store→Times停車場（BOOKOFF旁）": {
     "d1": 52438,
     "stores": [
       {"name":"西友","icon":"🟢","cat":"超市","branch":"サニー 有田店","d2":51937,"detour":0,"lat":33.5558057,"lng":130.3333055},
@@ -431,8 +431,8 @@ window.CHAIN_ROUTES = {
     "d1": null,
     "stores": []
   },
-  "BOOKOFF SUPER BAZAAR Mina天神→福岡國際機場": {
-    "d1": 7582,
+  "駿河屋 博多丸井店→福岡國際機場": {
+    "d1": null,
     "stores": [
       {"name":"すき家","icon":"🥩","cat":"丼飯","branch":"すき家 博多駅前四丁目店","d2":7053,"detour":0,"lat":33.5862974,"lng":130.4170379},
       {"name":"松屋","icon":"🍛","cat":"丼飯","branch":"松屋 博多駅前通り店","d2":6352,"detour":0,"lat":33.589803,"lng":130.413782},
