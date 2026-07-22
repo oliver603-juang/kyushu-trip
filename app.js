@@ -989,6 +989,11 @@ const ItineraryTab = ({
 
                 const isWalk = transportModes[spot.id] === "walk";
 
+                // 今日進度（與 DayProgress 連動）
+                const dayTotal = day.spots.length;
+                const dayDone = day.spots.filter((s) => s.isDeparted).length;
+                const dayRemaining = dayTotal - dayDone;
+
                 return (
                   <div key={spot.id} className="relative group mb-10 last:mb-0">
                     <div
@@ -1005,25 +1010,49 @@ const ItineraryTab = ({
                           : "bg-white border-gray-200 hover:border-indigo-300 hover:shadow-lg"
                       }`}
                     >
-                      {/* 時間顯示 - 放大字體 */}
-                      <div className="flex items-baseline gap-2 bg-gray-100 px-4 py-2 rounded-xl border border-gray-200 mb-4 inline-flex">
-                        <span className="text-sm font-bold text-gray-500 uppercase tracking-wide">
-                          {index === 0 ? "出發" : "抵達"}
-                        </span>
-                        {index === 0 ? (
-                          <input
-                            type="time"
-                            value={dayStartTimes[day.dayId] || "09:00"}
-                            onChange={(e) =>
-                              handleDayStartTimeChange(day.dayId, e.target.value)
-                            }
-                            className="bg-transparent font-mono font-black text-2xl text-gray-900 w-24 outline-none"
-                          />
-                        ) : (
-                          <span className="font-mono font-black text-2xl text-gray-900">
-                            {spot.time}
+                      {/* 時間顯示 + 今日進度徽章 */}
+                      <div className="flex items-start justify-between gap-3 mb-4">
+                        <div className="flex items-baseline gap-2 bg-gray-100 px-4 py-2 rounded-xl border border-gray-200 inline-flex">
+                          <span className="text-sm font-bold text-gray-500 uppercase tracking-wide">
+                            {index === 0 ? "出發" : "抵達"}
                           </span>
-                        )}
+                          {index === 0 ? (
+                            <input
+                              type="time"
+                              value={dayStartTimes[day.dayId] || "09:00"}
+                              onChange={(e) =>
+                                handleDayStartTimeChange(day.dayId, e.target.value)
+                              }
+                              className="bg-transparent font-mono font-black text-2xl text-gray-900 w-24 outline-none"
+                            />
+                          ) : (
+                            <span className="font-mono font-black text-2xl text-gray-900">
+                              {spot.time}
+                            </span>
+                          )}
+                        </div>
+                        <div
+                          className={`text-right shrink-0 px-3 py-1.5 rounded-xl border-2 ${
+                            dayRemaining === 0
+                              ? "bg-green-50 border-green-200"
+                              : "bg-indigo-50 border-indigo-100"
+                          }`}
+                        >
+                          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
+                            今日進度 · 第 {index + 1}/{dayTotal} 站
+                          </div>
+                          <div
+                            className={`text-sm font-black ${
+                              dayRemaining === 0
+                                ? "text-green-600"
+                                : "text-indigo-600"
+                            }`}
+                          >
+                            {dayRemaining === 0
+                              ? "✅ 今日完成"
+                              : `已完成 ${dayDone} · 還剩 ${dayRemaining} 站`}
+                          </div>
+                        </div>
                       </div>
 
                       <div>
