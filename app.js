@@ -829,6 +829,60 @@ const CurrencySwitcher = ({
 };
 
 // ==========================================
+// 2.9 每日行程進度環（已動身 X/Y · 還剩 N 站）
+// ==========================================
+
+const DayProgress = ({ spots }) => {
+  const total = spots.length;
+  const done = spots.filter((s) => s.isDeparted).length;
+  const remaining = total - done;
+  const pct = total > 0 ? done / total : 0;
+  const R = 16;
+  const C = 2 * Math.PI * R;
+  const isDone = remaining === 0 && total > 0;
+  const color = isDone ? "#22C55E" : "#6366F1";
+  return (
+    <div className="ml-auto flex items-center gap-2.5 bg-white rounded-2xl pl-3 pr-4 py-2 shadow-md border-2 border-gray-100 shrink-0">
+      <div className="relative w-11 h-11">
+        <svg width="44" height="44" viewBox="0 0 44 44" className="-rotate-90">
+          <circle cx="22" cy="22" r={R} fill="none" stroke="#E5E7EB" strokeWidth="5" />
+          <circle
+            cx="22"
+            cy="22"
+            r={R}
+            fill="none"
+            stroke={color}
+            strokeWidth="5"
+            strokeLinecap="round"
+            strokeDasharray={C}
+            strokeDashoffset={C * (1 - pct)}
+            style={{ transition: "stroke-dashoffset 0.6s ease" }}
+          />
+        </svg>
+        <span
+          className="absolute inset-0 flex items-center justify-center text-[11px] font-black"
+          style={{ color }}
+        >
+          {isDone ? "✓" : `${Math.round(pct * 100)}%`}
+        </span>
+      </div>
+      <div className="text-right leading-tight">
+        <div className="text-base font-black text-gray-800 font-mono">
+          {done}/{total}
+        </div>
+        <div
+          className={`text-[10px] font-bold whitespace-nowrap ${
+            isDone ? "text-green-600" : "text-gray-400"
+          }`}
+        >
+          {isDone ? "今日完成 🎉" : `還剩 ${remaining} 站`}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
 // 3. 分頁組件 (Tabs)
 // ==========================================
 
@@ -910,6 +964,7 @@ const ItineraryTab = ({
                   {day.title}
                 </div>
               </div>
+              <DayProgress spots={day.spots} />
             </div>
 
             <div className="space-y-0 pl-6 border-l-2 border-dashed border-gray-300 ml-9 relative pb-4">
@@ -958,7 +1013,7 @@ const ItineraryTab = ({
                         {index === 0 ? (
                           <input
                             type="time"
-                            value={dayStartTimes[day.dayId] || day.defaultStart || "09:00"}
+                            value={dayStartTimes[day.dayId] || "09:00"}
                             onChange={(e) =>
                               handleDayStartTimeChange(day.dayId, e.target.value)
                             }
@@ -2276,16 +2331,11 @@ function App() {
 
   // --- 核心運算：行程瀑布流 ---
   const tripData = useMemo(() => {
-    return window.RAW_KML_DATA.map((day, dayIdx) => {
-      // 出發時間優先序：使用者手動設定 > config 的 day.defaultStart >
-      // 第一天自動採用去程班機抵達時間（FLIGHT_INFO.outbound.arr，未來行程通用）> 09:00
-      const resolvedStart = day.defaultStart || (dayIdx === 0 && window.FLIGHT_INFO?.outbound?.arr) || "09:00";
-      let currentMinutes = timeToMinutes(dayStartTimes[day.dayId] || resolvedStart);
+    return window.RAW_KML_DATA.map((day) => {
+      let currentMinutes = timeToMinutes(dayStartTimes[day.dayId] || "09:00");
       const newSpots = day.spots.map((spot, idx) => {
         const spotId = `${day.dayId}-s${idx}`;
-        // 停車場類景點預設停留 0 分鐘（僅停車/取車，不佔行程時間）
-        const isParkingSpot = /停車場|駐車場|[Pp]arking/.test(spot.name);
-        const stayStr = stays[spotId] || (isParkingSpot ? "0 min" : "1.5 hr");
+        const stayStr = stays[spotId] || "1.5 hr";
         const stayMinutes = parseStayDuration(stayStr);
         const arrivalTimeStr = minutesToTimeStr(currentMinutes);
         let departureMinutes;
@@ -2344,7 +2394,7 @@ function App() {
           ticket: spot.ticket || null,
         };
       });
-      return { ...day, defaultStart: resolvedStart, spots: newSpots };
+      return { ...day, spots: newSpots };
     });
   }, [dayStartTimes, actualDepartures, stays, transportModes]);
 
