@@ -1019,7 +1019,7 @@ const ItineraryTab = ({
                           {index === 0 ? (
                             <input
                               type="time"
-                              value={dayStartTimes[day.dayId] || "09:00"}
+                              value={dayStartTimes[day.dayId] || day.defaultStart || "09:00"}
                               onChange={(e) =>
                                 handleDayStartTimeChange(day.dayId, e.target.value)
                               }
@@ -1272,7 +1272,14 @@ const ItineraryTab = ({
                                 const curSpot = spot;
                                 const nextData = spot.nextStop;
                                 openChainFinder(
-                                  { name: curSpot.name, lat: curSpot.lat, lon: curSpot.lon },
+                                  {
+                                    name: curSpot.name,
+                                    lat: curSpot.lat,
+                                    lon: curSpot.lon,
+                                    time: curSpot.time,
+                                    stay: curSpot.stay,
+                                    actualDepTime: curSpot.actualDepTime,
+                                  },
                                   { name: nextData.name, lat: nextData.lat, lon: nextData.lon }
                                 );
                               }}
@@ -2094,9 +2101,18 @@ function App() {
     const preCalc = window.CHAIN_ROUTES?.[routeKey];
     const d1 = preCalc?.d1 || null;
     const d1km = d1 ? (d1 / 1000).toFixed(1) : parseFloat(getDistanceFromLatLonInKm(spotA.lat, spotA.lon, spotB.lat, spotB.lon));
-    setChainMidpoint({ midLat, midLon, fromName: spotA.name, toName: spotB.name, fromLat: spotA.lat, fromLon: spotA.lon, toLat: spotB.lat, toLon: spotB.lon, d1km, hasPreCalc: !!preCalc });
+    // v5：估算通過時刻（實際出發時間優先，否則抵達＋停留），供營業時間警示
+    let passMinutes = null;
+    if (spotA.actualDepTime) {
+      passMinutes = timeToMinutes(spotA.actualDepTime);
+    } else if (spotA.time) {
+      passMinutes = timeToMinutes(spotA.time) + parseStayDuration(spotA.stay || "1.5 hr");
+    }
+    setChainMidpoint({ midLat, midLon, fromName: spotA.name, toName: spotB.name, fromLat: spotA.lat, fromLon: spotA.lon, toLat: spotB.lat, toLon: spotB.lon, d1km, d1min: preCalc?.min ?? null, passMinutes, hasPreCalc: !!preCalc });
     // Use pre-calculated stores if available, filter out huge detours (>30km = not in area)
     const preStores = preCalc?.stores?.filter(s => s.detour != null && s.detour < 30000) || [];
+    // v5：有真實繞路分鐘就用它排序
+    preStores.sort((a, b) => (a.detourMin ?? a.detour / 1000) - (b.detourMin ?? b.detour / 1000));
     setChainStores(preStores);
     setShowChainPanel(true);
   };
@@ -2360,11 +2376,19 @@ function App() {
 
   // --- 核心運算：行程瀑布流 ---
   const tripData = useMemo(() => {
-    return window.RAW_KML_DATA.map((day) => {
-      let currentMinutes = timeToMinutes(dayStartTimes[day.dayId] || "09:00");
+    return window.RAW_KML_DATA.map((day, dayIdx) => {
+      // 出發時間優先序：使用者手動設定 > config 的 day.defaultStart >
+      // 第一天自動採用去程班機抵達時間（FLIGHT_INFO.outbound.arr，未來行程通用）> 09:00
+      const resolvedStart =
+        day.defaultStart ||
+        (dayIdx === 0 && window.FLIGHT_INFO?.outbound?.arr) ||
+        "09:00";
+      let currentMinutes = timeToMinutes(dayStartTimes[day.dayId] || resolvedStart);
       const newSpots = day.spots.map((spot, idx) => {
         const spotId = `${day.dayId}-s${idx}`;
-        const stayStr = stays[spotId] || "1.5 hr";
+        // 停車場類景點預設停留 0 分鐘（僅停車/取車，不佔行程時間）
+        const isParkingSpot = /停車場|駐車場|[Pp]arking/.test(spot.name);
+        const stayStr = stays[spotId] || (isParkingSpot ? "0 min" : "1.5 hr");
         const stayMinutes = parseStayDuration(stayStr);
         const arrivalTimeStr = minutesToTimeStr(currentMinutes);
         let departureMinutes;
@@ -2388,17 +2412,29 @@ function App() {
             nextSpot.lon
           );
           const mode = transportModes[spotId] || "car";
+          // v5：優先用預計算真實車程（calculator v5 / Routes API 交通感知），無資料才退回直線估算
+          const dtKey = `${spot.name}→${nextSpot.name}`;
+          const dt = window.DRIVE_TIMES ? window.DRIVE_TIMES[dtKey] : null;
+          const driveBuffer = window.DRIVE_BUFFER_MIN != null ? window.DRIVE_BUFFER_MIN : 5;
+          const hasRealDrive = !!(dt && dt.min != null);
           const speed = mode === "car" ? 40 : 4;
-          let travelMinutes = Math.round((dist / speed) * 60);
-          if (mode === "car") travelMinutes += 10;
+          let travelMinutes;
+          if (mode === "car" && hasRealDrive) {
+            travelMinutes = dt.min + driveBuffer; // 真實車程＋停車緩衝
+          } else {
+            travelMinutes = Math.round((dist / speed) * 60);
+            if (mode === "car") travelMinutes += 10;
+          }
           currentMinutes = departureMinutes + travelMinutes;
           nextArrivalTimeStr = minutesToTimeStr(currentMinutes);
           nextStopInfo = {
             name: nextSpot.name,
             lat: nextSpot.lat,
             lon: nextSpot.lon,
-            distance: `${dist} km`,
-            driveTime: Math.round((dist / 40) * 60 + 10) + "m",
+            distance: hasRealDrive && dt.km != null ? `${dt.km} km` : `${dist} km`,
+            isRealDrive: hasRealDrive,
+            driveTime:
+              (hasRealDrive ? dt.min + driveBuffer : Math.round((dist / 40) * 60 + 10)) + "m",
             walkTime: Math.round((dist / 4) * 60) + "m",
             navLink: `https://www.google.com/maps/dir/?api=1&origin=${
               spot.lat
@@ -2423,7 +2459,7 @@ function App() {
           ticket: spot.ticket || null,
         };
       });
-      return { ...day, spots: newSpots };
+      return { ...day, defaultStart: resolvedStart, spots: newSpots };
     });
   }, [dayStartTimes, actualDepartures, stays, transportModes]);
 
@@ -2921,28 +2957,53 @@ ${JSON.stringify(hotelWithDates)}
             <div className="text-xs text-gray-400 mb-1">{chainMidpoint.fromName} → {chainMidpoint.toName}</div>
             <div className="bg-gray-50 rounded-lg px-3 py-2 mb-3 text-center text-sm">
               📏 直達 <span className="font-black text-gray-900">{chainMidpoint.d1km} km</span>
+              {chainMidpoint.d1min != null && (
+                <span className="text-gray-500"> ・🚗 約 {chainMidpoint.d1min} 分</span>
+              )}
+              {chainMidpoint.passMinutes != null && (
+                <span className="text-gray-400 text-xs"> ・預計 {minutesToTimeStr(chainMidpoint.passMinutes)} 出發</span>
+              )}
             </div>
 
             {chainStores.length > 0 ? (
               <div className="space-y-2">
                 {chainStores.map((store, i) => {
+                  // v5：有 detourMin（真實繞路分鐘）優先顯示與分級，否則沿用公尺
+                  const hasMin = store.detourMin != null;
                   const detourKm = store.detour >= 1000 ? (store.detour / 1000).toFixed(1) + "km" : store.detour + "m";
-                  const colorClass = store.detour <= 500 ? "bg-green-50 border-green-300 text-green-800" : store.detour <= 2000 ? "bg-green-50 border-green-200 text-green-800" : store.detour <= 5000 ? "bg-amber-50 border-amber-200 text-amber-800" : "bg-red-50 border-red-200 text-red-800";
-                  const badgeClass = store.detour <= 500 ? "bg-green-100 text-green-700" : store.detour <= 2000 ? "bg-green-100 text-green-700" : store.detour <= 5000 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700";
+                  const level = hasMin
+                    ? (store.detourMin <= 3 ? 0 : store.detourMin <= 8 ? 1 : 2)
+                    : (store.detour <= 2000 ? 0 : store.detour <= 5000 ? 1 : 2);
+                  const colorClass = level === 0 ? "bg-green-50 border-green-300 text-green-800" : level === 1 ? "bg-amber-50 border-amber-200 text-amber-800" : "bg-red-50 border-red-200 text-red-800";
+                  const badgeClass = level === 0 ? "bg-green-100 text-green-700" : level === 1 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700";
+                  const noDetour = hasMin ? store.detourMin <= 1 : store.detour <= 500;
+                  const detourLabel = noDetour ? "✅ 不繞路" : "🔄 +" + (hasMin ? store.detourMin + "分" : detourKm);
                   const catIcon = store.cat === "丼飯" ? "🍚" : "🛒";
+                  // v5：營業時間警示（預計通過時刻 vs 該日營業區間）
+                  const pm = chainMidpoint.passMinutes;
+                  const hasHours = store.open && store.close;
+                  const isClosedAtPass =
+                    hasHours && pm != null &&
+                    (pm < timeToMinutes(store.open) || pm >= timeToMinutes(store.close));
+                  const hoursLabel = store.open === "00:00" && store.close === "24:00" ? "24h" : store.open + "–" + store.close;
                   return (
                     <a key={i} href={chainNavUrl(store.branch && store.branch.match(/[\u3000-\u9fff]/) ? store.branch : store.name + " " + (store.branch || ""), chainMidpoint, store.lat, store.lng)} target="_blank" rel="noreferrer"
                       className={`block p-3 rounded-xl border-2 ${colorClass} active:scale-[0.98] transition`}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-bold text-sm">{store.icon} {store.name}</span>
                         <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${badgeClass}`}>
-                          {store.detour <= 500 ? "✅ 不繞路" : "🔄 +" + detourKm}
+                          {detourLabel}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-500">{catIcon} {store.branch || store.name}</span>
                         <span className="text-xs font-bold">🚗 導航</span>
                       </div>
+                      {hasHours && (
+                        <div className={`text-[11px] mt-1 font-bold ${isClosedAtPass ? "text-red-600" : "text-gray-400"}`}>
+                          {isClosedAtPass ? "⚠️ 預計通過時未營業　" : "🕐 "}營業 {hoursLabel}
+                        </div>
+                      )}
                     </a>
                   );
                 })}
