@@ -259,12 +259,65 @@ window.CHAIN_STORES = [
 ];
 
 // 11. 沿途連鎖店（calculator v5：Routes API + Search Along Route）
-// 產生日 2026/7/23｜detour=真實繞路公尺、detourMin=真實繞路分鐘、open/close=行程當日營業時間
+// 產生日 2026/7/23（含短程補算 patch）｜detour=真實繞路公尺、detourMin=真實繞路分鐘、open/close=行程當日營業時間
 window.CHAIN_ROUTES = {
  "福岡國際機場→ＯＲＩＸ國際線店": {
   "d1": 1191,
   "min": 4,
-  "stores": []
+  "stores": [
+   {
+    "name": "なか卯",
+    "icon": "🐔",
+    "cat": "丼飯",
+    "branch": "なか卯 福岡半道橋店",
+    "d2": 1593,
+    "detour": 402,
+    "detourMin": 2,
+    "lat": 33.5818374,
+    "lng": 130.43898760000002,
+    "open": "04:00",
+    "close": "24:00"
+   },
+   {
+    "name": "吉野家",
+    "icon": "🐂",
+    "cat": "丼飯",
+    "branch": "吉野家 福岡空港国際ターミナルビル店",
+    "d2": 2590,
+    "detour": 1399,
+    "detourMin": 4,
+    "lat": 33.5845919,
+    "lng": 130.4443192,
+    "open": "07:00",
+    "close": "21:00"
+   },
+   {
+    "name": "業務超市",
+    "icon": "📦",
+    "cat": "超市",
+    "branch": "業務スーパー 博多半道橋店",
+    "d2": 2439,
+    "detour": 1248,
+    "detourMin": 6,
+    "lat": 33.578486399999996,
+    "lng": 130.4396598,
+    "open": "09:00",
+    "close": "23:00"
+   },
+   {
+    "name": "吉野家",
+    "icon": "🐂",
+    "cat": "丼飯",
+    "branch": "吉野家 東光寺店",
+    "d2": 4007,
+    "detour": 2816,
+    "detourMin": 10,
+    "lat": 33.5753817,
+    "lng": 130.43645510000002,
+    "open": "00:00",
+    "close": "24:00"
+   }
+  ]
  },
  "ＯＲＩＸ國際線店→Yamaya Factory Terrace": {
   "d1": 18958,
@@ -1732,7 +1785,60 @@ window.CHAIN_ROUTES = {
  "佐賀熱氣球博物館→BOOKOFF PLUS 佐賀南部繞道店": {
   "d1": 2689,
   "min": 7,
-  "stores": []
+  "stores": [
+   {
+    "name": "すき家",
+    "icon": "🥩",
+    "cat": "丼飯",
+    "branch": "すき家 佐賀本庄店",
+    "d2": 2937,
+    "detour": 248,
+    "detourMin": 2,
+    "lat": 33.2391727,
+    "lng": 130.2991893,
+    "open": "04:00",
+    "close": "24:00"
+   },
+   {
+    "name": "吉野家",
+    "icon": "🐂",
+    "cat": "丼飯",
+    "branch": "吉野家 ２０８号線佐賀大学前店",
+    "d2": 6182,
+    "detour": 3493,
+    "detourMin": 8,
+    "lat": 33.2396045,
+    "lng": 130.287591,
+    "open": "00:00",
+    "close": "24:00"
+   },
+   {
+    "name": "AEON",
+    "icon": "🛒",
+    "cat": "超市",
+    "branch": "マックスバリュ南佐賀店",
+    "d2": 4837,
+    "detour": 2148,
+    "detourMin": 8,
+    "lat": 33.2417604,
+    "lng": 130.3156581,
+    "open": "00:00",
+    "close": "24:00"
+   },
+   {
+    "name": "AEON",
+    "icon": "🛒",
+    "cat": "超市",
+    "branch": "イオン佐賀店",
+    "d2": 7567,
+    "detour": 4878,
+    "detourMin": 10,
+    "lat": 33.222774199999996,
+    "lng": 130.3082781,
+    "open": "09:00",
+    "close": "22:00"
+   }
+  ]
  },
  "BOOKOFF PLUS 佐賀南部繞道店→BOOKOFF Saga Nabeshima": {
   "d1": 5995,
@@ -2358,7 +2464,21 @@ window.CHAIN_ROUTES = {
  "BOOKOFF AcrossPlaza佐世保→すき家 35號佐世保大和店": {
   "d1": 1076,
   "min": 4,
-  "stores": []
+  "stores": [
+   {
+    "name": "すき家",
+    "icon": "🥩",
+    "cat": "丼飯",
+    "branch": "すき家 35号佐世保大和店",
+    "d2": 1979,
+    "detour": 903,
+    "detourMin": 4,
+    "lat": 33.1590673,
+    "lng": 129.7513796,
+    "open": "04:00",
+    "close": "24:00"
+   }
+  ]
  },
  "すき家 35號佐世保大和店→伊萬里夢Misaki公園（滑草）": {
   "d1": 35490,
@@ -2685,7 +2805,164 @@ window.CHAIN_ROUTES = {
  "BOOKOFF SUPER BAZAAR Mina天神→新大谷特約停車場 Grand Parking": {
   "d1": 1467,
   "min": 6,
-  "stores": []
+  "stores": [
+   {
+    "name": "吉野家",
+    "icon": "🐂",
+    "cat": "丼飯",
+    "branch": "吉野家×はなまるうどん ミーナ天神店",
+    "d2": 1471,
+    "detour": 4,
+    "detourMin": 1,
+    "lat": 33.592919,
+    "lng": 130.398336,
+    "open": "07:00",
+    "close": "21:00"
+   },
+   {
+    "name": "AEON",
+    "icon": "🛒",
+    "cat": "超市",
+    "branch": "マックスバリュエクスプレス渡辺通3丁目店",
+    "d2": 1580,
+    "detour": 113,
+    "detourMin": 1,
+    "lat": 33.5855105,
+    "lng": 130.40561110000002,
+    "open": "07:00",
+    "close": "24:00"
+   },
+   {
+    "name": "すき家",
+    "icon": "🥩",
+    "cat": "丼飯",
+    "branch": "すき家 天神南駅東店",
+    "d2": 1633,
+    "detour": 166,
+    "detourMin": 2,
+    "lat": 33.589030699999995,
+    "lng": 130.4038856,
+    "open": "04:00",
+    "close": "24:00"
+   },
+   {
+    "name": "吉野家",
+    "icon": "🐂",
+    "cat": "丼飯",
+    "branch": "吉野家 春吉店",
+    "d2": 1896,
+    "detour": 429,
+    "detourMin": 3,
+    "lat": 33.5893,
+    "lng": 130.4046,
+    "open": "00:00",
+    "close": "24:00"
+   },
+   {
+    "name": "SEIYU",
+    "icon": "🟢",
+    "cat": "超市",
+    "branch": "サニー渡辺通店",
+    "d2": 1966,
+    "detour": 499,
+    "detourMin": 3,
+    "lat": 33.5821241,
+    "lng": 130.4068149,
+    "open": "00:00",
+    "close": "24:00"
+   },
+   {
+    "name": "吉野家",
+    "icon": "🐂",
+    "cat": "丼飯",
+    "branch": "吉野家 福岡天神３丁目店",
+    "d2": 2067,
+    "detour": 600,
+    "detourMin": 4,
+    "lat": 33.591557,
+    "lng": 130.395773,
+    "open": "00:00",
+    "close": "24:00"
+   },
+   {
+    "name": "AEON",
+    "icon": "🛒",
+    "cat": "超市",
+    "branch": "マックスバリュエクスプレス住吉4丁目店",
+    "d2": 2399,
+    "detour": 932,
+    "detourMin": 4,
+    "lat": 33.5828541,
+    "lng": 130.4104245,
+    "open": "07:00",
+    "close": "24:00"
+   },
+   {
+    "name": "松屋",
+    "icon": "🍛",
+    "cat": "丼飯",
+    "branch": "松屋 天神店",
+    "d2": 2603,
+    "detour": 1136,
+    "detourMin": 5,
+    "lat": 33.592352399999996,
+    "lng": 130.3977746,
+    "open": "00:00",
+    "close": "24:00"
+   },
+   {
+    "name": "業務超市",
+    "icon": "📦",
+    "cat": "超市",
+    "branch": "業務スーパー 春吉店",
+    "d2": 2229,
+    "detour": 762,
+    "detourMin": 5,
+    "lat": 33.5843351,
+    "lng": 130.4089294,
+    "open": "09:00",
+    "close": "21:00"
+   },
+   {
+    "name": "すき家",
+    "icon": "🥩",
+    "cat": "丼飯",
+    "branch": "すき家 福岡舞鶴店",
+    "d2": 2953,
+    "detour": 1486,
+    "detourMin": 6,
+    "lat": 33.5910359,
+    "lng": 130.3929233,
+    "open": "04:00",
+    "close": "24:00"
+   },
+   {
+    "name": "吉野家",
+    "icon": "🐂",
+    "cat": "丼飯",
+    "branch": "吉野家 福岡赤坂店",
+    "d2": 3383,
+    "detour": 1916,
+    "detourMin": 7,
+    "lat": 33.589380999999996,
+    "lng": 130.390278,
+    "open": "00:00",
+    "close": "24:00"
+   },
+   {
+    "name": "吉野家",
+    "icon": "🐂",
+    "cat": "丼飯",
+    "branch": "吉野家 天神サザン通り店",
+    "d2": 2283,
+    "detour": 816,
+    "detourMin": 7,
+    "lat": 33.5896805,
+    "lng": 130.3970234,
+    "open": "00:00",
+    "close": "24:00"
+   }
+  ]
  },
  "新大谷特約停車場 Grand Parking→博多新大谷飯店": {
   "d1": 261,
