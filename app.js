@@ -108,6 +108,18 @@ const isHotel = (name) => {
   return false;
 };
 
+// --- 消費分類（記帳/明細/Email 共用）---
+const CATEGORY_META = {
+  food: { label: "餐飲", icon: "🍜" },
+  shopping: { label: "購物", icon: "🛍️" },
+  transport: { label: "交通", icon: "⛽" },
+  parking: { label: "停車", icon: "🅿️" },
+  ticket: { label: "門票", icon: "🎫" },
+  lodging: { label: "住宿", icon: "🏨" },
+  other: { label: "其他", icon: "📦" },
+};
+const catMeta = (key) => CATEGORY_META[key] || CATEGORY_META.other;
+
 // ═══ Gemini Model Fallback Chain ═══
 const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.0-flash"];
 let GEMINI_MODEL = localStorage.getItem("ft-gemini-model") || GEMINI_MODELS[0];
@@ -350,9 +362,25 @@ const ExpenseModal = ({
             onChange={(e) =>
               setExpenseForm({ ...expenseForm, note: e.target.value })
             }
-            className="w-full bg-gray-50 p-3 rounded-xl mb-4 text-sm outline-none border border-gray-200 text-gray-800 focus:border-[#E4C2C1]"
+            className="w-full bg-gray-50 p-3 rounded-xl mb-3 text-sm outline-none border border-gray-200 text-gray-800 focus:border-[#E4C2C1]"
             placeholder="備註"
           />
+          {/* 分類選擇（手動記帳；AI 收據會自動分類） */}
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {["food", "shopping", "transport", "parking", "other"].map((k) => (
+              <button
+                key={k}
+                onClick={() => setExpenseForm({ ...expenseForm, category: k })}
+                className={`px-2.5 py-1 rounded-full text-xs font-bold border-2 transition-colors ${
+                  (expenseForm.category || "food") === k
+                    ? "bg-[#E4C2C1] text-white border-[#E4C2C1]"
+                    : "bg-white text-gray-500 border-gray-200"
+                }`}
+              >
+                {CATEGORY_META[k].icon} {CATEGORY_META[k].label}
+              </button>
+            ))}
+          </div>
           <div className="relative mb-4">
             <input
               type="number"
@@ -636,22 +664,31 @@ const DailyDetailModal = ({
         dayExpensesList.push({ ...r, spotName: spot.name })
       );
 
-      // 門票邏輯：排除飯店，且有票價才顯示
-      if (!isHotel(spot.name)) {
-        const currentTicket = ticketOverrides[spot.id] || spot.ticket;
-        // 有票價資訊才計算
-        if (
-          currentTicket &&
-          (currentTicket.adult > 0 || currentTicket.child > 0)
-        ) {
-          // 使用傳入的 getTicketCounts 或 fallback
-          const counts = getTicketCounts
-            ? getTicketCounts(spot.id)
-            : { adult: 2, child: 2 };
+      // 門票/住宿邏輯：有價格才列出（與 dailyStats 計算一致）
+      const currentTicket = ticketOverrides[spot.id] || spot.ticket;
+      if (
+        currentTicket &&
+        (currentTicket.adult > 0 || currentTicket.child > 0)
+      ) {
+        const counts = getTicketCounts
+          ? getTicketCounts(spot.id)
+          : { adult: 2, child: 2 };
+        if (isHotel(spot.name)) {
+          // 住宿：房價 × 房數（原版漏列，造成明細加總 < 卡片總額）
+          const cost = currentTicket.adult * counts.adult;
+          if (cost > 0)
+            dayExpensesList.push({
+              id: `h-${spot.id}`,
+              amount: cost,
+              note: `住宿 (${counts.adult} 房)`,
+              spotName: spot.name,
+              timestamp: 0,
+              category: "lodging",
+            });
+        } else {
           const cost =
             currentTicket.adult * counts.adult +
             currentTicket.child * counts.child;
-
           if (cost > 0)
             dayExpensesList.push({
               id: `t-${spot.id}`,
@@ -659,6 +696,7 @@ const DailyDetailModal = ({
               note: `門票 (大${counts.adult} 小${counts.child})`,
               spotName: spot.name,
               timestamp: 0,
+              category: "ticket",
             });
         }
       }
@@ -666,6 +704,13 @@ const DailyDetailModal = ({
   });
 
   const totalTWD = dayExpensesList.reduce((sum, item) => sum + item.amount, 0);
+
+  // 類別小計
+  const catTotals = {};
+  dayExpensesList.forEach((item) => {
+    const k = CATEGORY_META[item.category] ? item.category : "other";
+    catTotals[k] = (catTotals[k] || 0) + item.amount;
+  });
 
   const sortedList = [...dayExpensesList].sort((a, b) => {
     const valA = sortConfig.key === "date" ? a.timestamp || 0 : a.amount;
@@ -702,6 +747,21 @@ const DailyDetailModal = ({
             <Icons.X size={20} className="text-gray-400 hover:text-gray-600" />
           </button>
         </div>
+
+        {Object.keys(catTotals).length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {Object.entries(catTotals)
+              .sort((a, b) => b[1] - a[1])
+              .map(([k, v]) => (
+                <span
+                  key={k}
+                  className="px-2 py-1 rounded-full text-[10px] font-bold bg-gray-50 border border-gray-200 text-gray-600"
+                >
+                  {catMeta(k).icon} {catMeta(k).label} ¥{v.toLocaleString()}
+                </span>
+              ))}
+          </div>
+        )}
 
         <div className="flex justify-between items-center mb-2 px-1">
           <span className="text-xs font-bold text-gray-400 uppercase">
@@ -749,7 +809,7 @@ const DailyDetailModal = ({
                   {item.spotName}
                 </div>
                 <div className="text-sm font-bold text-gray-600">
-                  {item.note}
+                  {catMeta(item.category).icon} {item.note}
                 </div>
                 {item.timestamp > 0 && (
                   <div className="text-[10px] text-gray-400 mt-0.5">
@@ -758,7 +818,7 @@ const DailyDetailModal = ({
                 )}
               </div>
               <div className="font-mono font-bold text-[#E4C2C1] text-lg">
-                NT${item.amount.toLocaleString()}
+                ¥{item.amount.toLocaleString()}
               </div>
             </div>
           ))}
@@ -766,9 +826,9 @@ const DailyDetailModal = ({
 
         <div className="mt-4 pt-4 border-t border-gray-100 space-y-1">
           <div className="flex justify-between">
-            <span className="text-sm font-bold text-gray-500">總計 (TWD)</span>
+            <span className="text-sm font-bold text-gray-500">總計 (JPY)</span>
             <span className="text-xl font-mono font-black text-[#E4C2C1]">
-              NT${totalTWD.toLocaleString()}
+              ¥{totalTWD.toLocaleString()}
             </span>
           </div>
           <div className="flex justify-between">
@@ -1659,7 +1719,7 @@ const StatsTab = ({
           })}
         </div>
         <div className="text-xs text-gray-400 font-mono mb-6">
-          ( NT${stats.totalJpy.toLocaleString()} )
+          ( ¥{stats.totalJpy.toLocaleString()} )
         </div>
         <button
           onClick={handleOpenEmailClick}
@@ -2564,7 +2624,7 @@ function App() {
         timestamp: timestamp,
         amount: parseInt(expenseForm.amount),
         note: expenseForm.note || "手動記帳",
-        category: "food",
+        category: expenseForm.category || "food",
       });
     }
     pendingReceipts.forEach((p, idx) => {
@@ -2581,7 +2641,7 @@ function App() {
           timestamp: recordTime,
           amount: parseInt(p.amount),
           note: p.note,
-          category: "food",
+          category: p.category || "other",
         });
       }
     });
@@ -2607,6 +2667,107 @@ function App() {
     setSelectedDailyStats(dayData);
     setIsDailyDetailOpen(true);
   };
+  // --- 產生 Gmail 友善的詳細明細 HTML（全 inline style、table 排版）---
+  const buildExpenseReportHtml = () => {
+    const esc = (s) =>
+      String(s == null ? "" : s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    const yen = (n) => "&yen;" + (n || 0).toLocaleString();
+    const tdL = 'style="padding:6px 8px;border-bottom:1px solid #eee;font-size:13px;color:#444;text-align:left"';
+    const tdR = 'style="padding:6px 8px;border-bottom:1px solid #eee;font-size:13px;color:#444;text-align:right;font-family:Consolas,monospace;white-space:nowrap"';
+
+    const catTotals = {};
+    let grand = 0;
+    let daysHtml = "";
+
+    tripData.forEach((day) => {
+      const rows = [];
+      day.spots.forEach((spot) => {
+        (expenses[spot.id] || []).forEach((r) => {
+          const k = CATEGORY_META[r.category] ? r.category : "other";
+          rows.push({ cat: k, note: r.note, spot: spot.name, ts: r.timestamp, amount: r.amount || 0 });
+        });
+        const t = ticketOverrides[spot.id] || spot.ticket;
+        if (t && (t.adult > 0 || t.child > 0)) {
+          const c = spotTicketCounts[spot.id] || { adult: 2, child: 2 };
+          if (isHotel(spot.name)) {
+            const cost = t.adult * c.adult;
+            if (cost > 0) rows.push({ cat: "lodging", note: "住宿 (" + c.adult + " 房)", spot: spot.name, ts: 0, amount: cost });
+          } else {
+            const cost = t.adult * c.adult + t.child * c.child;
+            if (cost > 0) rows.push({ cat: "ticket", note: "門票 (大" + c.adult + " 小" + c.child + ")", spot: spot.name, ts: 0, amount: cost });
+          }
+        }
+      });
+      const dayTotal = rows.reduce((s, r) => s + r.amount, 0);
+      grand += dayTotal;
+      rows.forEach((r) => (catTotals[r.cat] = (catTotals[r.cat] || 0) + r.amount));
+      if (rows.length === 0) return;
+      rows.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+
+      let body = "";
+      rows.forEach((r, i) => {
+        const bg = i % 2 === 0 ? "#ffffff" : "#faf8f6";
+        const timeStr = r.ts > 0 ? formatTime(r.ts) : "";
+        body +=
+          '<tr style="background:' + bg + '">' +
+          "<td " + tdL + ">" + catMeta(r.cat).icon + " " + esc(catMeta(r.cat).label) + "</td>" +
+          "<td " + tdL + ">" + esc(r.note) + '<br><span style="font-size:11px;color:#999">' + esc(r.spot) + (timeStr ? "・" + esc(timeStr) : "") + "</span></td>" +
+          "<td " + tdR + ">" + yen(r.amount) + "</td>" +
+          "</tr>";
+      });
+      daysHtml +=
+        '<h3 style="margin:22px 0 6px;font-size:15px;color:#4a4a4a;border-left:4px solid #E4C2C1;padding-left:8px">' +
+        esc(day.date + " " + day.title) + "</h3>" +
+        '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #eee;border-radius:6px">' +
+        '<tr style="background:#f3efec">' +
+        '<th style="padding:6px 8px;font-size:12px;color:#888;text-align:left;width:70px">類別</th>' +
+        '<th style="padding:6px 8px;font-size:12px;color:#888;text-align:left">項目 / 地點</th>' +
+        '<th style="padding:6px 8px;font-size:12px;color:#888;text-align:right;width:90px">金額</th>' +
+        "</tr>" + body +
+        '<tr style="background:#f9f4f3"><td colspan="2" style="padding:7px 8px;font-size:13px;font-weight:bold;color:#4a4a4a">小計</td>' +
+        '<td style="padding:7px 8px;font-size:14px;font-weight:bold;color:#c76b68;text-align:right;font-family:Consolas,monospace">' + yen(dayTotal) + "</td></tr>" +
+        "</table>";
+    });
+
+    // 類別統計
+    let catRows = "";
+    Object.entries(catTotals)
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([k, v]) => {
+        catRows +=
+          "<tr><td " + tdL + ">" + catMeta(k).icon + " " + esc(catMeta(k).label) + "</td>" +
+          "<td " + tdR + ">" + yen(v) + "</td>" +
+          "<td " + tdR + ">" + (grand > 0 ? Math.round((v / grand) * 100) : 0) + "%</td></tr>";
+      });
+
+    const converted = (grand * exchangeRate).toLocaleString(undefined, { maximumFractionDigits: 0 });
+    const now = new Date();
+    const genTime = now.getFullYear() + "/" + (now.getMonth() + 1) + "/" + now.getDate() + " " +
+      String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+
+    return (
+      '<div style="font-family:\'Microsoft JhengHei\',\'PingFang TC\',Arial,sans-serif;max-width:640px;margin:0 auto;padding:8px;color:#4a4a4a">' +
+      '<h2 style="margin:0 0 4px;font-size:20px;color:#4a4a4a">🗾 ' + esc(window.APP_TITLE || "旅遊") + " 花費明細</h2>" +
+      '<p style="margin:0 0 16px;font-size:12px;color:#999">製表時間 ' + genTime + "・幣別 JPY（日圓）</p>" +
+      '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;background:#faf7f5;border:1px solid #eee;border-radius:6px">' +
+      '<tr><td style="padding:12px 14px"><div style="font-size:12px;color:#999">總花費</div>' +
+      '<div style="font-size:26px;font-weight:bold;color:#c76b68;font-family:Consolas,monospace">' + yen(grand) + "</div>" +
+      '<div style="font-size:12px;color:#999">約合 ' + esc(selectedCurrency.code) + " " + esc(selectedCurrency.symbol) + converted + "</div></td></tr></table>" +
+      '<h3 style="margin:18px 0 6px;font-size:15px;color:#4a4a4a;border-left:4px solid #A9BFA8;padding-left:8px">類別統計</h3>' +
+      '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #eee">' +
+      '<tr style="background:#f0f3ef"><th style="padding:6px 8px;font-size:12px;color:#888;text-align:left">類別</th>' +
+      '<th style="padding:6px 8px;font-size:12px;color:#888;text-align:right;width:100px">金額</th>' +
+      '<th style="padding:6px 8px;font-size:12px;color:#888;text-align:right;width:60px">佔比</th></tr>' +
+      catRows + "</table>" +
+      daysHtml +
+      '<p style="margin:20px 0 0;font-size:11px;color:#bbb">由 ' + esc(window.APP_TITLE || "") + " App 自動產生・門票/住宿為預估或 AI 查價，實際以收據為準</p>" +
+      "</div>"
+    );
+  };
+
   const handleSendEmail = async () => {
     if (!emailInput) {
       alert("請輸入信箱");
@@ -2615,11 +2776,11 @@ function App() {
     setIsSendingEmail(true);
     localStorage.setItem("user_email", emailInput);
     try {
-      const htmlMessage = `<html><body><h2>旅遊報表</h2><p>總花費: NT$${stats.totalJpy}</p></body></html>`;
+      const htmlMessage = buildExpenseReportHtml();
       await window.emailjs.send("service_5yh7x6g", "template_dlbyml8", {
         email: emailInput,
         to_email: emailInput,
-        subject: "旅遊花費報表",
+        subject: (window.APP_TITLE || "旅遊") + " 花費明細 " + new Date().toLocaleDateString("zh-TW"),
         message: htmlMessage,
       });
       alert("發送成功！");
@@ -2652,7 +2813,13 @@ function App() {
         reader.onloadend = async () => {
           try {
             const res = await generateGeminiContent(
-              `分析這張收據的金額、店家名稱與時間。回傳 JSON: {amount: number, store: string, date: "YYYY/MM/DD HH:mm"}。如果找不到時間，date 回傳 null。`,
+              `這是一張日本消費收據（レシート）的照片。請仔細擷取以下欄位：
+1. amount：實付總額（優先找「合計」「お買上げ計」「クレジット支払」的稅込金額，純數字）
+2. store：店家名稱（收據抬頭，保留日文即可）
+3. date：交易日期時間，轉為西曆 "YYYY/MM/DD HH:mm"。注意令和年號換算：令和N年 = 2018+N 年（例：令和8年=2026）。找不到回傳 null
+4. category：消費分類，從以下擇一：food(餐飲/超商食品)、shopping(購物/藥妝/玩具/雜貨)、transport(加油/過路費/交通票)、parking(停車費)、other(其他)
+5. items：主要品項摘要，最多列 3 項、共 15 字內（例如「牛丼×2、味噌湯」），超過加「等」；看不清楚回傳 null
+只回傳純 JSON：{amount, store, date, category, items}`,
               reader.result
             );
             const jsonMatch = res.match(/\{[\s\S]*\}/);
@@ -2662,12 +2829,14 @@ function App() {
                 if (p.id !== item.id) return p;
                 const displayNote =
                   (json.date ? json.date + " " : "") +
-                  (json.store || "未命名收據");
+                  (json.store || "未命名收據") +
+                  (json.items ? "・" + json.items : "");
                 return {
                   ...p,
                   isAnalyzing: false,
                   amount: json.amount,
                   note: displayNote,
+                  category: json.category || "other",
                   timestamp: json.date
                     ? new Date(json.date).getTime()
                     : Date.now(),
