@@ -10,8 +10,8 @@ window.TRIP_ID = "2026-kyushu-0807";
 window.APP_TITLE = "2026 九州初體驗";
 window.APP_LOGO = "logo.jpg";
 window.DEFAULT_CURRENCY = "JPY";
-// 收據共享相簿（Google Photos 共享連結；家人上傳收據 → 記帳時批次入帳）。留空字串則隱藏按鈕
-window.SHARED_ALBUM_URL = "https://photos.app.goo.gl/qbkwKxxKwtpWoXuj6";
+// 收據共享相簿（已改用 Firebase 全家帳同步，留空隱藏按鈕；若要恢復填回共享連結即可）
+window.SHARED_ALBUM_URL = "";
 // 消費記錄雲端同步（Firebase Realtime Database；多裝置全家帳）。留空字串停用同步
 window.FIREBASE_DB_URL = "https://phonics-app-28eac-default-rtdb.europe-west1.firebasedatabase.app";
 
