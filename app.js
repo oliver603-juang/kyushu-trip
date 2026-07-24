@@ -323,6 +323,7 @@ const ExpenseModal = ({
   deleteExpense,
   isAnalyzingReceipt,
   quotaStatus,
+  twdJpyRate,
 }) => {
   const Icons = window.Icons;
   const [sortConfig, setSortConfig] = useState({
@@ -350,10 +351,21 @@ const ExpenseModal = ({
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="glass-panel rounded-3xl p-6 w-full max-w-sm bg-white border border-gray-100 flex flex-col max-h-[85vh] shadow-2xl">
-        <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-gray-800">
+        <h3 className="font-bold text-lg mb-2 flex items-center gap-2 text-gray-800">
           <Icons.Wallet size={20} className="text-[#E4C2C1]" />{" "}
           {currentEditingSpot.name}
         </h3>
+        {window.SHARED_ALBUM_URL && (
+          <a
+            href={window.SHARED_ALBUM_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1.5 mb-3 px-3 py-2 bg-[#F9F7F5] border border-[#A9BFA8]/40 rounded-xl text-xs font-bold text-[#A9BFA8] hover:bg-white"
+          >
+            📤 收據共享相簿
+            <span className="text-gray-400 font-normal">看家人上傳的收據 → 用相簿鈕選圖入帳</span>
+          </a>
+        )}
 
         <div className="flex-1 overflow-y-auto pr-1 no-scrollbar">
           <input
@@ -380,7 +392,29 @@ const ExpenseModal = ({
                 {CATEGORY_META[k].icon} {CATEGORY_META[k].label}
               </button>
             ))}
+            <span className="mx-1 border-l border-gray-200"></span>
+            {[
+              { c: "JPY", t: "¥ 日圓" },
+              { c: "TWD", t: "NT$ 台幣" },
+            ].map(({ c, t }) => (
+              <button
+                key={c}
+                onClick={() => setExpenseForm({ ...expenseForm, currency: c })}
+                className={`px-2.5 py-1 rounded-full text-xs font-bold border-2 transition-colors ${
+                  (expenseForm.currency || "JPY") === c
+                    ? "bg-[#A9BFA8] text-white border-[#A9BFA8]"
+                    : "bg-white text-gray-500 border-gray-200"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
           </div>
+          {(expenseForm.currency || "JPY") === "TWD" && (
+            <div className="text-[11px] text-[#A9BFA8] font-bold -mt-2 mb-3 ml-1">
+              台幣消費將以 1:{(twdJpyRate || 4.6).toFixed(2)} 自動轉為日圓入帳
+            </div>
+          )}
           <div className="relative mb-4">
             <input
               type="number"
@@ -551,7 +585,12 @@ const ExpenseModal = ({
                   </div>
                   <div className="flex gap-3 items-center">
                     <span className="font-mono font-bold text-gray-800">
-                      NT${r.amount}
+                      ¥{(r.amount || 0).toLocaleString()}
+                      {r.currency === "TWD" && r.origAmount != null && (
+                        <span className="block text-[9px] text-gray-400 text-right font-normal">
+                          NT${r.origAmount.toLocaleString()}
+                        </span>
+                      )}
                     </span>
                     <button
                       onClick={() => deleteExpense(currentEditingSpot.id, r.id)}
@@ -817,8 +856,13 @@ const DailyDetailModal = ({
                   </div>
                 )}
               </div>
-              <div className="font-mono font-bold text-[#E4C2C1] text-lg">
+              <div className="font-mono font-bold text-[#E4C2C1] text-lg text-right">
                 ¥{item.amount.toLocaleString()}
+                {item.currency === "TWD" && item.origAmount != null && (
+                  <div className="text-[9px] text-gray-400 font-normal">
+                    NT${item.origAmount.toLocaleString()}
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -859,7 +903,7 @@ const CurrencySwitcher = ({
       <div className="text-[10px] sm:text-xs font-bold text-gray-400 italic whitespace-nowrap hidden sm:block">
         {isRateLoading
           ? "..."
-          : `1 TWD ≈ ${exchangeRate.toFixed(4)} ${selectedCurrency.code}`}
+          : `1 JPY ≈ ${exchangeRate.toFixed(4)} ${selectedCurrency.code}`}
       </div>
       <div className="bg-white p-1.5 sm:p-2 rounded-xl shadow-sm border border-gray-200 relative group hover:border-[#A9BFA8] transition-colors">
         <select
@@ -1692,7 +1736,55 @@ const InfoTab = () => {
               <Icons.Upload size={18} /> 📥 匯入資料（還原）
             </button>
           </div>
-          <p className="text-xs text-gray-400 text-center">匯入前會顯示差異比對，確認後才覆蓋。不同行程的資料會額外警告。</p>
+
+          {/* 家人記帳合併：只合併消費記錄，不動其他資料 */}
+          <div className="relative">
+            <input
+              type="file"
+              accept=".json"
+              id="merge-expense-input"
+              className="absolute inset-0 opacity-0 cursor-pointer z-10"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                  try {
+                    const imported = JSON.parse(evt.target.result);
+                    if (!imported._meta) { alert("❌ 無效的備份檔案（缺少 _meta）"); return; }
+                    if (!imported.expenses) { alert("❌ 備份檔中沒有消費記錄"); return; }
+                    const theirExpenses = JSON.parse(imported.expenses);
+                    const mine = JSON.parse(localStorage.getItem("expenses") || "{}");
+                    let added = 0, skipped = 0;
+                    Object.entries(theirExpenses).forEach(([spotId, recs]) => {
+                      if (!Array.isArray(recs)) return;
+                      const mineList = mine[spotId] || [];
+                      const mineIds = new Set(mineList.map((r) => r.id));
+                      recs.forEach((r) => {
+                        if (mineIds.has(r.id)) { skipped++; return; }
+                        mineList.push(r); added++;
+                      });
+                      mine[spotId] = mineList;
+                    });
+                    if (added === 0) { alert("沒有新記錄可合併（重複 " + skipped + " 筆已略過）"); return; }
+                    if (confirm("🧾 合併預覽：\n\n備份裝置：" + (imported._meta.device || "未知").substring(0, 40) + "\n新增 " + added + " 筆消費記錄\n略過重複 " + skipped + " 筆\n\n只會合併消費記錄，不影響其他資料。確定合併？")) {
+                      localStorage.setItem("expenses", JSON.stringify(mine));
+                      alert("✅ 合併完成！頁面將重新載入。");
+                      window.location.reload();
+                    }
+                  } catch (err) {
+                    alert("❌ 檔案解析失敗：" + err.message);
+                  }
+                };
+                reader.readAsText(file);
+                e.target.value = "";
+              }}
+            />
+            <button className="w-full py-4 bg-[#F9F7F5] text-[#A9BFA8] rounded-xl font-bold text-base border-2 border-[#A9BFA8]/40 flex items-center justify-center gap-2 pointer-events-none">
+              <Icons.Upload size={18} /> 🧾 合併家人的消費記錄
+            </button>
+          </div>
+          <p className="text-xs text-gray-400 text-center">匯入（還原）會覆蓋全部資料；「合併」只加入對方的消費記錄（依 ID 去重），適合家人各自記帳後彙整。</p>
         </div>
       </div>
     </div>
@@ -1727,6 +1819,16 @@ const StatsTab = ({
         >
           <Icons.Mail size={16} /> 發送詳細報表
         </button>
+        {window.SHARED_ALBUM_URL && (
+          <a
+            href={window.SHARED_ALBUM_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="w-full mt-2 py-3 bg-[#F9F7F5] border border-gray-200 text-[#E4C2C1] rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-white hover:shadow-md transition-all"
+          >
+            📤 收據共享相簿（全家上傳）
+          </a>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -2322,6 +2424,31 @@ function App() {
   });
   const [exchangeRate, setExchangeRate] = useState(1);
   const [isRateLoading, setIsRateLoading] = useState(false);
+  // TWD→JPY 換匯率（台幣消費入帳時轉日圓；每日自動更新一次，失敗用快取/預設）
+  const [twdJpyRate, setTwdJpyRate] = useState(
+    () => parseFloat(localStorage.getItem("twd_jpy_rate")) || 4.6
+  );
+  useEffect(() => {
+    const today = new Date().toDateString();
+    if (localStorage.getItem("twd_jpy_rate_date") === today) return;
+    if (!localStorage.getItem("gemini_api_key")) return;
+    (async () => {
+      try {
+        const res = await generateGeminiContent(
+          "1 TWD to JPY exchange rate? number only",
+          null,
+          true
+        );
+        const m = res.match(/[\d.]+/g);
+        const r = m ? parseFloat(m[m.length - 1]) : null;
+        if (r && r > 1 && r < 20) {
+          setTwdJpyRate(r);
+          localStorage.setItem("twd_jpy_rate", String(r));
+          localStorage.setItem("twd_jpy_rate_date", today);
+        }
+      } catch (e) {}
+    })();
+  }, []);
 
   const [aiLoading, setAiLoading] = useState(false);
   const [isAnalyzingReceipt, setIsAnalyzingReceipt] = useState(false);
@@ -2344,6 +2471,7 @@ function App() {
   const [selectedDailyStats, setSelectedDailyStats] = useState(null);
   const [expenseForm, setExpenseForm] = useState({
     category: "food",
+    currency: "JPY",
     amount: "",
     note: "",
   });
@@ -2412,14 +2540,15 @@ function App() {
   // --- Currency Fetch ---
   useEffect(() => {
     const fetchRate = async () => {
-      if (selectedCurrency.code === "TWD") {
+      // 基準幣別 = JPY（日本行程：消費/門票/住宿皆以日圓入帳）
+      if (selectedCurrency.code === "JPY") {
         setExchangeRate(1);
         return;
       }
       setIsRateLoading(true);
       try {
         const res = await generateGeminiContent(
-          `1 TWD to ${selectedCurrency.code} rate? number only`,
+          `1 JPY to ${selectedCurrency.code} rate? number only`,
           null,
           true
         );
@@ -2611,20 +2740,28 @@ function App() {
 
   const openExpenseModal = (spot) => {
     setCurrentEditingSpot(spot);
-    setExpenseForm({ category: "food", amount: "", note: "" });
+    setExpenseForm({ category: "food", currency: "JPY", amount: "", note: "" });
     setPendingReceipts([]);
     setIsModalOpen(true);
   };
   const saveExpense = () => {
     const newRecs = [];
     const timestamp = Date.now();
+    // 非日圓 → 以 twdJpyRate 轉為日圓入帳，保留原幣金額顯示
+    const toJpyRec = (amt, cur) => {
+      if (cur === "TWD") {
+        return { amount: Math.round(amt * twdJpyRate), origAmount: amt, currency: "TWD" };
+      }
+      return { amount: amt, currency: "JPY" };
+    };
     if (expenseForm.amount) {
+      const conv = toJpyRec(parseInt(expenseForm.amount), expenseForm.currency || "JPY");
       newRecs.push({
         id: timestamp,
         timestamp: timestamp,
-        amount: parseInt(expenseForm.amount),
         note: expenseForm.note || "手動記帳",
         category: expenseForm.category || "food",
+        ...conv,
       });
     }
     pendingReceipts.forEach((p, idx) => {
@@ -2636,12 +2773,13 @@ function App() {
           );
           if (!isNaN(aiDate.getTime())) recordTime = aiDate.getTime();
         }
+        const conv = toJpyRec(parseInt(p.amount), p.currency || "JPY");
         newRecs.push({
           id: timestamp + idx + 100,
           timestamp: recordTime,
-          amount: parseInt(p.amount),
           note: p.note,
           category: p.category || "other",
+          ...conv,
         });
       }
     });
@@ -2687,7 +2825,12 @@ function App() {
       day.spots.forEach((spot) => {
         (expenses[spot.id] || []).forEach((r) => {
           const k = CATEGORY_META[r.category] ? r.category : "other";
-          rows.push({ cat: k, note: r.note, spot: spot.name, ts: r.timestamp, amount: r.amount || 0 });
+          const noteWithOrig =
+            r.note +
+            (r.currency === "TWD" && r.origAmount != null
+              ? "（NT$" + r.origAmount.toLocaleString() + "）"
+              : "");
+          rows.push({ cat: k, note: noteWithOrig, spot: spot.name, ts: r.timestamp, amount: r.amount || 0 });
         });
         const t = ticketOverrides[spot.id] || spot.ticket;
         if (t && (t.adult > 0 || t.child > 0)) {
@@ -2819,7 +2962,8 @@ function App() {
 3. date：交易日期時間，轉為西曆 "YYYY/MM/DD HH:mm"。注意令和年號換算：令和N年 = 2018+N 年（例：令和8年=2026）。找不到回傳 null
 4. category：消費分類，從以下擇一：food(餐飲/超商食品)、shopping(購物/藥妝/玩具/雜貨)、transport(加油/過路費/交通票)、parking(停車費)、other(其他)
 5. items：主要品項摘要，最多列 3 項、共 15 字內（例如「牛丼×2、味噌湯」），超過加「等」；看不清楚回傳 null
-只回傳純 JSON：{amount, store, date, category, items}`,
+6. currency：幣別判斷。日本收據（円、税込、日文格式）回傳 "JPY"；台灣收據（NT$、新台幣、統一發票、台灣門市如超商/LOUISA/路易莎）回傳 "TWD"；其他國家回傳 ISO 代碼
+只回傳純 JSON：{amount, store, date, category, items, currency}`,
               reader.result
             );
             const jsonMatch = res.match(/\{[\s\S]*\}/);
@@ -2827,14 +2971,17 @@ function App() {
             setPendingReceipts((prev) =>
               prev.map((p) => {
                 if (p.id !== item.id) return p;
+                const cur = json.currency || "JPY";
                 const displayNote =
                   (json.date ? json.date + " " : "") +
                   (json.store || "未命名收據") +
-                  (json.items ? "・" + json.items : "");
+                  (json.items ? "・" + json.items : "") +
+                  (cur !== "JPY" ? "（" + cur + " " + json.amount + "）" : "");
                 return {
                   ...p,
                   isAnalyzing: false,
                   amount: json.amount,
+                  currency: cur,
                   note: displayNote,
                   category: json.category || "other",
                   timestamp: json.date
@@ -3376,6 +3523,7 @@ ${JSON.stringify(hotelWithDates)}
         onClose={() => setIsModalOpen(false)}
         currentEditingSpot={currentEditingSpot}
         expenseForm={expenseForm}
+        twdJpyRate={twdJpyRate}
         setExpenseForm={setExpenseForm}
         handleImageUpload={handleImageUpload}
         pendingReceipts={pendingReceipts}
