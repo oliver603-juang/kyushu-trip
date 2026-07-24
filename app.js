@@ -2773,9 +2773,11 @@ function App() {
     setIsModalOpen(true);
   };
   // ═══ 消費記錄雲端同步（Firebase RTDB REST；多裝置全家帳）═══
-  const SYNC_BASE = window.FIREBASE_DB_URL
-    ? window.FIREBASE_DB_URL + "/trips/" + (window.TRIP_ID || "trip") + "/expenses"
+  const SYNC_ROOT = window.FIREBASE_DB_URL
+    ? window.FIREBASE_DB_URL + "/trips/" + (window.TRIP_ID || "trip")
     : null;
+  const SYNC_BASE = SYNC_ROOT ? SYNC_ROOT + "/expenses" : null;
+  const TOMB_BASE = SYNC_ROOT ? SYNC_ROOT + "/deleted" : null; // 刪除墓碑：一機刪、全家消
   const [syncStatus, setSyncStatus] = useState({
     state: "idle",
     text: localStorage.getItem("sync_last") ? "上次同步 " + localStorage.getItem("sync_last") : "尚未同步",
@@ -2806,6 +2808,14 @@ function App() {
           body: op.type === "del" ? undefined : JSON.stringify(op.rec),
         });
         if (!res.ok) throw new Error("HTTP " + res.status);
+        // 刪除時同步寫入墓碑，讓其他裝置下次同步自動移除本機那筆
+        if (op.type === "del") {
+          const tomb = await fetch(TOMB_BASE + "/r" + op.recId + ".json", {
+            method: "PUT",
+            body: JSON.stringify({ t: Date.now() }),
+          });
+          if (!tomb.ok) throw new Error("HTTP " + tomb.status);
+        }
       } catch (e) {
         remain.push(op);
       }
@@ -2822,22 +2832,35 @@ function App() {
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.json();
       });
+      // 墓碑：任一裝置刪除的記錄 id 清單
+      const tombs = (await fetch(TOMB_BASE + ".json").then((r) => (r.ok ? r.json() : null))) || {};
+      const isDead = (id) => !!tombs["r" + id];
       let added = 0;
-      if (remote) {
+      let removed = 0;
+      {
         const next = { ...expenses };
-        Object.entries(remote).forEach(([spotId, recs]) => {
-          const list = [...(next[spotId] || [])];
-          const ids = new Set(list.map((r) => r.id));
-          Object.values(recs || {}).forEach((r) => {
-            if (r && r.id != null && !ids.has(r.id)) {
-              list.push(r);
-              ids.add(r.id);
-              added++;
-            }
+        // 1) 合併雲端新記錄（跳過已刪除的）
+        if (remote) {
+          Object.entries(remote).forEach(([spotId, recs]) => {
+            const list = [...(next[spotId] || [])];
+            const ids = new Set(list.map((r) => r.id));
+            Object.values(recs || {}).forEach((r) => {
+              if (r && r.id != null && !ids.has(r.id) && !isDead(r.id)) {
+                list.push(r);
+                ids.add(r.id);
+                added++;
+              }
+            });
+            next[spotId] = list;
           });
-          next[spotId] = list;
+        }
+        // 2) 依墓碑清除本機殘留（一機刪、全家消）
+        Object.keys(next).forEach((spotId) => {
+          const before = next[spotId].length;
+          next[spotId] = next[spotId].filter((r) => !isDead(r.id));
+          removed += before - next[spotId].length;
         });
-        if (added > 0) setExpenses(next);
+        if (added > 0 || removed > 0) setExpenses(next);
       }
       const now = new Date();
       const timeStr =
@@ -2846,7 +2869,13 @@ function App() {
       localStorage.setItem("sync_last", timeStr);
       setSyncStatus({
         state: pending > 0 ? "warn" : "ok",
-        text: (added > 0 ? "⬇ 新增 " + added + " 筆・" : "已是最新・") + timeStr + (pending > 0 ? "・" + pending + " 筆待上傳" : ""),
+        text:
+          (added > 0 || removed > 0
+            ? (added > 0 ? "⬇ 新增 " + added + " 筆" : "") +
+              (removed > 0 ? (added > 0 ? "、" : "") + "🗑 移除 " + removed + " 筆" : "") + "・"
+            : "已是最新・") +
+          timeStr +
+          (pending > 0 ? "・" + pending + " 筆待上傳" : ""),
       });
     } catch (e) {
       setSyncStatus({ state: "err", text: "離線或同步失敗，記錄已排入佇列，連網後自動補傳" });
