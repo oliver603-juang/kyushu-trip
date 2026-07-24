@@ -846,6 +846,9 @@ const DailyDetailModal = ({
               <div className="flex flex-col">
                 <div className="text-xs text-[#A9BFA8] font-bold mb-0.5">
                   {item.spotName}
+                  {item.by && (
+                    <span className="text-gray-400 font-normal">・{item.by}</span>
+                  )}
                 </div>
                 <div className="text-sm font-bold text-gray-600">
                   {catMeta(item.category).icon} {item.note}
@@ -1797,6 +1800,9 @@ const StatsTab = ({
   stats,
   selectedCurrency,
   exchangeRate,
+  syncStatus,
+  onSyncNow,
+  syncEnabled,
 }) => {
   const Icons = window.Icons;
   return (
@@ -1828,6 +1834,28 @@ const StatsTab = ({
           >
             📤 收據共享相簿（全家上傳）
           </a>
+        )}
+        {syncEnabled && (
+          <div className="mt-2">
+            <button
+              onClick={onSyncNow}
+              disabled={syncStatus.state === "syncing"}
+              className="w-full py-3 bg-[#F9F7F5] border border-gray-200 text-[#A2C4C9] rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-white hover:shadow-md transition-all disabled:opacity-50"
+            >
+              ☁️ {syncStatus.state === "syncing" ? "同步中..." : "同步全家帳（Firebase）"}
+            </button>
+            <div
+              className={`text-[11px] mt-1.5 font-bold ${
+                syncStatus.state === "err"
+                  ? "text-red-500"
+                  : syncStatus.state === "warn"
+                  ? "text-amber-500"
+                  : "text-gray-400"
+              }`}
+            >
+              {syncStatus.text}
+            </div>
+          </div>
         )}
       </div>
 
@@ -2744,6 +2772,94 @@ function App() {
     setPendingReceipts([]);
     setIsModalOpen(true);
   };
+  // ═══ 消費記錄雲端同步（Firebase RTDB REST；多裝置全家帳）═══
+  const SYNC_BASE = window.FIREBASE_DB_URL
+    ? window.FIREBASE_DB_URL + "/trips/" + (window.TRIP_ID || "trip") + "/expenses"
+    : null;
+  const [syncStatus, setSyncStatus] = useState({
+    state: "idle",
+    text: localStorage.getItem("sync_last") ? "上次同步 " + localStorage.getItem("sync_last") : "尚未同步",
+  });
+  const getSyncName = () => {
+    let n = localStorage.getItem("sync_name");
+    if (!n) {
+      n = (window.prompt("第一次同步：輸入你的暱稱（會顯示在全家帳目上）", "") || "").trim() || "匿名";
+      localStorage.setItem("sync_name", n);
+    }
+    return n;
+  };
+  const enqueueSync = (op) => {
+    if (!SYNC_BASE) return;
+    const q = JSON.parse(localStorage.getItem("sync_queue") || "[]");
+    q.push(op);
+    localStorage.setItem("sync_queue", JSON.stringify(q));
+  };
+  const flushSyncQueue = async () => {
+    if (!SYNC_BASE) return 0;
+    const q = JSON.parse(localStorage.getItem("sync_queue") || "[]");
+    if (q.length === 0) return 0;
+    const remain = [];
+    for (const op of q) {
+      try {
+        const res = await fetch(SYNC_BASE + "/" + op.spotId + "/r" + op.recId + ".json", {
+          method: op.type === "del" ? "DELETE" : "PUT",
+          body: op.type === "del" ? undefined : JSON.stringify(op.rec),
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+      } catch (e) {
+        remain.push(op);
+      }
+    }
+    localStorage.setItem("sync_queue", JSON.stringify(remain));
+    return remain.length;
+  };
+  const syncNow = async () => {
+    if (!SYNC_BASE) return;
+    setSyncStatus({ state: "syncing", text: "同步中..." });
+    try {
+      const pending = await flushSyncQueue();
+      const remote = await fetch(SYNC_BASE + ".json").then((r) => {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      });
+      let added = 0;
+      if (remote) {
+        const next = { ...expenses };
+        Object.entries(remote).forEach(([spotId, recs]) => {
+          const list = [...(next[spotId] || [])];
+          const ids = new Set(list.map((r) => r.id));
+          Object.values(recs || {}).forEach((r) => {
+            if (r && r.id != null && !ids.has(r.id)) {
+              list.push(r);
+              ids.add(r.id);
+              added++;
+            }
+          });
+          next[spotId] = list;
+        });
+        if (added > 0) setExpenses(next);
+      }
+      const now = new Date();
+      const timeStr =
+        now.getMonth() + 1 + "/" + now.getDate() + " " +
+        String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+      localStorage.setItem("sync_last", timeStr);
+      setSyncStatus({
+        state: pending > 0 ? "warn" : "ok",
+        text: (added > 0 ? "⬇ 新增 " + added + " 筆・" : "已是最新・") + timeStr + (pending > 0 ? "・" + pending + " 筆待上傳" : ""),
+      });
+    } catch (e) {
+      setSyncStatus({ state: "err", text: "離線或同步失敗，記錄已排入佇列，連網後自動補傳" });
+    }
+  };
+  useEffect(() => {
+    if (!SYNC_BASE) return;
+    syncNow();
+    const onOnline = () => flushSyncQueue();
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, []);
+
   const saveExpense = () => {
     const newRecs = [];
     const timestamp = Date.now();
@@ -2784,18 +2900,42 @@ function App() {
       }
     });
     if (newRecs.length > 0) {
+      // 記帳人暱稱（雲端同步時顯示在全家帳目）
+      const finalRecs = SYNC_BASE
+        ? newRecs.map((r) => ({ ...r, by: getSyncName() }))
+        : newRecs;
       setExpenses((p) => ({
         ...p,
         [currentEditingSpot.id]: [
           ...(p[currentEditingSpot.id] || []),
-          ...newRecs,
+          ...finalRecs,
         ],
       }));
+      // 推送到雲端（離線時留在佇列，連網自動補傳）
+      finalRecs.forEach((r) =>
+        enqueueSync({ type: "put", spotId: currentEditingSpot.id, recId: r.id, rec: r })
+      );
+      flushSyncQueue().then((remain) => {
+        if (remain === 0) {
+          const now = new Date();
+          const timeStr =
+            now.getMonth() + 1 + "/" + now.getDate() + " " +
+            String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+          localStorage.setItem("sync_last", timeStr);
+          setSyncStatus({ state: "ok", text: "⬆ 已上傳・" + timeStr });
+        } else if (remain > 0) {
+          setSyncStatus({ state: "warn", text: remain + " 筆待上傳（離線佇列）" });
+        }
+      });
       setIsModalOpen(false);
     }
   };
-  const deleteExpense = (sid, rid) =>
+  const deleteExpense = (sid, rid) => {
     setExpenses((p) => ({ ...p, [sid]: p[sid].filter((r) => r.id !== rid) }));
+    // 同步刪除雲端記錄
+    enqueueSync({ type: "del", spotId: sid, recId: rid });
+    flushSyncQueue();
+  };
 
   const handleOpenEmailClick = () => {
     setEmailInput(localStorage.getItem("user_email") || "");
@@ -2830,7 +2970,8 @@ function App() {
             (r.currency === "TWD" && r.origAmount != null
               ? "（NT$" + r.origAmount.toLocaleString() + "）"
               : "");
-          rows.push({ cat: k, note: noteWithOrig, spot: spot.name, ts: r.timestamp, amount: r.amount || 0 });
+          const spotLabel = spot.name + (r.by ? "・" + r.by : "");
+          rows.push({ cat: k, note: noteWithOrig, spot: spotLabel, ts: r.timestamp, amount: r.amount || 0 });
         });
         const t = ticketOverrides[spot.id] || spot.ticket;
         if (t && (t.adult > 0 || t.child > 0)) {
@@ -3242,6 +3383,9 @@ ${JSON.stringify(hotelWithDates)}
               setIsDailyDetailOpen(true);
             }}
             handleOpenEmailClick={() => setIsEmailModalOpen(true)}
+            syncStatus={syncStatus}
+            onSyncNow={syncNow}
+            syncEnabled={!!SYNC_BASE}
           />
         )}
         {activeTab === "guard" && (

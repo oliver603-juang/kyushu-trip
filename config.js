@@ -12,6 +12,8 @@ window.APP_LOGO = "logo.jpg";
 window.DEFAULT_CURRENCY = "JPY";
 // 收據共享相簿（Google Photos 共享連結；家人上傳收據 → 記帳時批次入帳）。留空字串則隱藏按鈕
 window.SHARED_ALBUM_URL = "https://photos.app.goo.gl/qbkwKxxKwtpWoXuj6";
+// 消費記錄雲端同步（Firebase Realtime Database；多裝置全家帳）。留空字串停用同步
+window.FIREBASE_DB_URL = "https://phonics-app-28eac-default-rtdb.europe-west1.firebasedatabase.app";
 
 window.CURRENCY_OPTIONS = [
   { code: "JPY", symbol: "¥", label: "日幣" },
