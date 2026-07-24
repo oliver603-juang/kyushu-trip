@@ -2929,6 +2929,26 @@ function App() {
       }
     });
     if (newRecs.length > 0) {
+      // 疑似重複偵測：同景點已有「金額相同＋消費時間差1分鐘內」的記錄（含家人同步的）→ 確認後才入帳
+      const existing = expenses[currentEditingSpot.id] || [];
+      const dups = newRecs.filter((r) =>
+        existing.some(
+          (e) =>
+            e.amount === r.amount &&
+            Math.abs((e.timestamp || 0) - (r.timestamp || 0)) < 60000
+        )
+      );
+      if (dups.length > 0) {
+        const list = dups.map((d) => "・" + d.note + "（¥" + d.amount + "）").join("\n");
+        if (
+          !window.confirm(
+            "⚠️ 疑似重複入帳（同金額＋同時間已存在，可能是同一張收據掃了兩次）：\n\n" +
+              list +
+              "\n\n仍要入帳嗎？"
+          )
+        )
+          return;
+      }
       // 記帳人暱稱（雲端同步時顯示在全家帳目）
       const finalRecs = SYNC_BASE
         ? newRecs.map((r) => ({ ...r, by: getSyncName() }))
