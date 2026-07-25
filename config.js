@@ -30,7 +30,7 @@ window.RAW_KML_DATA = [
     spots: [
       { name: "福岡國際機場", lat: 33.5849988, lon: 130.4490906, desc: "JX840 星宇航空 桃園09:35出發 → 13:05抵達福岡。入境+領行李後前往 ORIX 取車。", mapCode: "", driveTime: "", ticket: { adult: 0, child: 0 } },
       { name: "ＯＲＩＸ國際線店", lat: 33.582242, lon: 130.442429, desc: "ORIX 租車福岡機場國際線店，取車出發。", mapCode: "", driveTime: "接駁/步行", ticket: { adult: 0, child: 0 } },
-      { name: "Yamaya Factory Terrace", lat: 33.6319684, lon: 130.5209968, desc: "明太子工廠見學＋直賣所。營業 10:00~17:00", mapCode: "55 752 414*52", driveTime: "國道19分、縣道22分", ticket: { adult: 0, child: 0 } },
+      { name: "Yamaya Factory Terrace", lat: 33.6319684, lon: 130.5209968, desc: "明太子工廠見學＋直賣所。營業 10:00~17:00。免費參觀。", mapCode: "55 752 414*52", driveTime: "國道19分、縣道22分", ticket: { adult: 0, child: 0, locked: true } },
       { name: "BOOKOFF + Hard Off", lat: 33.6545076, lon: 130.4923254, desc: "福岡挖寶第一站。", mapCode: "13 569 130*24", driveTime: "9分", ticket: { adult: 0, child: 0 } },
       { name: "ハードオフ福岡中間店", lat: 33.8180129, lon: 130.7162195, desc: "Hard Off 福岡中間店。", mapCode: "68 536 695*78", driveTime: "40分", ticket: { adult: 0, child: 0 } },
       { name: "ART 新田川小倉酒店", lat: 33.879354, lon: 130.880973, desc: "北九州小倉住宿。", mapCode: "16 466 090*23", driveTime: "27分", ticket: { adult: 0, child: 0 } },
@@ -44,10 +44,9 @@ window.RAW_KML_DATA = [
       { name: "駿河屋 小倉AruaruCity店", lat: 33.8876455, lon: 130.884624, desc: "🧸 絕版 LEGO 救星！中古動漫/絕版模型霸主，AruaruCity 2F/4F，小倉站前步行可達。", mapCode: "", driveTime: "步行1分", ticket: { adult: 0, child: 0 } },
       { name: "薩莉亞 小倉站前AruaruCity店", lat: 33.8874016, lon: 130.884736, desc: "午餐：Saizeriya 小倉站前 AruaruCity 店。", mapCode: "", driveTime: "同棟", ticket: { adult: 0, child: 0 } },
       { name: "BOOKOFF 大野城三笠川店", lat: 33.5468162, lon: 130.4828346, desc: "大野城 BOOKOFF，旁邊有超市。", mapCode: "13 178 249*77", driveTime: "1小時", ticket: { adult: 0, child: 0 } },
-      { name: "九州國立博物館", lat: 33.5182578, lon: 130.5381224, desc: "太宰府 九州國立博物館。9:30-17:00（16:30 最後入館）；金・土夜間開館至 20:00（19:30 最後入館，行前再確認）。8/8 週六有開。常設展（文化交流展）大人 700 円、高中以下免費，特別展另計。", mapCode: "", driveTime: "20分", ticket: { adult: 700, child: 0 } },
+      { name: "九州國立博物館", lat: 33.5182578, lon: 130.5381224, desc: "太宰府 九州國立博物館。9:30-17:00（16:30 最後入館）；金・土夜間開館至 20:00（19:30 最後入館，行前再確認）。8/8 週六有開。常設展（文化交流展）大人 700 円、高中以下免費，特別展另計。", mapCode: "", driveTime: "20分", ticket: { adult: 700, child: 0, locked: true } },
       { name: "Hard Off & Hobby Off 春日白水店", lat: 33.5092061, lon: 130.4496045, desc: "春日白水 Hard Off + Hobby Off，有樂高！", mapCode: "13 024 636*17", driveTime: "25分", ticket: { adult: 0, child: 0 } },
       { name: "BOOKOFF上津久留米店", lat: 33.2849572, lon: 130.5110566, desc: "久留米 BOOKOFF。", mapCode: "37 406 708*24", driveTime: "25分", ticket: { adult: 0, child: 0 } },
-      { name: "Hard Off 佐賀店", lat: 33.2212552, lon: 130.3077721, desc: "佐賀 Hard Off。", mapCode: "87 202 126*02", driveTime: "37分", ticket: { adult: 0, child: 0 } },
       { name: "APA酒店 佐賀站南口", lat: 33.2629778, lon: 130.2996529, desc: "佐賀站旁住宿。旁邊停車場1泊1,000円(41 532 501*11)", mapCode: "87 351 127*20", driveTime: "10分", ticket: { adult: 0, child: 0 } },
     ],
   },
@@ -59,7 +58,7 @@ window.RAW_KML_DATA = [
       { name: "BOOKOFF Saga Nabeshima", lat: 33.2652133, lon: 130.2718048, desc: "鍋島 BOOKOFF。", mapCode: "87 347 386*40", driveTime: "11分", ticket: { adult: 0, child: 0 } },
       { name: "佐賀縣立宇宙科學館 夢銀河", lat: 33.1791421, lon: 130.035404, desc: "互動體驗型宇宙科學館。", mapCode: "104 349 105*75", driveTime: "37分", ticket: { adult: 0, child: 0 } },
       { name: "Hard Off Sasebo", lat: 33.1586631, lon: 129.7642449, desc: "佐世保 Hard Off。", mapCode: "307 556 599*63", driveTime: "32分", ticket: { adult: 0, child: 0 } },
-      { name: "未確認生物UMA展（島瀬美術センター）", lat: 33.17277, lon: 129.72066, desc: "UMA 未確認生物展 8/1~8/31 無休。10:00-18:00（17:30 最後入館）。大人當日1,500円/前售1,300円、國高中生1,000円、小學生以下免費。等身大模型+拍照區，可手機拍照。距飯店步行5分。", mapCode: "", driveTime: "10分", ticket: { adult: 1500, child: 0 } },
+      { name: "未確認生物UMA展（島瀬美術センター）", lat: 33.17277, lon: 129.72066, desc: "UMA 未確認生物展 8/1~8/31 無休。10:00-18:00（17:30 最後入館）。大人當日1,500円/前售1,300円、國高中生1,000円、小學生以下免費。等身大模型+拍照區，可手機拍照。距飯店步行5分。", mapCode: "", driveTime: "10分", ticket: { adult: 1500, child: 0, locked: true } },
       { name: "佐世保中央飯店", lat: 33.1702927, lon: 129.7231849, desc: "佐世保市區住宿。", mapCode: "89 027 031*61", driveTime: "步行5分", ticket: { adult: 0, child: 0 } },
       { name: "おもちゃのあおき 四ヶ町アーケード本島店", lat: 33.17091, lon: 129.72166, desc: "老字號玩具店，四ヶ町商店街拱廊內，飯店旁。晚餐後散步順逛。", mapCode: "", driveTime: "步行2分", ticket: { adult: 0, child: 0 } },
     ],
@@ -264,8 +263,7 @@ window.CHAIN_STORES = [
   { cat: "超市", name: "SEIYU", icon: "🟢", query: "西友+SEIYU" },
 ];
 
-// 11. 沿途連鎖店（calculator v5，KMZ v4 行程 29 段全量）
-// detour=真實繞路公尺、detourMin=真實繞路分鐘、open/close=行程當日營業時間
+// 11. 沿途連鎖店（calculator v5；KMZ v5 移除 HardOff佐賀後 1 段待補算）
 window.CHAIN_ROUTES = {
  "福岡國際機場→ＯＲＩＸ國際線店": {
   "d1": 1191,
@@ -1133,172 +1131,6 @@ window.CHAIN_ROUTES = {
     "detourMin": 8,
     "lat": 33.8624587,
     "lng": 130.88096769999999,
-    "open": "00:00",
-    "close": "24:00"
-   }
-  ]
- },
- "BOOKOFF上津久留米店→Hard Off 佐賀店": {
-  "d1": 25893,
-  "min": 39,
-  "stores": [
-   {
-    "name": "SEIYU",
-    "icon": "🟢",
-    "cat": "超市",
-    "branch": "サニー久留米南店",
-    "d2": 26322,
-    "detour": 429,
-    "detourMin": 6,
-    "lat": 33.2811848,
-    "lng": 130.48104949999998,
-    "open": "08:00",
-    "close": "22:00"
-   },
-   {
-    "name": "AEON",
-    "icon": "🛒",
-    "cat": "超市",
-    "branch": "イオン佐賀店",
-    "d2": 27082,
-    "detour": 1189,
-    "detourMin": 8,
-    "lat": 33.222774199999996,
-    "lng": 130.3082781,
-    "open": "09:00",
-    "close": "22:00"
-   },
-   {
-    "name": "AEON",
-    "icon": "🛒",
-    "cat": "超市",
-    "branch": "イオン 大木店",
-    "d2": 28457,
-    "detour": 2564,
-    "detourMin": 13,
-    "lat": 33.220774999999996,
-    "lng": 130.4475803,
-    "open": "09:00",
-    "close": "22:00"
-   }
-  ]
- },
- "Hard Off 佐賀店→APA酒店 佐賀站南口": {
-  "d1": 5124,
-  "min": 12,
-  "stores": [
-   {
-    "name": "AEON",
-    "icon": "🛒",
-    "cat": "超市",
-    "branch": "イオン佐賀店",
-    "d2": 5212,
-    "detour": 88,
-    "detourMin": 4,
-    "lat": 33.222774199999996,
-    "lng": 130.3082781,
-    "open": "09:00",
-    "close": "22:00"
-   },
-   {
-    "name": "松屋",
-    "icon": "🍛",
-    "cat": "丼飯",
-    "branch": "松屋 佐賀大財店（松のや併設）",
-    "d2": 6016,
-    "detour": 892,
-    "detourMin": 6,
-    "lat": 33.262122,
-    "lng": 130.303406,
-    "open": "00:00",
-    "close": "24:00"
-   },
-   {
-    "name": "業務超市",
-    "icon": "📦",
-    "cat": "超市",
-    "branch": "業務スーパー 大財店",
-    "d2": 7172,
-    "detour": 2048,
-    "detourMin": 7,
-    "lat": 33.263213,
-    "lng": 130.3083551,
-    "open": "09:00",
-    "close": "21:00"
-   },
-   {
-    "name": "AEON",
-    "icon": "🛒",
-    "cat": "超市",
-    "branch": "マックスバリュ南佐賀店",
-    "d2": 7404,
-    "detour": 2280,
-    "detourMin": 8,
-    "lat": 33.2417604,
-    "lng": 130.3156581,
-    "open": "00:00",
-    "close": "24:00"
-   },
-   {
-    "name": "吉野家",
-    "icon": "🐂",
-    "cat": "丼飯",
-    "branch": "吉野家 佐賀環状東通り店",
-    "d2": 8572,
-    "detour": 3448,
-    "detourMin": 9,
-    "lat": 33.253933499999995,
-    "lng": 130.3209977,
-    "open": "05:00",
-    "close": "24:00"
-   },
-   {
-    "name": "吉野家",
-    "icon": "🐂",
-    "cat": "丼飯",
-    "branch": "吉野家 佐賀環状東通り店駐車場",
-    "d2": 8572,
-    "detour": 3448,
-    "detourMin": 9,
-    "lat": 33.2538002,
-    "lng": 130.3209953
-   },
-   {
-    "name": "すき家",
-    "icon": "🥩",
-    "cat": "丼飯",
-    "branch": "すき家 佐賀本庄店",
-    "d2": 7342,
-    "detour": 2218,
-    "detourMin": 10,
-    "lat": 33.2391727,
-    "lng": 130.2991893,
-    "open": "04:00",
-    "close": "24:00"
-   },
-   {
-    "name": "業務超市",
-    "icon": "📦",
-    "cat": "超市",
-    "branch": "業務スーパー 南佐賀店",
-    "d2": 8096,
-    "detour": 2972,
-    "detourMin": 10,
-    "lat": 33.2137855,
-    "lng": 130.3085132,
-    "open": "08:30",
-    "close": "19:30"
-   },
-   {
-    "name": "吉野家",
-    "icon": "🐂",
-    "cat": "丼飯",
-    "branch": "吉野家 ２０８号線佐賀大学前店",
-    "d2": 8681,
-    "detour": 3557,
-    "detourMin": 11,
-    "lat": 33.2396045,
-    "lng": 130.287591,
     "open": "00:00",
     "close": "24:00"
    }
@@ -3141,7 +2973,7 @@ window.CHAIN_ROUTES = {
  }
 };
 
-// 12. 真實車程（calculator v5，Routes API 交通感知，KMZ v4 行程 29 段全量）
+// 12. 真實車程（calculator v5；KMZ v5 後「上津久留米→APA」待補算，缺 key 自動退回估算）
 window.DRIVE_TIMES = {
  "福岡國際機場→ＯＲＩＸ國際線店": {
   "min": 4,
@@ -3187,16 +3019,6 @@ window.DRIVE_TIMES = {
   "min": 66,
   "km": 75,
   "dep": "08/08 14:03"
- },
- "BOOKOFF上津久留米店→Hard Off 佐賀店": {
-  "min": 39,
-  "km": 25.9,
-  "dep": "08/08 22:50"
- },
- "Hard Off 佐賀店→APA酒店 佐賀站南口": {
-  "min": 12,
-  "km": 5.1,
-  "dep": "08/08 23:59"
  },
  "佐賀熱氣球博物館→BOOKOFF PLUS 佐賀南部繞道店": {
   "min": 7,

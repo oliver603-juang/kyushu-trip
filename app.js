@@ -120,6 +120,10 @@ const CATEGORY_META = {
 };
 const catMeta = (key) => CATEGORY_META[key] || CATEGORY_META.other;
 
+// 門票取得：config 設 locked:true 的票價為「確定價」（免費或已查證），AI 估算/手動覆蓋均不生效
+const getTicket = (spot, overrides) =>
+  spot.ticket && spot.ticket.locked ? spot.ticket : (overrides[spot.id] || spot.ticket);
+
 // ═══ Gemini Model Fallback Chain ═══
 const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.0-flash"];
 let GEMINI_MODEL = localStorage.getItem("ft-gemini-model") || GEMINI_MODELS[0];
@@ -704,7 +708,7 @@ const DailyDetailModal = ({
       );
 
       // 門票/住宿邏輯：有價格才列出（與 dailyStats 計算一致）
-      const currentTicket = ticketOverrides[spot.id] || spot.ticket;
+      const currentTicket = getTicket(spot, ticketOverrides);
       if (
         currentTicket &&
         (currentTicket.adult > 0 || currentTicket.child > 0)
@@ -1083,7 +1087,7 @@ const ItineraryTab = ({
                 );
                 const counts = getTicketCounts(spot.id);
                 // Merge AI ticket info
-                const currentTicket = ticketOverrides[spot.id] || spot.ticket;
+                const currentTicket = getTicket(spot, ticketOverrides);
                 const isAccommodation = isHotel(spot.name);
                 
                 // 統一處理：景點門票或住宿費用
@@ -1198,7 +1202,7 @@ const ItineraryTab = ({
                                   <div className="flex items-center gap-1 text-gray-600">
                                     <Icons.Hotel size={14} className="text-[#A9BFA8]" />
                                     <span>住宿費</span>
-                                    <span className="font-mono font-bold text-[#E4C2C1]">NT${currentTicket.adult.toLocaleString()}</span>
+                                    <span className="font-mono font-bold text-[#E4C2C1]">¥{currentTicket.adult.toLocaleString()}</span>
                                     <span className="text-gray-400">×</span>
                                     <div className="flex items-center bg-white border rounded-lg px-1 shadow-sm">
                                       <button onClick={() => updateSpotTicketCount(spot.id, "adult", -1)} className="w-10 h-10 flex items-center justify-center bg-white border-2 border-gray-300 rounded-xl text-xl text-gray-700 active:bg-gray-200 shadow-sm font-bold">-</button>
@@ -1209,7 +1213,7 @@ const ItineraryTab = ({
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-sm font-mono font-bold text-[#E4C2C1]">共 NT${ticketTotal.toLocaleString()}</span>
+                                  <span className="text-sm font-mono font-bold text-[#E4C2C1]">共 ¥{ticketTotal.toLocaleString()}</span>
                                   <button onClick={() => handleManualTicketEdit(spot.id)} className="text-gray-300 hover:text-gray-500"><Icons.Edit size={12} /></button>
                                 </div>
                               </div>
@@ -1221,7 +1225,7 @@ const ItineraryTab = ({
                                     <div className="flex items-center gap-1 text-gray-600">
                                       <Icons.Ticket size={14} className="text-[#E4C2C1]" />
                                       <span>成人票</span>
-                                      <span className="font-mono font-bold text-[#E4C2C1]">NT${currentTicket.adult.toLocaleString()}</span>
+                                      <span className="font-mono font-bold text-[#E4C2C1]">¥{currentTicket.adult.toLocaleString()}</span>
                                       <span className="text-gray-400">×</span>
                                       <div className="flex items-center bg-white border rounded-lg px-1 shadow-sm">
                                         <button onClick={() => updateSpotTicketCount(spot.id, "adult", -1)} className="w-10 h-10 flex items-center justify-center bg-white border-2 border-gray-300 rounded-xl text-xl text-gray-700 active:bg-gray-200 shadow-sm font-bold">-</button>
@@ -1232,7 +1236,7 @@ const ItineraryTab = ({
                                     {currentTicket.child > 0 && (
                                       <div className="flex items-center gap-1 text-gray-600">
                                         <span>兒童票</span>
-                                        <span className="font-mono font-bold text-[#A9BFA8]">NT${currentTicket.child.toLocaleString()}</span>
+                                        <span className="font-mono font-bold text-[#A9BFA8]">¥{currentTicket.child.toLocaleString()}</span>
                                         <span className="text-gray-400">×</span>
                                         <div className="flex items-center bg-white border rounded-lg px-1 shadow-sm">
                                           <button onClick={() => updateSpotTicketCount(spot.id, "child", -1)} className="w-10 h-10 flex items-center justify-center bg-white border-2 border-gray-300 rounded-xl text-xl text-gray-700 active:bg-gray-200 shadow-sm font-bold">-</button>
@@ -1242,19 +1246,19 @@ const ItineraryTab = ({
                                       </div>
                                     )}
                                   </div>
-                                  <button onClick={() => handleManualTicketEdit(spot.id)} className="text-gray-300 hover:text-gray-500 shrink-0"><Icons.Edit size={12} /></button>
+                                  {!(spot.ticket && spot.ticket.locked) && (<button onClick={() => handleManualTicketEdit(spot.id)} className="text-gray-300 hover:text-gray-500 shrink-0"><Icons.Edit size={12} /></button>)}
                                 </div>
-                                <div className="text-right text-sm font-mono font-bold text-[#E4C2C1]">共 NT${ticketTotal.toLocaleString()}</div>
+                                <div className="text-right text-sm font-mono font-bold text-[#E4C2C1]">共 ¥{ticketTotal.toLocaleString()}</div>
                               </div>
                             )}
-                            {ticketOverrides[spot.id] && (
+                            {ticketOverrides[spot.id] && !(spot.ticket && spot.ticket.locked) && (
                               <div className="text-right text-[9px] text-[#A9BFA8] italic mt-1">AI 估算</div>
                             )}
                           </div>
                         ) : (
                           !isAccommodation && (
                             <div className="text-[10px] text-gray-300 mb-4 flex items-center gap-1">
-                              <Icons.Ticket size={12} /> {isTicketEstimating ? "AI 估價中..." : "免費 / 待估價"}
+                              <Icons.Ticket size={12} /> {spot.ticket && spot.ticket.locked ? "免費（已確認）" : isTicketEstimating ? "AI 估價中..." : "免費 / 待估價"}
                             </div>
                           )
                         )}
@@ -2687,7 +2691,7 @@ function App() {
       d.spots.forEach((spot) => {
         const spotExpenses = expenses[spot.id] || [];
         spotExpenses.forEach((e) => (dayTotal += e.amount || 0));
-        const currentTicket = ticketOverrides[spot.id] || spot.ticket;
+        const currentTicket = getTicket(spot, ticketOverrides);
         if (currentTicket && (currentTicket.adult > 0 || currentTicket.child > 0)) {
           const counts = spotTicketCounts[spot.id] || { adult: 2, child: 2 };
           if (isHotel(spot.name)) {
@@ -2745,16 +2749,16 @@ function App() {
     const isAccom = isHotel(spotName);
     
     if (isAccom) {
-      const roomPrice = prompt("請輸入每晚房價 (NT$):", current.adult);
+      const roomPrice = prompt("請輸入每晚房價 (¥):", current.adult);
       if (roomPrice === null) return;
       setTicketOverrides((prev) => ({
         ...prev,
         [spotId]: { adult: parseInt(roomPrice) || 0, child: 0 },
       }));
     } else {
-      const adultPrice = prompt("請輸入成人票價 (NT$):", current.adult);
+      const adultPrice = prompt("請輸入成人票價 (¥):", current.adult);
       if (adultPrice === null) return;
-      const childPrice = prompt("請輸入兒童票價 (NT$):", current.child);
+      const childPrice = prompt("請輸入兒童票價 (¥):", current.child);
       if (childPrice === null) return;
       setTicketOverrides((prev) => ({
         ...prev,
@@ -3022,7 +3026,7 @@ function App() {
           const spotLabel = spot.name + (r.by ? "・" + r.by : "");
           rows.push({ cat: k, note: noteWithOrig, spot: spotLabel, ts: r.timestamp, amount: r.amount || 0 });
         });
-        const t = ticketOverrides[spot.id] || spot.ticket;
+        const t = getTicket(spot, ticketOverrides);
         if (t && (t.adult > 0 || t.child > 0)) {
           const c = spotTicketCounts[spot.id] || { adult: 2, child: 2 };
           if (isHotel(spot.name)) {
@@ -3216,6 +3220,7 @@ function App() {
 
     tripData.forEach((day) => {
       day.spots.forEach((spot) => {
+        if (spot.ticket && spot.ticket.locked) return; // 確定價（免費/已查證）不估
         if (isHotel(spot.name)) {
           hotelList.push({ id: spot.id, name: spot.name });
         } else {
