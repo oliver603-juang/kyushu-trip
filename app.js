@@ -2318,10 +2318,19 @@ function App() {
     localStorage.setItem("shopping_list", JSON.stringify(shoppingList));
   }, [shoppingList]);
 
+  // 購物清單同步：勾選狀態可變 → 用 updatedAt「後寫贏」(last-write-wins)
+  const pushShopItem = (item) => {
+    enqueueSync({ type: "shop", itemId: item.id, item });
+    flushSyncQueue();
+  };
+
   const toggleBought = (id) => {
-    setShoppingList(prev => prev.map(item =>
-      item.id === id ? { ...item, bought: !item.bought } : item
-    ));
+    setShoppingList(prev => prev.map(item => {
+      if (item.id !== id) return item;
+      const next = { ...item, bought: !item.bought, updatedAt: Date.now() };
+      pushShopItem(next);
+      return next;
+    }));
   };
 
   const addShoppingItem = (name, category, keywords, icon, note) => {
@@ -2332,12 +2341,18 @@ function App() {
       icon: icon || "🛒",
       note: note || "",
       bought: false,
+      updatedAt: Date.now(),
     };
     setShoppingList(prev => [...prev, newItem]);
+    pushShopItem(newItem);
   };
 
   const removeShoppingItem = (id) => {
-    setShoppingList(prev => prev.filter(item => item.id !== id));
+    setShoppingList(prev => {
+      const target = prev.find((i) => i.id === id);
+      if (target) pushShopItem({ ...target, deleted: true, updatedAt: Date.now() });
+      return prev.filter(item => item.id !== id);
+    });
   };
 
   // Match shopping items to a spot name
@@ -2782,6 +2797,7 @@ function App() {
     : null;
   const SYNC_BASE = SYNC_ROOT ? SYNC_ROOT + "/expenses" : null;
   const TOMB_BASE = SYNC_ROOT ? SYNC_ROOT + "/deleted" : null; // 刪除墓碑：一機刪、全家消
+  const SHOP_BASE = SYNC_ROOT ? SYNC_ROOT + "/shopping" : null; // 購物清單（含勾選狀態）
   const [syncStatus, setSyncStatus] = useState({
     state: "idle",
     text: localStorage.getItem("sync_last") ? "上次同步 " + localStorage.getItem("sync_last") : "尚未同步",
@@ -2807,6 +2823,14 @@ function App() {
     const remain = [];
     for (const op of q) {
       try {
+        if (op.type === "shop") {
+          const r2 = await fetch(SHOP_BASE + "/" + op.itemId + ".json", {
+            method: "PUT",
+            body: JSON.stringify(op.item),
+          });
+          if (!r2.ok) throw new Error("HTTP " + r2.status);
+          continue;
+        }
         const res = await fetch(SYNC_BASE + "/" + op.spotId + "/r" + op.recId + ".json", {
           method: op.type === "del" ? "DELETE" : "PUT",
           body: op.type === "del" ? undefined : JSON.stringify(op.rec),
@@ -2866,6 +2890,32 @@ function App() {
         });
         if (added > 0 || removed > 0) setExpenses(next);
       }
+      // 3) 購物清單：以 updatedAt 後寫贏合併（勾選/新增/刪除都會同步）
+      let shopChanged = 0;
+      try {
+        const rShop = (await fetch(SHOP_BASE + ".json").then((r) => (r.ok ? r.json() : null))) || {};
+        const localMap = new Map(shoppingList.map((i) => [i.id, i]));
+        Object.values(rShop).forEach((ri) => {
+          if (!ri || !ri.id) return;
+          const li = localMap.get(ri.id);
+          if (!li) {
+            if (!ri.deleted) { localMap.set(ri.id, ri); shopChanged++; }
+            return;
+          }
+          if ((ri.updatedAt || 0) > (li.updatedAt || 0)) {
+            if (ri.deleted) localMap.delete(ri.id);
+            else localMap.set(ri.id, ri);
+            shopChanged++;
+          }
+        });
+        // 本機有、雲端沒有的（含預設清單）→ 補上傳
+        shoppingList.forEach((li) => {
+          if (!rShop[li.id]) enqueueSync({ type: "shop", itemId: li.id, item: { ...li, updatedAt: li.updatedAt || 1 } });
+        });
+        if (shopChanged > 0) setShoppingList(Array.from(localMap.values()));
+        await flushSyncQueue();
+      } catch (e) {}
+
       const now = new Date();
       const timeStr =
         now.getMonth() + 1 + "/" + now.getDate() + " " +
@@ -2879,6 +2929,7 @@ function App() {
               (removed > 0 ? (added > 0 ? "、" : "") + "🗑 移除 " + removed + " 筆" : "") + "・"
             : "已是最新・") +
           timeStr +
+          (shopChanged > 0 ? "・🛒 清單更新 " + shopChanged : "") +
           (pending > 0 ? "・" + pending + " 筆待上傳" : ""),
       });
     } catch (e) {
@@ -3550,7 +3601,7 @@ ${JSON.stringify(hotelWithDates)}
 
       {/* 購物清單浮動按鈕 */}
       <button
-        onClick={() => setShowShoppingPanel(!showShoppingPanel)}
+        onClick={() => { if (!showShoppingPanel && SHOP_BASE) syncNow(); setShowShoppingPanel(!showShoppingPanel); }}
         className="fixed bottom-20 right-4 z-50 w-14 h-14 bg-amber-500 text-white rounded-full shadow-lg flex items-center justify-center text-2xl active:scale-90 transition-transform"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
