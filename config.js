@@ -267,6 +267,15 @@ window.CHAIN_STORES = [
   { cat: "文具", name: "唐吉訶德", icon: "🐧", query: "ドン・キホーテ" },
   { cat: "文具", name: "蔦屋書店", icon: "📚", query: "蔦屋書店+TSUTAYA" },
   { cat: "文具", name: "文具店", icon: "✏️", query: "文房具店" },
+  { cat: "家電", name: "BIC CAMERA", icon: "🟥", query: "ビックカメラ" },
+  { cat: "家電", name: "友都八喜", icon: "📷", query: "ヨドバシカメラ" },
+  { cat: "家電", name: "BEST電器", icon: "🔵", query: "ベスト電器" },
+  { cat: "家電", name: "EDION", icon: "🟦", query: "エディオン" },
+  { cat: "家電", name: "YAMADA", icon: "🟨", query: "ヤマダデンキ" },
+  { cat: "家電", name: "K's DENKI", icon: "🔴", query: "ケーズデンキ" },
+  { cat: "家電", name: "KOJIMA", icon: "🟧", query: "コジマ" },
+  { cat: "家電", name: "100滿伏特", icon: "⚡", query: "100満ボルト" },
+  { cat: "家電", name: "運動用品店", icon: "🏃", query: "スポーツオーソリティ+ゼビオ+アルペン" },
 ];
 
 // 11. 沿途連鎖店（calculator v5；KMZ v5 移除 HardOff佐賀後 1 段待補算）
@@ -360,6 +369,45 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 アウトレット福岡空港南店",
+    "d2": 19151,
+    "detour": 193,
+    "detourMin": 1,
+    "lat": 33.5807826,
+    "lng": 130.4425023,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド博多本店",
+    "d2": 19302,
+    "detour": 344,
+    "detourMin": 1,
+    "lat": 33.590838,
+    "lng": 130.436574,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 博多半道橋店",
+    "d2": 19385,
+    "detour": 427,
+    "detourMin": 2,
+    "lat": 33.583186999999995,
+    "lng": 130.4389808,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "SEIYU",
     "icon": "🟢",
     "cat": "超市",
@@ -397,6 +445,19 @@ window.CHAIN_ROUTES = {
     "lng": 130.4396598,
     "open": "09:00",
     "close": "23:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器福岡本店",
+    "d2": 19437,
+    "detour": 479,
+    "detourMin": 5,
+    "lat": 33.608671099999995,
+    "lng": 130.4103182,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "すき家",
@@ -477,6 +538,19 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "スーパースポーツゼビオ ゆめタウン博多店",
+    "d2": 19638,
+    "detour": 680,
+    "detourMin": 6,
+    "lat": 33.6103619,
+    "lng": 130.4110131,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
     "name": "すき家",
     "icon": "🥩",
     "cat": "丼飯",
@@ -542,6 +616,45 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 アウトレット トリアス久山店",
+    "d2": 23292,
+    "detour": 4334,
+    "detourMin": 10,
+    "lat": 33.651820799999996,
+    "lng": 130.491009,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 福岡長浜店",
+    "d2": 24836,
+    "detour": 5878,
+    "detourMin": 10,
+    "lat": 33.5946,
+    "lng": 130.3922,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "LOFT",
+    "icon": "🟡",
+    "cat": "家電",
+    "branch": "天神ロフト",
+    "d2": 24046,
+    "detour": 5088,
+    "detourMin": 10,
+    "lat": 33.5929742,
+    "lng": 130.39837359999999,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "HANDS",
     "icon": "🟩",
     "cat": "文具",
@@ -571,6 +684,19 @@ window.CHAIN_ROUTES = {
     "name": "友都八喜",
     "icon": "📷",
     "cat": "文具",
+    "branch": "ヨドバシカメラ マルチメディア博多",
+    "d2": 19775,
+    "detour": 817,
+    "detourMin": 11,
+    "lat": 33.5883051,
+    "lng": 130.42169379999999,
+    "open": "09:30",
+    "close": "22:00"
+   },
+   {
+    "name": "友都八喜",
+    "icon": "📷",
+    "cat": "家電",
     "branch": "ヨドバシカメラ マルチメディア博多",
     "d2": 19775,
     "detour": 817,
@@ -639,6 +765,19 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 アウトレット トリアス久山店",
+    "d2": 5708,
+    "detour": 249,
+    "detourMin": 2,
+    "lat": 33.651820799999996,
+    "lng": 130.491009,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "SEIYU",
     "icon": "🟢",
     "cat": "超市",
@@ -697,6 +836,19 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 アウトレット トリアス久山店",
+    "d2": 38130,
+    "detour": 758,
+    "detourMin": 4,
+    "lat": 33.651820799999996,
+    "lng": 130.491009,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "AEON",
     "icon": "🛒",
     "cat": "超市",
@@ -749,6 +901,32 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 新宮店",
+    "d2": 41947,
+    "detour": 4575,
+    "detourMin": 11,
+    "lat": 33.7045965,
+    "lng": 130.4531448,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド新宮店",
+    "d2": 42740,
+    "detour": 5368,
+    "detourMin": 11,
+    "lat": 33.7087295,
+    "lng": 130.4558824,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "業務超市",
     "icon": "📦",
     "cat": "超市",
@@ -786,6 +964,19 @@ window.CHAIN_ROUTES = {
     "lng": 130.4620117,
     "open": "04:00",
     "close": "24:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 古賀店",
+    "d2": 45470,
+    "detour": 8098,
+    "detourMin": 15,
+    "lat": 33.7454536,
+    "lng": 130.4864322,
+    "open": "10:00",
+    "close": "20:00"
    }
   ]
  },
@@ -793,6 +984,32 @@ window.CHAIN_ROUTES = {
   "d1": 19921,
   "min": 28,
   "stores": [
+   {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 三萩野店",
+    "d2": 20486,
+    "detour": 565,
+    "detourMin": 3,
+    "lat": 33.87325,
+    "lng": 130.882228,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 福岡中間店",
+    "d2": 20350,
+    "detour": 429,
+    "detourMin": 4,
+    "lat": 33.82308270000001,
+    "lng": 130.72171849999998,
+    "open": "10:00",
+    "close": "20:00"
+   },
    {
     "name": "すき家",
     "icon": "🥩",
@@ -885,6 +1102,19 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 八幡本店",
+    "d2": 20792,
+    "detour": 871,
+    "detourMin": 7,
+    "lat": 33.867338,
+    "lng": 130.8082035,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "吉野家",
     "icon": "🐂",
     "cat": "丼飯",
@@ -922,6 +1152,19 @@ window.CHAIN_ROUTES = {
     "lng": 130.74295899999998,
     "open": "00:00",
     "close": "24:00"
+   },
+   {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 八幡西店",
+    "d2": 23273,
+    "detour": 3352,
+    "detourMin": 8,
+    "lat": 33.845669,
+    "lng": 130.728293,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "ロピア",
@@ -963,6 +1206,45 @@ window.CHAIN_ROUTES = {
     "close": "18:00"
    },
    {
+    "name": "BIC CAMERA",
+    "icon": "🟥",
+    "cat": "家電",
+    "branch": "コジマ×ビックカメラ 八幡店",
+    "d2": 25022,
+    "detour": 5101,
+    "detourMin": 9,
+    "lat": 33.870568500000005,
+    "lng": 130.7957219,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド八幡西店",
+    "d2": 22124,
+    "detour": 2203,
+    "detourMin": 9,
+    "lat": 33.8275617,
+    "lng": 130.7526603,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "LOFT",
+    "icon": "🟡",
+    "cat": "家電",
+    "branch": "小倉ロフト",
+    "d2": 21565,
+    "detour": 1644,
+    "detourMin": 9,
+    "lat": 33.8851233,
+    "lng": 130.88251169999998,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "すき家",
     "icon": "🥩",
     "cat": "丼飯",
@@ -1002,6 +1284,32 @@ window.CHAIN_ROUTES = {
     "close": "21:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器八幡西店",
+    "d2": 23538,
+    "detour": 3617,
+    "detourMin": 10,
+    "lat": 33.8440204,
+    "lng": 130.7305141,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 到津店",
+    "d2": 21736,
+    "detour": 1815,
+    "detourMin": 10,
+    "lat": 33.8741956,
+    "lng": 130.84981,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "すき家",
     "icon": "🥩",
     "cat": "丼飯",
@@ -1026,6 +1334,19 @@ window.CHAIN_ROUTES = {
     "lng": 130.7565458,
     "open": "09:00",
     "close": "24:00"
+   },
+   {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 八幡黒崎店",
+    "d2": 24267,
+    "detour": 4346,
+    "detourMin": 13,
+    "lat": 33.8593335,
+    "lng": 130.762647,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "唐吉訶德",
@@ -1164,6 +1485,45 @@ window.CHAIN_ROUTES = {
     "close": "20:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 小倉駅前店",
+    "d2": 3152,
+    "detour": 0,
+    "detourMin": 3,
+    "lat": 33.8851275,
+    "lng": 130.8825574,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 小倉井筒屋店",
+    "d2": 3381,
+    "detour": 9,
+    "detourMin": 3,
+    "lat": 33.8845096,
+    "lng": 130.8783326,
+    "open": "10:00",
+    "close": "19:00"
+   },
+   {
+    "name": "LOFT",
+    "icon": "🟡",
+    "cat": "家電",
+    "branch": "小倉ロフト",
+    "d2": 3152,
+    "detour": 0,
+    "detourMin": 3,
+    "lat": 33.8851233,
+    "lng": 130.88251169999998,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "吉野家",
     "icon": "🐂",
     "cat": "丼飯",
@@ -1188,6 +1548,32 @@ window.CHAIN_ROUTES = {
     "lng": 130.882175,
     "open": "09:00",
     "close": "22:00"
+   },
+   {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 三萩野店",
+    "d2": 7191,
+    "detour": 3819,
+    "detourMin": 4,
+    "lat": 33.87325,
+    "lng": 130.882228,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド小倉本店",
+    "d2": 4239,
+    "detour": 867,
+    "detourMin": 4,
+    "lat": 33.8875776,
+    "lng": 130.8757601,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "松屋",
@@ -1279,6 +1665,19 @@ window.CHAIN_ROUTES = {
     "lng": 130.8511853,
     "open": "04:00",
     "close": "24:00"
+   },
+   {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 到津店",
+    "d2": 8332,
+    "detour": 4960,
+    "detourMin": 10,
+    "lat": 33.8741956,
+    "lng": 130.84981,
+    "open": "10:00",
+    "close": "20:00"
    }
   ]
  },
@@ -1362,6 +1761,32 @@ window.CHAIN_ROUTES = {
     "close": "20:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 小倉駅前店",
+    "d2": 75416,
+    "detour": 394,
+    "detourMin": 4,
+    "lat": 33.8851275,
+    "lng": 130.8825574,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "LOFT",
+    "icon": "🟡",
+    "cat": "家電",
+    "branch": "小倉ロフト",
+    "d2": 75416,
+    "detour": 394,
+    "detourMin": 4,
+    "lat": 33.8851233,
+    "lng": 130.88251169999998,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "すき家",
     "icon": "🥩",
     "cat": "丼飯",
@@ -1399,6 +1824,32 @@ window.CHAIN_ROUTES = {
     "lng": 130.87075199999998,
     "open": "09:00",
     "close": "24:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 小倉井筒屋店",
+    "d2": 74971,
+    "detour": 0,
+    "detourMin": 5,
+    "lat": 33.8845096,
+    "lng": 130.8783326,
+    "open": "10:00",
+    "close": "19:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド小倉本店",
+    "d2": 78030,
+    "detour": 3008,
+    "detourMin": 5,
+    "lat": 33.8875776,
+    "lng": 130.8757601,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "吉野家",
@@ -1466,6 +1917,19 @@ window.CHAIN_ROUTES = {
     "close": "18:00"
    },
    {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 三萩野店",
+    "d2": 81834,
+    "detour": 6812,
+    "detourMin": 6,
+    "lat": 33.87325,
+    "lng": 130.882228,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "すき家",
     "icon": "🥩",
     "cat": "丼飯",
@@ -1477,6 +1941,32 @@ window.CHAIN_ROUTES = {
     "lng": 130.8511853,
     "open": "04:00",
     "close": "24:00"
+   },
+   {
+    "name": "BIC CAMERA",
+    "icon": "🟥",
+    "cat": "家電",
+    "branch": "コジマ×ビックカメラ 小倉店",
+    "d2": 82942,
+    "detour": 7920,
+    "detourMin": 7,
+    "lat": 33.837705899999996,
+    "lng": 130.90945879999998,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 到津店",
+    "d2": 76830,
+    "detour": 1808,
+    "detourMin": 7,
+    "lat": 33.8741956,
+    "lng": 130.84981,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "すき家",
@@ -1516,6 +2006,32 @@ window.CHAIN_ROUTES = {
     "lng": 130.88096769999999,
     "open": "00:00",
     "close": "24:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 八幡本店",
+    "d2": 76616,
+    "detour": 1594,
+    "detourMin": 9,
+    "lat": 33.867338,
+    "lng": 130.8082035,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 戸畑店",
+    "d2": 78247,
+    "detour": 3225,
+    "detourMin": 9,
+    "lat": 33.8938433,
+    "lng": 130.8200229,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "唐吉訶德",
@@ -1563,6 +2079,19 @@ window.CHAIN_ROUTES = {
   "min": 7,
   "stores": [
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 佐賀本庄店",
+    "d2": 2851,
+    "detour": 162,
+    "detourMin": 1,
+    "lat": 33.2396135,
+    "lng": 130.2935618,
+    "open": "10:00",
+    "close": "19:00"
+   },
+   {
     "name": "すき家",
     "icon": "🥩",
     "cat": "丼飯",
@@ -1587,6 +2116,19 @@ window.CHAIN_ROUTES = {
     "lng": 130.2921011,
     "open": "09:00",
     "close": "23:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ 家電住まいる館×YAMADA web.com 佐賀南部バイパス店",
+    "d2": 3059,
+    "detour": 370,
+    "detourMin": 2,
+    "lat": 33.2390239,
+    "lng": 130.2928144,
+    "open": "10:00",
+    "close": "21:00"
    },
    {
     "name": "吉野家",
@@ -1626,6 +2168,19 @@ window.CHAIN_ROUTES = {
     "lng": 130.3082781,
     "open": "09:00",
     "close": "22:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ モラージュ佐賀店",
+    "d2": 6213,
+    "detour": 3524,
+    "detourMin": 12,
+    "lat": 33.2535739,
+    "lng": 130.3172774,
+    "open": "10:00",
+    "close": "21:00"
    },
    {
     "name": "唐吉訶德",
@@ -1669,6 +2224,32 @@ window.CHAIN_ROUTES = {
     "lng": 130.2921011,
     "open": "09:00",
     "close": "23:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ 家電住まいる館×YAMADA web.com 佐賀南部バイパス店",
+    "d2": 6404,
+    "detour": 409,
+    "detourMin": 1,
+    "lat": 33.2390239,
+    "lng": 130.2928144,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 佐賀本庄店",
+    "d2": 7366,
+    "detour": 1371,
+    "detourMin": 2,
+    "lat": 33.2396135,
+    "lng": 130.2935618,
+    "open": "10:00",
+    "close": "19:00"
    },
    {
     "name": "吉野家",
@@ -1812,6 +2393,45 @@ window.CHAIN_ROUTES = {
     "close": "18:00"
    },
    {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 佐賀本店",
+    "d2": 11304,
+    "detour": 5309,
+    "detourMin": 11,
+    "lat": 33.274832499999995,
+    "lng": 130.31272239999998,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ モラージュ佐賀店",
+    "d2": 10255,
+    "detour": 4260,
+    "detourMin": 11,
+    "lat": 33.2535739,
+    "lng": 130.3172774,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "スーパースポーツゼビオ ゆめタウン佐賀店",
+    "d2": 11223,
+    "detour": 5228,
+    "detourMin": 11,
+    "lat": 33.275650999999996,
+    "lng": 130.30784,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
     "name": "LOFT",
     "icon": "🟡",
     "cat": "文具",
@@ -1838,6 +2458,32 @@ window.CHAIN_ROUTES = {
     "close": "22:00"
    },
    {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド佐賀本店",
+    "d2": 10932,
+    "detour": 4937,
+    "detourMin": 12,
+    "lat": 33.259432499999996,
+    "lng": 130.3196801,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
+    "name": "LOFT",
+    "icon": "🟡",
+    "cat": "家電",
+    "branch": "佐賀ロフト",
+    "d2": 10218,
+    "detour": 4223,
+    "detourMin": 12,
+    "lat": 33.2752145,
+    "lng": 130.3066797,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
     "name": "すき家",
     "icon": "🥩",
     "cat": "丼飯",
@@ -1862,6 +2508,19 @@ window.CHAIN_ROUTES = {
     "lng": 130.2997354,
     "open": "04:00",
     "close": "24:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 佐賀本店",
+    "d2": 11252,
+    "detour": 5257,
+    "detourMin": 13,
+    "lat": 33.2759517,
+    "lng": 130.309865,
+    "open": "10:00",
+    "close": "21:00"
    }
   ]
  },
@@ -1922,6 +2581,32 @@ window.CHAIN_ROUTES = {
     "close": "18:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 江北店",
+    "d2": 28998,
+    "detour": 175,
+    "detourMin": 0,
+    "lat": 33.2179855,
+    "lng": 130.16348399999998,
+    "open": "10:00",
+    "close": "19:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 武雄店",
+    "d2": 40184,
+    "detour": 11361,
+    "detourMin": 0,
+    "lat": 33.202101,
+    "lng": 130.0386028,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "吉野家",
     "icon": "🐂",
     "cat": "丼飯",
@@ -1959,6 +2644,45 @@ window.CHAIN_ROUTES = {
     "lng": 130.0362826,
     "open": "00:00",
     "close": "24:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 佐賀大和店",
+    "d2": 40600,
+    "detour": 11777,
+    "detourMin": 2,
+    "lat": 33.3016529,
+    "lng": 130.2817399,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 小城本町店",
+    "d2": 37170,
+    "detour": 8347,
+    "detourMin": 3,
+    "lat": 33.2924295,
+    "lng": 130.1994901,
+    "open": "09:00",
+    "close": "20:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 佐賀小城店",
+    "d2": 32017,
+    "detour": 3194,
+    "detourMin": 4,
+    "lat": 33.2765655,
+    "lng": 130.2163848,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "すき家",
@@ -2013,6 +2737,32 @@ window.CHAIN_ROUTES = {
     "close": "21:00"
    },
    {
+    "name": "LOFT",
+    "icon": "🟡",
+    "cat": "家電",
+    "branch": "佐賀ロフト",
+    "d2": 43945,
+    "detour": 15122,
+    "detourMin": 8,
+    "lat": 33.2752145,
+    "lng": 130.3066797,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "スーパースポーツゼビオ ゆめタウン佐賀店",
+    "d2": 44738,
+    "detour": 15915,
+    "detourMin": 8,
+    "lat": 33.275650999999996,
+    "lng": 130.30784,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
     "name": "松屋",
     "icon": "🍛",
     "cat": "丼飯",
@@ -2024,6 +2774,45 @@ window.CHAIN_ROUTES = {
     "lng": 130.303406,
     "open": "00:00",
     "close": "24:00"
+   },
+   {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 佐賀本店",
+    "d2": 45442,
+    "detour": 16619,
+    "detourMin": 10,
+    "lat": 33.274832499999995,
+    "lng": 130.31272239999998,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 佐賀本店",
+    "d2": 44876,
+    "detour": 16053,
+    "detourMin": 11,
+    "lat": 33.2759517,
+    "lng": 130.309865,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 佐賀本庄店",
+    "d2": 39231,
+    "detour": 10408,
+    "detourMin": 13,
+    "lat": 33.2396135,
+    "lng": 130.2935618,
+    "open": "10:00",
+    "close": "19:00"
    },
    {
     "name": "吉野家",
@@ -2097,6 +2886,19 @@ window.CHAIN_ROUTES = {
     "close": "20:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 佐世保本店",
+    "d2": 31615,
+    "detour": 0,
+    "detourMin": 0,
+    "lat": 33.154283,
+    "lng": 129.772311,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "唐吉訶德",
     "icon": "🐧",
     "cat": "文具",
@@ -2110,6 +2912,32 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 佐世保店",
+    "d2": 31833,
+    "detour": 218,
+    "detourMin": 1,
+    "lat": 33.156631,
+    "lng": 129.769197,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 佐世保店",
+    "d2": 32271,
+    "detour": 656,
+    "detourMin": 1,
+    "lat": 33.1468973,
+    "lng": 129.78048909999998,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "蔦屋書店",
     "icon": "📚",
     "cat": "文具",
@@ -2120,6 +2948,32 @@ window.CHAIN_ROUTES = {
     "lat": 33.189099999999996,
     "lng": 130.02367999999998,
     "open": "09:00",
+    "close": "21:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 武雄店",
+    "d2": 33914,
+    "detour": 2299,
+    "detourMin": 5,
+    "lat": 33.188728399999995,
+    "lng": 130.0250107,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "スーパースポーツゼビオ アクロスプラザ佐世保藤原町店",
+    "d2": 38187,
+    "detour": 6572,
+    "detourMin": 7,
+    "lat": 33.159639000000006,
+    "lng": 129.74318499999998,
+    "open": "10:00",
     "close": "21:00"
    },
    {
@@ -2147,6 +3001,32 @@ window.CHAIN_ROUTES = {
     "lng": 129.7475078,
     "open": "08:00",
     "close": "22:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド佐世保本店",
+    "d2": 38266,
+    "detour": 6651,
+    "detourMin": 8,
+    "lat": 33.1603984,
+    "lng": 129.7437664,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 武雄店",
+    "d2": 43502,
+    "detour": 11887,
+    "detourMin": 10,
+    "lat": 33.202101,
+    "lng": 130.0386028,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "蔦屋書店",
@@ -2220,6 +3100,19 @@ window.CHAIN_ROUTES = {
     "close": "19:00"
    },
    {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 佐世保店",
+    "d2": 6619,
+    "detour": 0,
+    "detourMin": 0,
+    "lat": 33.156631,
+    "lng": 129.769197,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "吉野家",
     "icon": "🐂",
     "cat": "丼飯",
@@ -2231,6 +3124,45 @@ window.CHAIN_ROUTES = {
     "lng": 129.78051639999998,
     "open": "09:00",
     "close": "23:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 佐世保本店",
+    "d2": 9904,
+    "detour": 1,
+    "detourMin": 1,
+    "lat": 33.154283,
+    "lng": 129.772311,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド佐世保本店",
+    "d2": 6916,
+    "detour": 0,
+    "detourMin": 1,
+    "lat": 33.1603984,
+    "lng": 129.7437664,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "スーパースポーツゼビオ アクロスプラザ佐世保藤原町店",
+    "d2": 6838,
+    "detour": 0,
+    "detourMin": 1,
+    "lat": 33.159639000000006,
+    "lng": 129.74318499999998,
+    "open": "10:00",
+    "close": "21:00"
    },
    {
     "name": "吉野家",
@@ -2257,6 +3189,19 @@ window.CHAIN_ROUTES = {
     "lng": 129.7701648,
     "open": "09:00",
     "close": "20:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 長崎四ヶ町店",
+    "d2": 7329,
+    "detour": 0,
+    "detourMin": 2,
+    "lat": 33.170418999999995,
+    "lng": 129.7214483,
+    "open": "10:00",
+    "close": "18:30"
    },
    {
     "name": "AEON",
@@ -2309,6 +3254,19 @@ window.CHAIN_ROUTES = {
     "lng": 129.7156599,
     "open": "10:00",
     "close": "18:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 佐世保店",
+    "d2": 10621,
+    "detour": 718,
+    "detourMin": 4,
+    "lat": 33.1468973,
+    "lng": 129.78048909999998,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "すき家",
@@ -2378,6 +3336,45 @@ window.CHAIN_ROUTES = {
   "d1": 7778,
   "min": 18,
   "stores": [
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド佐世保本店",
+    "d2": 7969,
+    "detour": 191,
+    "detourMin": 0,
+    "lat": 33.1603984,
+    "lng": 129.7437664,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "スーパースポーツゼビオ アクロスプラザ佐世保藤原町店",
+    "d2": 7916,
+    "detour": 138,
+    "detourMin": 0,
+    "lat": 33.159639000000006,
+    "lng": 129.74318499999998,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 長崎四ヶ町店",
+    "d2": 8147,
+    "detour": 369,
+    "detourMin": 1,
+    "lat": 33.170418999999995,
+    "lng": 129.7214483,
+    "open": "10:00",
+    "close": "18:30"
+   },
    {
     "name": "吉野家",
     "icon": "🐂",
@@ -2496,6 +3493,19 @@ window.CHAIN_ROUTES = {
     "close": "23:00"
    },
    {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 佐世保店",
+    "d2": 13801,
+    "detour": 6023,
+    "detourMin": 13,
+    "lat": 33.156631,
+    "lng": 129.769197,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "業務超市",
     "icon": "📦",
     "cat": "超市",
@@ -2520,6 +3530,19 @@ window.CHAIN_ROUTES = {
     "lng": 129.7779639,
     "open": "09:00",
     "close": "24:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 佐世保店",
+    "d2": 18969,
+    "detour": 11191,
+    "detourMin": 15,
+    "lat": 33.1468973,
+    "lng": 129.78048909999998,
+    "open": "10:00",
+    "close": "20:00"
    }
   ]
  },
@@ -2623,6 +3646,71 @@ window.CHAIN_ROUTES = {
     "lng": 129.8722807,
     "open": "08:00",
     "close": "19:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 佐世保本店",
+    "d2": 35490,
+    "detour": 0,
+    "detourMin": 0,
+    "lat": 33.154283,
+    "lng": 129.772311,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 佐世保店",
+    "d2": 35707,
+    "detour": 217,
+    "detourMin": 0,
+    "lat": 33.156631,
+    "lng": 129.769197,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド佐世保本店",
+    "d2": 39224,
+    "detour": 3734,
+    "detourMin": 0,
+    "lat": 33.1603984,
+    "lng": 129.7437664,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 佐世保店",
+    "d2": 36207,
+    "detour": 717,
+    "detourMin": 0,
+    "lat": 33.1468973,
+    "lng": 129.78048909999998,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "スーパースポーツゼビオ アクロスプラザ佐世保藤原町店",
+    "d2": 39146,
+    "detour": 3656,
+    "detourMin": 0,
+    "lat": 33.159639000000006,
+    "lng": 129.74318499999998,
+    "open": "10:00",
+    "close": "21:00"
    },
    {
     "name": "AEON",
@@ -2761,6 +3849,19 @@ window.CHAIN_ROUTES = {
     "close": "19:00"
    },
    {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 唐津店",
+    "d2": 27138,
+    "detour": 3707,
+    "detourMin": 8,
+    "lat": 33.4290057,
+    "lng": 129.9818473,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "吉野家",
     "icon": "🐂",
     "cat": "丼飯",
@@ -2858,6 +3959,32 @@ window.CHAIN_ROUTES = {
     "close": "20:00"
    },
    {
+    "name": "LOFT",
+    "icon": "🟡",
+    "cat": "家電",
+    "branch": "天神ロフト",
+    "d2": 51454,
+    "detour": 251,
+    "detourMin": 0,
+    "lat": 33.5929742,
+    "lng": 130.39837359999999,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "LOFT",
+    "icon": "🟡",
+    "cat": "家電",
+    "branch": "オンタイム天神ロフト店",
+    "d2": 51454,
+    "detour": 251,
+    "detourMin": 0,
+    "lat": 33.5929742,
+    "lng": 130.39837359999999,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "唐吉訶德",
     "icon": "🐧",
     "cat": "文具",
@@ -2871,6 +3998,32 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン イオン唐津店",
+    "d2": 51530,
+    "detour": 327,
+    "detourMin": 1,
+    "lat": 33.436859999999996,
+    "lng": 130.0116376,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 唐津店",
+    "d2": 51816,
+    "detour": 613,
+    "detourMin": 1,
+    "lat": 33.4290057,
+    "lng": 129.9818473,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "松屋",
     "icon": "🍛",
     "cat": "丼飯",
@@ -2882,6 +4035,19 @@ window.CHAIN_ROUTES = {
     "lng": 130.3977746,
     "open": "00:00",
     "close": "24:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド New唐津店",
+    "d2": 51754,
+    "detour": 551,
+    "detourMin": 2,
+    "lat": 33.4348698,
+    "lng": 130.00801769999998,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "吉野家",
@@ -2921,6 +4087,19 @@ window.CHAIN_ROUTES = {
     "lng": 130.3993155,
     "open": "10:00",
     "close": "21:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 福岡長浜店",
+    "d2": 52296,
+    "detour": 1093,
+    "detourMin": 3,
+    "lat": 33.5946,
+    "lng": 130.3922,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "すき家",
@@ -3040,6 +4219,32 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 伊都店",
+    "d2": 52360,
+    "detour": 1157,
+    "detourMin": 7,
+    "lat": 33.577095299999996,
+    "lng": 130.2563523,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 福岡西店",
+    "d2": 52265,
+    "detour": 1062,
+    "detourMin": 7,
+    "lat": 33.565464,
+    "lng": 130.318859,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "松屋",
     "icon": "🍛",
     "cat": "丼飯",
@@ -3051,6 +4256,45 @@ window.CHAIN_ROUTES = {
     "lng": 130.17417129999998,
     "open": "06:00",
     "close": "23:30"
+   },
+   {
+    "name": "BIC CAMERA",
+    "icon": "🟥",
+    "cat": "家電",
+    "branch": "ビックカメラ 天神1号館",
+    "d2": 53000,
+    "detour": 1797,
+    "detourMin": 8,
+    "lat": 33.5875219,
+    "lng": 130.40071079999998,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
+    "name": "HANDS",
+    "icon": "🟩",
+    "cat": "家電",
+    "branch": "ハンズハンズ",
+    "d2": 54341,
+    "detour": 3138,
+    "detourMin": 8,
+    "lat": 33.5662435,
+    "lng": 130.2454292,
+    "open": "10:00",
+    "close": "18:00"
+   },
+   {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "スーパースポーツゼビオ 福岡天神店",
+    "d2": 53001,
+    "detour": 1798,
+    "detourMin": 8,
+    "lat": 33.5868925,
+    "lng": 130.4015593,
+    "open": "10:00",
+    "close": "21:00"
    },
    {
     "name": "文具店",
@@ -3155,6 +4399,32 @@ window.CHAIN_ROUTES = {
     "close": "21:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器ギフトステーション",
+    "d2": 1467,
+    "detour": 0,
+    "detourMin": 1,
+    "lat": 33.5884697,
+    "lng": 130.40136030000002,
+    "open": "10:00",
+    "close": "18:00"
+   },
+   {
+    "name": "LOFT",
+    "icon": "🟡",
+    "cat": "家電",
+    "branch": "天神ロフト",
+    "d2": 1467,
+    "detour": 0,
+    "detourMin": 1,
+    "lat": 33.5929742,
+    "lng": 130.39837359999999,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "すき家",
     "icon": "🥩",
     "cat": "丼飯",
@@ -3192,6 +4462,58 @@ window.CHAIN_ROUTES = {
     "lng": 130.4068149,
     "open": "00:00",
     "close": "24:00"
+   },
+   {
+    "name": "BIC CAMERA",
+    "icon": "🟥",
+    "cat": "家電",
+    "branch": "ビックカメラ 天神1号館",
+    "d2": 1701,
+    "detour": 234,
+    "detourMin": 3,
+    "lat": 33.5875219,
+    "lng": 130.40071079999998,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
+    "name": "BIC CAMERA",
+    "icon": "🟥",
+    "cat": "家電",
+    "branch": "ビックカメラ",
+    "d2": 1701,
+    "detour": 234,
+    "detourMin": 3,
+    "lat": 33.585900699999996,
+    "lng": 130.40139109999998,
+    "open": "10:46",
+    "close": "21:00"
+   },
+   {
+    "name": "HANDS",
+    "icon": "🟩",
+    "cat": "家電",
+    "branch": "CLAP HANDS 福岡新天町",
+    "d2": 1634,
+    "detour": 167,
+    "detourMin": 3,
+    "lat": 33.5903,
+    "lng": 130.39831669999998,
+    "open": "11:00",
+    "close": "21:00"
+   },
+   {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "スーパースポーツゼビオ 福岡天神店",
+    "d2": 1701,
+    "detour": 234,
+    "detourMin": 3,
+    "lat": 33.5868925,
+    "lng": 130.4015593,
+    "open": "10:00",
+    "close": "21:00"
    },
    {
     "name": "吉野家",
@@ -3285,6 +4607,19 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "BIC CAMERA",
+    "icon": "🟥",
+    "cat": "家電",
+    "branch": "ビックカメラ 天神2号館",
+    "d2": 2378,
+    "detour": 911,
+    "detourMin": 6,
+    "lat": 33.587547,
+    "lng": 130.39862399999998,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
     "name": "吉野家",
     "icon": "🐂",
     "cat": "丼飯",
@@ -3337,9 +4672,74 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "タイムズケーズデンキ福岡長浜店",
+    "d2": 3749,
+    "detour": 2282,
+    "detourMin": 9,
+    "lat": 33.594089,
+    "lng": 130.392628,
+    "open": "09:00",
+    "close": "21:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 福岡長浜店",
+    "d2": 3977,
+    "detour": 2510,
+    "detourMin": 10,
+    "lat": 33.5946,
+    "lng": 130.3922,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "HANDS",
+    "icon": "🟩",
+    "cat": "家電",
+    "branch": "クツショウテン ハンズ博多店（JR博多シティ４階）",
+    "d2": 4352,
+    "detour": 2885,
+    "detourMin": 10,
+    "lat": 33.590103899999995,
+    "lng": 130.4193577,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "Alpen FUKUOKA",
+    "d2": 3726,
+    "detour": 2259,
+    "detourMin": 10,
+    "lat": 33.5886365,
+    "lng": 130.4108934,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
     "name": "HANDS",
     "icon": "🟩",
     "cat": "文具",
+    "branch": "ハンズ 博多店",
+    "d2": 4472,
+    "detour": 3005,
+    "detourMin": 12,
+    "lat": 33.5907425,
+    "lng": 130.4200615,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "HANDS",
+    "icon": "🟩",
+    "cat": "家電",
     "branch": "ハンズ 博多店",
     "d2": 4472,
     "detour": 3005,
@@ -3398,6 +4798,32 @@ window.CHAIN_ROUTES = {
     "lng": 130.43898760000002,
     "open": "04:00",
     "close": "24:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド博多本店",
+    "d2": 4020,
+    "detour": 544,
+    "detourMin": 2,
+    "lat": 33.590838,
+    "lng": 130.436574,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 博多半道橋店",
+    "d2": 4109,
+    "detour": 633,
+    "detourMin": 2,
+    "lat": 33.583186999999995,
+    "lng": 130.4389808,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "すき家",
@@ -3478,6 +4904,19 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "友都八喜",
+    "icon": "📷",
+    "cat": "家電",
+    "branch": "ヨドバシカメラ マルチメディア博多",
+    "d2": 3796,
+    "detour": 320,
+    "detourMin": 3,
+    "lat": 33.5883051,
+    "lng": 130.42169379999999,
+    "open": "09:30",
+    "close": "22:00"
+   },
+   {
     "name": "すき家",
     "icon": "🥩",
     "cat": "丼飯",
@@ -3517,6 +4956,19 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 アウトレット福岡空港南店",
+    "d2": 5476,
+    "detour": 2000,
+    "detourMin": 5,
+    "lat": 33.5807826,
+    "lng": 130.4425023,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "SEIYU",
     "icon": "🟢",
     "cat": "超市",
@@ -3541,6 +4993,32 @@ window.CHAIN_ROUTES = {
     "lng": 130.4200615,
     "open": "10:00",
     "close": "20:00"
+   },
+   {
+    "name": "HANDS",
+    "icon": "🟩",
+    "cat": "家電",
+    "branch": "ハンズ 博多店",
+    "d2": 5147,
+    "detour": 1671,
+    "detourMin": 7,
+    "lat": 33.5907425,
+    "lng": 130.4200615,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "HANDS",
+    "icon": "🟩",
+    "cat": "家電",
+    "branch": "iCracked Store ハンズ博多",
+    "d2": 5147,
+    "detour": 1671,
+    "detourMin": 7,
+    "lat": 33.5907632,
+    "lng": 130.4199478,
+    "open": "10:00",
+    "close": "19:00"
    },
    {
     "name": "SEIYU",
@@ -3569,6 +5047,19 @@ window.CHAIN_ROUTES = {
     "close": "21:00"
    },
    {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランドららぽーと福岡店",
+    "d2": 7599,
+    "detour": 4123,
+    "detourMin": 11,
+    "lat": 33.5647947,
+    "lng": 130.4406175,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
     "name": "LOFT",
     "icon": "🟡",
     "cat": "文具",
@@ -3593,6 +5084,58 @@ window.CHAIN_ROUTES = {
     "lng": 130.4058456,
     "open": "00:00",
     "close": "24:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器福岡本店",
+    "d2": 10884,
+    "detour": 7408,
+    "detourMin": 12,
+    "lat": 33.608671099999995,
+    "lng": 130.4103182,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ BRANCH博多店",
+    "d2": 8099,
+    "detour": 4623,
+    "detourMin": 12,
+    "lat": 33.6022804,
+    "lng": 130.42025710000001,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "LOFT",
+    "icon": "🟡",
+    "cat": "家電",
+    "branch": "ららぽーと福岡ロフト",
+    "d2": 7663,
+    "detour": 4187,
+    "detourMin": 12,
+    "lat": 33.5638118,
+    "lng": 130.4390917,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "Alpen FUKUOKA",
+    "d2": 8012,
+    "detour": 4536,
+    "detourMin": 12,
+    "lat": 33.5886365,
+    "lng": 130.4108934,
+    "open": "10:00",
+    "close": "21:00"
    },
    {
     "name": "蔦屋書店",
@@ -3640,6 +5183,19 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器アウトレット太宰府店",
+    "d2": 12052,
+    "detour": 1077,
+    "detourMin": 2,
+    "lat": 33.507791,
+    "lng": 130.5233715,
+    "open": "10:00",
+    "close": "19:00"
+   },
+   {
     "name": "AEON",
     "icon": "🛒",
     "cat": "超市",
@@ -3677,6 +5233,45 @@ window.CHAIN_ROUTES = {
     "lng": 130.51885199999998,
     "open": "08:00",
     "close": "22:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 筑紫野店",
+    "d2": 15569,
+    "detour": 4594,
+    "detourMin": 6,
+    "lat": 33.4865889,
+    "lng": 130.5373861,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "スーパースポーツゼビオ ゆめタウン筑紫野店",
+    "d2": 15569,
+    "detour": 4594,
+    "detourMin": 6,
+    "lat": 33.486222999999995,
+    "lng": 130.5373649,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド筑紫野店",
+    "d2": 14190,
+    "detour": 3215,
+    "detourMin": 7,
+    "lat": 33.500997399999996,
+    "lng": 130.5145628,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "すき家",
@@ -3757,6 +5352,19 @@ window.CHAIN_ROUTES = {
     "close": "21:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 福岡太宰府店",
+    "d2": 14212,
+    "detour": 3237,
+    "detourMin": 11,
+    "lat": 33.508874999999996,
+    "lng": 130.49450919999998,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "唐吉訶德",
     "icon": "🐧",
     "cat": "文具",
@@ -3807,6 +5415,19 @@ window.CHAIN_ROUTES = {
     "lng": 130.4575405,
     "open": "09:00",
     "close": "21:00"
+   },
+   {
+    "name": "BIC CAMERA",
+    "icon": "🟥",
+    "cat": "家電",
+    "branch": "コジマ×ビックカメラ 福岡春日店",
+    "d2": 22269,
+    "detour": 11294,
+    "detourMin": 15,
+    "lat": 33.5463634,
+    "lng": 130.44439119999998,
+    "open": "10:00",
+    "close": "20:00"
    }
   ]
  },
@@ -3984,6 +5605,45 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 福岡太宰府店",
+    "d2": 14397,
+    "detour": 1237,
+    "detourMin": 0,
+    "lat": 33.508874999999996,
+    "lng": 130.49450919999998,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器アウトレット太宰府店",
+    "d2": 13322,
+    "detour": 162,
+    "detourMin": 0,
+    "lat": 33.507791,
+    "lng": 130.5233715,
+    "open": "10:00",
+    "close": "19:00"
+   },
+   {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "スーパースポーツゼビオ 春日店",
+    "d2": 13499,
+    "detour": 339,
+    "detourMin": 0,
+    "lat": 33.515582699999996,
+    "lng": 130.4721339,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "唐吉訶德",
     "icon": "🐧",
     "cat": "文具",
@@ -3995,6 +5655,58 @@ window.CHAIN_ROUTES = {
     "lng": 130.5161545,
     "open": "09:00",
     "close": "24:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 筑紫野店",
+    "d2": 16888,
+    "detour": 3728,
+    "detourMin": 1,
+    "lat": 33.4865889,
+    "lng": 130.5373861,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 春日店",
+    "d2": 14038,
+    "detour": 878,
+    "detourMin": 1,
+    "lat": 33.5068763,
+    "lng": 130.4521053,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "スーパースポーツゼビオ ゆめタウン筑紫野店",
+    "d2": 16857,
+    "detour": 3697,
+    "detourMin": 1,
+    "lat": 33.486222999999995,
+    "lng": 130.5373649,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド筑紫野店",
+    "d2": 15738,
+    "detour": 2578,
+    "detourMin": 2,
+    "lat": 33.500997399999996,
+    "lng": 130.5145628,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "蔦屋書店",
@@ -4010,6 +5722,45 @@ window.CHAIN_ROUTES = {
     "close": "21:00"
    },
    {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランドNew筑紫野基山店",
+    "d2": 26471,
+    "detour": 13311,
+    "detourMin": 8,
+    "lat": 33.442444699999996,
+    "lng": 130.53644630000002,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド福岡春日店",
+    "d2": 17646,
+    "detour": 4486,
+    "detourMin": 8,
+    "lat": 33.5269903,
+    "lng": 130.4459459,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "KOJIMA",
+    "icon": "🟧",
+    "cat": "家電",
+    "branch": "コジマ×ビックカメラ 福岡春日店",
+    "d2": 21699,
+    "detour": 8539,
+    "detourMin": 8,
+    "lat": 33.5463634,
+    "lng": 130.44439119999998,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "蔦屋書店",
     "icon": "📚",
     "cat": "文具",
@@ -4021,6 +5772,19 @@ window.CHAIN_ROUTES = {
     "lng": 130.5377433,
     "open": "10:00",
     "close": "21:45"
+   },
+   {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン アウトレット筑紫野店",
+    "d2": 26660,
+    "detour": 13500,
+    "detourMin": 10,
+    "lat": 33.444382,
+    "lng": 130.538553,
+    "open": "10:00",
+    "close": "19:00"
    },
    {
     "name": "唐吉訶德",
@@ -4079,6 +5843,19 @@ window.CHAIN_ROUTES = {
     "lng": 130.4819989,
     "open": "00:00",
     "close": "24:00"
+   },
+   {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "スーパースポーツゼビオ 春日店",
+    "d2": 36273,
+    "detour": 0,
+    "detourMin": 4,
+    "lat": 33.515582699999996,
+    "lng": 130.4721339,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "吉野家",
@@ -4159,6 +5936,19 @@ window.CHAIN_ROUTES = {
     "close": "21:00"
    },
    {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン アクロスモール春日店",
+    "d2": 36401,
+    "detour": 0,
+    "detourMin": 5,
+    "lat": 33.5159302,
+    "lng": 130.4713641,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "SEIYU",
     "icon": "🟢",
     "cat": "超市",
@@ -4170,6 +5960,19 @@ window.CHAIN_ROUTES = {
     "lng": 130.47063359999999,
     "open": "00:00",
     "close": "24:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 福岡太宰府店",
+    "d2": 36534,
+    "detour": 0,
+    "detourMin": 6,
+    "lat": 33.508874999999996,
+    "lng": 130.49450919999998,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "AEON",
@@ -4198,6 +6001,32 @@ window.CHAIN_ROUTES = {
     "close": "22:00"
    },
    {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 久留米店",
+    "d2": 39774,
+    "detour": 1566,
+    "detourMin": 8,
+    "lat": 33.3204956,
+    "lng": 130.55400079999998,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ 春日店",
+    "d2": 39504,
+    "detour": 1296,
+    "detourMin": 9,
+    "lat": 33.5068763,
+    "lng": 130.4521053,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
     "name": "唐吉訶德",
     "icon": "🐧",
     "cat": "文具",
@@ -4209,6 +6038,32 @@ window.CHAIN_ROUTES = {
     "lng": 130.5161545,
     "open": "09:00",
     "close": "24:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランドNew筑紫野基山店",
+    "d2": 38113,
+    "detour": 0,
+    "detourMin": 12,
+    "lat": 33.442444699999996,
+    "lng": 130.53644630000002,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド筑紫野店",
+    "d2": 37539,
+    "detour": 0,
+    "detourMin": 12,
+    "lat": 33.500997399999996,
+    "lng": 130.5145628,
+    "open": "10:00",
+    "close": "20:00"
    },
    {
     "name": "蔦屋書店",
@@ -4261,6 +6116,58 @@ window.CHAIN_ROUTES = {
     "lng": 130.5005994,
     "open": "10:00",
     "close": "19:00"
+   },
+   {
+    "name": "BIC CAMERA",
+    "icon": "🟥",
+    "cat": "家電",
+    "branch": "コジマ×ビックカメラ 福岡春日店",
+    "d2": 46993,
+    "detour": 8785,
+    "detourMin": 15,
+    "lat": 33.5463634,
+    "lng": 130.44439119999998,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 ゆめモール那珂川店",
+    "d2": 49012,
+    "detour": 10804,
+    "detourMin": 15,
+    "lat": 33.5121355,
+    "lng": 130.41933849999998,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 筑紫野店",
+    "d2": 41061,
+    "detour": 2853,
+    "detourMin": 15,
+    "lat": 33.4865889,
+    "lng": 130.5373861,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン アウトレット筑紫野店",
+    "d2": 38729,
+    "detour": 521,
+    "detourMin": 15,
+    "lat": 33.444382,
+    "lng": 130.538553,
+    "open": "10:00",
+    "close": "19:00"
    }
   ]
  },
@@ -4280,6 +6187,45 @@ window.CHAIN_ROUTES = {
     "lng": 130.3198842,
     "open": "09:00",
     "close": "22:00"
+   },
+   {
+    "name": "EDION",
+    "icon": "🟦",
+    "cat": "家電",
+    "branch": "エディオン 久留米津福店",
+    "d2": 24804,
+    "detour": 1089,
+    "detourMin": 9,
+    "lat": 33.291387799999995,
+    "lng": 130.5089707,
+    "open": "10:00",
+    "close": "20:00"
+   },
+   {
+    "name": "YAMADA",
+    "icon": "🟨",
+    "cat": "家電",
+    "branch": "ヤマダデンキ テックランド佐賀本店",
+    "d2": 25342,
+    "detour": 1627,
+    "detourMin": 10,
+    "lat": 33.259432499999996,
+    "lng": 130.3196801,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ モラージュ佐賀店",
+    "d2": 24514,
+    "detour": 799,
+    "detourMin": 10,
+    "lat": 33.2535739,
+    "lng": 130.3172774,
+    "open": "10:00",
+    "close": "21:00"
    },
    {
     "name": "文具店",
@@ -4308,6 +6254,19 @@ window.CHAIN_ROUTES = {
     "close": "24:00"
    },
    {
+    "name": "運動用品店",
+    "icon": "🏃",
+    "cat": "家電",
+    "branch": "スーパースポーツゼビオ ゆめタウン佐賀店",
+    "d2": 26490,
+    "detour": 2775,
+    "detourMin": 12,
+    "lat": 33.275650999999996,
+    "lng": 130.30784,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
     "name": "LOFT",
     "icon": "🟡",
     "cat": "文具",
@@ -4319,6 +6278,45 @@ window.CHAIN_ROUTES = {
     "lng": 130.3066797,
     "open": "10:00",
     "close": "21:00"
+   },
+   {
+    "name": "LOFT",
+    "icon": "🟡",
+    "cat": "家電",
+    "branch": "佐賀ロフト",
+    "d2": 26719,
+    "detour": 3004,
+    "detourMin": 13,
+    "lat": 33.2752145,
+    "lng": 130.3066797,
+    "open": "10:00",
+    "close": "21:00"
+   },
+   {
+    "name": "BEST電器",
+    "icon": "🔵",
+    "cat": "家電",
+    "branch": "ベスト電器 久留米南店",
+    "d2": 26047,
+    "detour": 2332,
+    "detourMin": 14,
+    "lat": 33.2878921,
+    "lng": 130.523083,
+    "open": "10:00",
+    "close": "19:00"
+   },
+   {
+    "name": "K's DENKI",
+    "icon": "🔴",
+    "cat": "家電",
+    "branch": "ケーズデンキ みやき店",
+    "d2": 26487,
+    "detour": 2772,
+    "detourMin": 14,
+    "lat": 33.3179855,
+    "lng": 130.4834442,
+    "open": "10:00",
+    "close": "20:00"
    }
   ]
  }

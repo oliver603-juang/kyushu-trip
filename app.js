@@ -3543,7 +3543,7 @@ ${JSON.stringify(hotelWithDates)}
                   const badgeClass = level === 0 ? "bg-green-100 text-green-700" : level === 1 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700";
                   const noDetour = hasMin ? store.detourMin <= 1 : store.detour <= 500;
                   const detourLabel = noDetour ? "✅ 不繞路" : "🔄 +" + (hasMin ? store.detourMin + "分" : detourKm);
-                  const catIcon = store.cat === "丼飯" ? "🍚" : store.cat === "文具" ? "✏️" : "🛒";
+                  const catIcon = store.cat === "丼飯" ? "🍚" : store.cat === "文具" ? "✏️" : store.cat === "家電" ? "🔌" : "🛒";
                   // v5：營業時間警示（預計通過時刻 vs 該日營業區間）
                   const pm = chainMidpoint.passMinutes;
                   const hasHours = store.open && store.close;
@@ -3594,10 +3594,19 @@ ${JSON.stringify(hotelWithDates)}
                   ))}
                 </div>
                 <div className="text-xs font-bold text-blue-600 mb-2">✏️ 文具／生活雜貨（クルトガ等）</div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 mb-4">
                   {chains.filter(c => c.cat === "文具").map((c, i) => (
                     <a key={i} href={chainNavUrl(c.name, chainMidpoint)} target="_blank" rel="noreferrer"
                       className="flex items-center gap-2 p-3 bg-blue-50 rounded-xl border-2 border-blue-200 text-sm font-bold text-blue-800 active:scale-95 transition">
+                      <span className="text-lg">{c.icon}</span><span className="flex-1">{c.name}</span><span className="text-xs">🚗</span>
+                    </a>
+                  ))}
+                </div>
+                <div className="text-xs font-bold text-purple-600 mb-2">🔌 家電量販／健康家電（ドクターエア等）</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {chains.filter(c => c.cat === "家電").map((c, i) => (
+                    <a key={i} href={chainNavUrl(c.name, chainMidpoint)} target="_blank" rel="noreferrer"
+                      className="flex items-center gap-2 p-3 bg-purple-50 rounded-xl border-2 border-purple-200 text-sm font-bold text-purple-800 active:scale-95 transition">
                       <span className="text-lg">{c.icon}</span><span className="flex-1">{c.name}</span><span className="text-xs">🚗</span>
                     </a>
                   ))}
