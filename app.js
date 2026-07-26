@@ -1266,6 +1266,18 @@ const ItineraryTab = ({
                         <p className="text-sm text-gray-500 mb-2 leading-relaxed">
                           {spot.desc}
                         </p>
+                        {/* 步行順買提醒 */}
+                        {spot.walkBuy && (
+                          <a href={spot.walkBuy.url} target="_blank" rel="noreferrer"
+                            className="block mb-3 p-3 bg-amber-50 rounded-xl border-2 border-amber-200 active:scale-95 transition">
+                            <div className="flex items-center gap-2 text-xs font-bold text-amber-800">
+                              <span className="text-base">🚶</span>
+                              <span className="flex-1">順路：步行 {spot.walkBuy.min} 分到 {spot.walkBuy.name}</span>
+                              <span>🗺️</span>
+                            </div>
+                            <div className="text-[11px] text-amber-700 mt-1 leading-relaxed">🛍️ 記得買：{spot.walkBuy.item}</div>
+                          </a>
+                        )}
                         {/* MapCode + 車程 */}
                         {(spot.mapCode || spot.driveTime) && (
                           <div className="flex flex-wrap gap-2 mb-4 text-xs">

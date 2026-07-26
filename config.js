@@ -72,7 +72,7 @@ window.RAW_KML_DATA = [
       { name: "伊萬里夢Misaki公園（滑草）", lat: 33.3469052, lon: 129.8502744, desc: "伊萬里滑草親子設施。", mapCode: "458 357 219*57", driveTime: "50分", ticket: { adult: 0, child: 0 } },
       { name: "BOOKOFF Karatsu Store", lat: 33.4400913, lon: 129.9643643, desc: "唐津 BOOKOFF。", mapCode: "182 370 389*11", driveTime: "27分", ticket: { adult: 0, child: 0 } },
       { name: "Times停車場（BOOKOFF旁）", lat: 33.5942146, lon: 130.3988619, desc: "13 318 784*18 再往前。停車後步行至天神 BOOKOFF。", mapCode: "13 318 784*18", driveTime: "約60分", ticket: { adult: 0, child: 0 } },
-      { name: "BOOKOFF SUPER BAZAAR Mina天神", lat: 33.5929742, lon: 130.3983736, desc: "九州最大 BOOKOFF，天神挖寶！", mapCode: "", driveTime: "步行1分", ticket: { adult: 0, child: 0 } },
+      { name: "BOOKOFF SUPER BAZAAR Mina天神", lat: 33.5929742, lon: 130.3983736, desc: "九州最大 BOOKOFF，天神挖寶！", mapCode: "", driveTime: "步行1分", ticket: { adult: 0, child: 0 }, walkBuy: { name: "天神ロフト", min: 4, item: "KING JIM TEX-POUCH SLIM 矽膠收納包（TXP400）", url: "https://www.google.com/maps/dir/?api=1&destination=%E5%A4%A9%E7%A5%9E%E3%83%AD%E3%83%95%E3%83%88%20%E7%A6%8F%E5%B2%A1%E5%B8%82%E4%B8%AD%E5%A4%AE%E5%8C%BA%E5%A4%A9%E7%A5%9E&travelmode=walking" } },
       { name: "新大谷特約停車場 Grand Parking", lat: 33.5835175, lon: 130.4066823, desc: "博多新大谷飯店特約停車場（Tsukigime Parking）。", mapCode: "", driveTime: "12分", ticket: { adult: 0, child: 0 } },
       { name: "博多新大谷飯店", lat: 33.5830614, lon: 130.4063095, desc: "博多站旁高級飯店。特約停車場：Grand Parking", mapCode: "13 289 511*86", driveTime: "步行4分", ticket: { adult: 0, child: 0 } },
     ],
@@ -80,7 +80,7 @@ window.RAW_KML_DATA = [
   {
     dayId: "day5", date: "8/11 (二)", title: "博多→回家", themeColor: "bg-[#D4A5A5]",
     spots: [
-      { name: "駿河屋 博多丸井店", lat: 33.5888254, lon: 130.4199115, desc: "🧸 市區最後補刀！動漫/模型/玩具地毯式二手店，博多站正對面 OIOI 6F。", mapCode: "", driveTime: "步行", ticket: { adult: 0, child: 0 } },
+      { name: "駿河屋 博多丸井店", lat: 33.5888254, lon: 130.4199115, desc: "🧸 市區最後補刀！動漫/模型/玩具地毯式二手店，博多站正對面 OIOI 6F。", mapCode: "", driveTime: "步行", ticket: { adult: 0, child: 0 }, walkBuy: { name: "ヨドバシ博多", min: 5, item: "KING JIM TEX-POUCH SLIM 矽膠收納包（TXP400）＋DOCTORAIR REG-11（可免税）", url: "https://www.google.com/maps/dir/?api=1&destination=%E3%83%A8%E3%83%89%E3%83%90%E3%82%B7%E3%82%AB%E3%83%A1%E3%83%A9%20%E5%8D%9A%E5%A4%9A&travelmode=walking" } },
       { name: "福岡國際機場", lat: 33.5849988, lon: 130.4490906, desc: "還車 → JX841 14:25 出發 → 15:45 抵達桃園", mapCode: "", driveTime: "", ticket: { adult: 0, child: 0 } },
     ],
   },
