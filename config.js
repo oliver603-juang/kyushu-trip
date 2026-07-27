@@ -249,6 +249,8 @@ window.SHOPPING_LIST = [
   { id: "s2", name: "太田胃散", category: "medicine", keywords: ["藥妝","ドラッグストア","マツモトキヨシ","ウエルシア","サンドラッグ","コスモス","ツルハ","スギ薬局","ダイコクドラッグ"], icon: "💊", note: "家庭常備藥，大罐裝最划算", bought: false },
   { id: "s3", name: "DARIYA SALON de PRO 5號 白髮染髮霜", category: "cosmetics", keywords: ["藥妝","ドラッグストア","マツモトキヨシ","ウエルシア","サンドラッグ","コスモス","ツルハ","スギ薬局","ダイコクドラッグ"], icon: "💇", note: "快速染髮系列，5號自然棕", bought: false },
   { id: "s4", name: "二手 BALMUDA 微波烤箱", category: "electronics", keywords: ["Hard Off","BOOKOFF","ハードオフ","ブックオフ","Off House","オフハウス","SUPER BAZAAR","Mina天神","リサイクル","セカンドストリート"], icon: "🔌", note: "The Range 或 The Toaster，看品相再買", bought: false },
+  { id: "s5", name: "uni KURU TOGA DIVE 0.5mm", category: "stationery", keywords: ["ロフト","LOFT","ハンズ","HANDS","ヨドバシ","蔦屋書店","文房具店","クルトガダイブ","KURU TOGA DIVE","BOOKOFF","ハードオフ","駿河屋"], icon: "✏️", note: "⚠️ 機會品・不繞路。定價¥5,500 但 2026 仍長期缺貨，不定期入荷、當日售完，部分店抽選。看到才買，別為它多跑。二手 BOOKOFF／駿河屋 偶爾有，轉賣價 ¥8,000+ 不值得。", bought: false },
+  { id: "s6", name: "二手 Technics EAH-AZ80 真無線耳機", category: "electronics", keywords: ["ハードオフ","Hard Off","Hobby Off","Off House","オフハウス","SUPER BAZAAR","Mina天神","オーディオ","イヤホン","ジャンク","セカンドストリート","リサイクル"], icon: "🎧", note: "⚠️ 機會品・不繞路。主攻 8/7 ハードオフ福岡中間店・8/8 春日白水店・8/9 Hard Off Sasebo。行情約定價五~七成（新品約¥30,000）。檢查：①耳機+充電盒是否齊全（缺件=ジャンク）②電池衰退（用2~3年剩6~7成，原廠不換電池）③耳塞務必另買新的。高單價鎖玻璃櫃，要請店員拿。", bought: false },
 ];
 
 // 10. 沿途連鎖店快速搜尋（v3：移除九州無店的 4 間）
