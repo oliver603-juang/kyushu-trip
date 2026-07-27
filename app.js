@@ -1266,7 +1266,35 @@ const ItineraryTab = ({
                         <p className="text-sm text-gray-500 mb-2 leading-relaxed">
                           {spot.desc}
                         </p>
-                        {/* 步行順買提醒 */}
+                        {/* 免税標示 */}
+              {spot.taxFree && (
+                <div className={`mb-3 p-3 rounded-xl border-2 ${
+                  spot.taxFree.ok === true ? "bg-emerald-50 border-emerald-200"
+                  : spot.taxFree.ok === false ? "bg-rose-50 border-rose-200"
+                  : "bg-gray-50 border-gray-200"
+                }`}>
+                  <div className={`flex items-center gap-2 text-xs font-black ${
+                    spot.taxFree.ok === true ? "text-emerald-800"
+                    : spot.taxFree.ok === false ? "text-rose-800" : "text-gray-600"
+                  }`}>
+                    <span className="text-base">
+                      {spot.taxFree.ok === true ? "🟢" : spot.taxFree.ok === false ? "🔴" : "⚪"}
+                    </span>
+                    <span>
+                      {spot.taxFree.ok === true ? "可免税（未税滿 ¥5,000・帶護照）"
+                        : spot.taxFree.ok === false ? "不可免税" : "免税未確認"}
+                    </span>
+                  </div>
+                  <div className={`text-[11px] mt-1 leading-relaxed ${
+                    spot.taxFree.ok === true ? "text-emerald-700"
+                    : spot.taxFree.ok === false ? "text-rose-700" : "text-gray-500"
+                  }`}>
+                    {spot.taxFree.note}
+                  </div>
+                </div>
+              )}
+
+              {/* 步行順買提醒 */}
                         {spot.walkBuy && (
                           <a href={spot.walkBuy.url} target="_blank" rel="noreferrer"
                             className="block mb-3 p-3 bg-amber-50 rounded-xl border-2 border-amber-200 active:scale-95 transition">
