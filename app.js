@@ -1275,7 +1275,13 @@ const ItineraryTab = ({
                               <span className="flex-1">順路：步行 {spot.walkBuy.min} 分到 {spot.walkBuy.name}</span>
                               <span>🗺️</span>
                             </div>
-                            <div className="text-[11px] text-amber-700 mt-1 leading-relaxed">🛍️ 記得買：{spot.walkBuy.item}</div>
+                            <div className="text-[11px] text-amber-700 mt-1 leading-relaxed">
+                              <div className="font-bold mb-0.5">🛍️ 記得買：</div>
+                              {(spot.walkBuy.items || [spot.walkBuy.item]).filter(Boolean).map((it, i) => (
+                                <div key={i} className="pl-3">・{it}</div>
+                              ))}
+                              {spot.walkBuy.note && <div className="mt-1 text-amber-800 font-bold">💡 {spot.walkBuy.note}</div>}
+                            </div>
                           </a>
                         )}
                         {/* MapCode + 車程 */}
