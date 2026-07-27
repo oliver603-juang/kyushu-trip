@@ -6479,3 +6479,84 @@ window.DRIVE_TIMES = {
 };
 // 停車緩衝分鐘（app 加在真實車程上，可調）
 window.DRIVE_BUFFER_MIN = 5;
+
+// ==========================================
+// 二手縫紉機鑑價資料庫（用途：換皮包/外套拉鍊、縫收納包 → 重吃厚能力）
+// verdict: BUY 直接買 / WATCH 看價格 / AVOID 避開
+// re 為字串，app.js 用 new RegExp(re, "i") 編譯
+// ==========================================
+window.SEWING_DB = [
+  { id: "juki-tl", brand: "JUKI", re: "^(juki[\\s-]*)?(tl[\\s-]?\\d{2,3}|spur[\\s-]?\\d{2,3})",
+    tier: "職業用直線機", verdict: "BUY", thick: 5, price: [25000, 60000], weight: "10~13kg",
+    label: "JUKI TL / SPUR 系列",
+    note: "皮革帆布玩家的終極武器。只能縫直線，但換皮外套拉鍊零壓力。⚠️ 超重，回程行李要先算好。" },
+  { id: "juki-hzl-hi", brand: "JUKI", re: "^(juki[\\s-]*)?hzl[\\s-]?(f|g|x|ux|nx)",
+    tier: "高階家用電腦機", verdict: "BUY", thick: 4, price: [15000, 40000], weight: "7~10kg",
+    label: "JUKI HZL-F / G / X 系列",
+    note: "箱型送布，吃厚能力在家用機裡數一數二，還能車布邊花樣。你的需求這台最平衡。" },
+  { id: "juki-hzl-lo", brand: "JUKI", re: "^(juki[\\s-]*)?hzl[\\s-]?(j|k|12|20|g100|ez)",
+    tier: "中階家用", verdict: "WATCH", thick: 3, price: [6000, 15000], weight: "5~7kg",
+    label: "JUKI HZL 入門/中階",
+    note: "縫收納包 OK，皮包厚接縫會吃力。便宜（¥10,000 內）才值得。" },
+  { id: "janome-pro", brand: "JANOME", re: "^(janome|蛇の目)?[\\s-]*(780db|hs\\d{2}|ck1200|コスチューラ|costura)",
+    tier: "職業用/準職業", verdict: "BUY", thick: 5, price: [20000, 50000], weight: "9~12kg",
+    label: "JANOME 職業用系列",
+    note: "扭力兇，金屬骨架不晃。跟 JUKI TL 同級的選擇。" },
+  { id: "janome-full", brand: "JANOME", re: "^(janome|蛇の目)?[\\s-]*(jp[\\s-]?5\\d{2}|mp[\\s-]?\\d{3}|np[\\s-]?\\d{3}|jn[\\s-]?8\\d{2}|se\\d{3})",
+    tier: "全尺寸家用電腦機", verdict: "BUY", thick: 4, price: [8000, 25000], weight: "7~8kg",
+    label: "JANOME JP510 / MP400 / NP 系列",
+    note: "二手市場流通率最高的甜蜜點。重量好帶、穿透力夠，改外套縫收納包剛好。" },
+  { id: "janome-mini", brand: "JANOME", re: "^(janome|蛇の目)?[\\s-]*(j[fca]\\d|mini|コンパクト)",
+    tier: "輕便型", verdict: "AVOID", thick: 1, price: [0, 4000], weight: "2~4kg",
+    label: "JANOME 輕便型",
+    note: "❌ 馬力不足，遇皮包厚度直接卡死斷針。再便宜都別買。" },
+  { id: "brother-pro", brand: "brother", re: "^(brother|ブラザー)?[\\s-]*(ta3|ヌイキル|nuikiru|pro[\\s-]?\\d)",
+    tier: "職業用", verdict: "BUY", thick: 5, price: [20000, 50000], weight: "10~13kg",
+    label: "brother 職業用",
+    note: "少見但遇到就是賺。直線專用、馬力足。" },
+  { id: "brother-hi", brand: "brother", re: "^(brother|ブラザー)?[\\s-]*(innovis|イノヴィス|nx[\\s-]?\\d|bf[\\s-]?\\d|ls[\\s-]?\\d|parie|soleil)",
+    tier: "中高階家用", verdict: "WATCH", thick: 3, price: [8000, 25000], weight: "6~9kg",
+    label: "brother Innovis / LS / BF 系列",
+    note: "內部金屬零件多、馬達撐得住厚物。但同型號差異大，一定要現場試縫。" },
+  { id: "brother-lo", brand: "brother", re: "^(brother|ブラザー)?[\\s-]*(ps\\d{3}|a\\d{2}\\b|el\\d{3}|sensia|zz3)",
+    tier: "輕便入門", verdict: "AVOID", thick: 1, price: [0, 5000], weight: "3~5kg",
+    label: "brother PS / A 系列入門款",
+    note: "❌ 萬元日幣以下的入門塑膠機，皮外套拉鍊過不去。直接跳過。" },
+  { id: "singer-lo", brand: "SINGER", re: "^(singer|シンガー)[\\s-]*(mo|sn\\d{2}|モナミ|monami|nui)",
+    tier: "輕便入門", verdict: "AVOID", thick: 1, price: [0, 5000], weight: "3~5kg",
+    label: "SINGER 家用入門",
+    note: "❌ 便宜好看但吃厚不行，你的用途會後悔。" },
+  { id: "jaguar", brand: "JAGUAR/AXE", re: "^(jaguar|ジャガー|axe|アックスヤマザキ|toyota|トヨタ)",
+    tier: "低價位家用", verdict: "AVOID", thick: 1, price: [0, 5000], weight: "2~5kg",
+    label: "JAGUAR / アックスヤマザキ 等",
+    note: "❌ 量販低價機，縫棉布可以，皮革免談。" },
+  { id: "generic-pro", brand: "通用", re: "(職業用|工業用|厚物)",
+    tier: "職業/工業級", verdict: "BUY", thick: 5, price: [15000, 60000], weight: "10kg+",
+    label: "標示職業用/工業用/厚物縫い",
+    note: "標籤有這幾個字就是對的方向。確認附件齊全即可。" }
+];
+
+// 沒中規則時的品牌傾向（第二層推斷）
+window.SEWING_BRAND_HINT = {
+  "juki": "JUKI 整體體質好，但仍要確認是不是 HZL 低階塑膠款。",
+  "janome": "JANOME 馬達扭力出名，看重量：7kg 以上通常是全尺寸金屬骨架。",
+  "蛇の目": "JANOME 馬達扭力出名，看重量：7kg 以上通常是全尺寸金屬骨架。",
+  "brother": "brother 機型落差最大，重量低於 6kg 幾乎都是入門塑膠機。",
+  "singer": "SINGER 二手多為輕便款，吃厚普遍不行。",
+  "bernina": "BERNINA 瑞士機，體質極好但二手仍貴，¥40,000 以內才算撿到。",
+  "pfaff": "PFAFF 內建上送布，縫皮革很強，看到別放過。"
+};
+
+// 現場實測檢查清單
+window.SEWING_CHECKLIST = [
+  { k: "通電", t: "請店員通電，踩腳踏板聽有無異音、卡頓、焦味" },
+  { k: "手轉飛輪", t: "手動轉飛輪一圈，上下軸要順，卡卡的就是內部生鏽" },
+  { k: "送布齒", t: "看送布齒有無磨平／缺齒。7枚送り歯 最理想" },
+  { k: "試縫厚物", t: "拿牛仔布折 4~6 層試縫，過不去就當場放棄" },
+  { k: "附件齊全", t: "腳踏板／電源線／釜（梭殼）／壓布腳。缺一件就只值 ジャンク 價" },
+  { k: "標籤字義", t: "「動作確認済」=可用；「通電のみ」=只確認會亮燈，不保證能縫；「ジャンク」=零件機" },
+  { k: "重量", t: "抱起來估重。7kg 以下要懷疑是輕便機；10kg 以上回程行李要算" }
+];
+
+// 標籤上看到就加分的日文關鍵字
+window.SEWING_TAGS = ["厚物縫い", "パワフル貫通力", "7枚送り歯", "フルサイズ", "職業用", "動作確認済", "金属フレーム"];

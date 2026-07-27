@@ -2251,6 +2251,227 @@ const WishlistTab = ({ aiLoading, setAiLoading, openKeyModal }) => {
   );
 };
 
+// --- SewingTab (二手縫紉機鑑價) ---
+const SEWING_VERDICT = {
+  BUY:   { emoji: "🟢", text: "可以下手", bg: "bg-emerald-50", bd: "border-emerald-300", tx: "text-emerald-800" },
+  WATCH: { emoji: "🟡", text: "看價格再決定", bg: "bg-amber-50", bd: "border-amber-300", tx: "text-amber-800" },
+  AVOID: { emoji: "🔴", text: "避開，別買", bg: "bg-rose-50", bd: "border-rose-300", tx: "text-rose-800" },
+  UNKNOWN: { emoji: "⚪", text: "資料庫沒有，請用 AI 查", bg: "bg-gray-50", bd: "border-gray-300", tx: "text-gray-700" }
+};
+
+const SewingTab = ({ aiLoading, setAiLoading, openKeyModal }) => {
+  const Icons = window.Icons;
+  const DB = window.SEWING_DB || [];
+  const HINT = window.SEWING_BRAND_HINT || {};
+  const CHECK = window.SEWING_CHECKLIST || [];
+  const TAGS = window.SEWING_TAGS || [];
+
+  const [model, setModel] = useState("");
+  const [price, setPrice] = useState("");
+  const [result, setResult] = useState(null);
+  const [aiText, setAiText] = useState("");
+  const [showCheck, setShowCheck] = useState(false);
+
+  const judge = () => {
+    const q = (model || "").trim();
+    setAiText("");
+    if (!q) { setResult(null); return; }
+    const hit = DB.find((r) => { try { return new RegExp(r.re, "i").test(q); } catch (e) { return false; } });
+    const lower = q.toLowerCase();
+    const hintKey = Object.keys(HINT).find((b) => lower.includes(b));
+    const p = parseInt(String(price).replace(/[^\d]/g, ""), 10);
+    let priceMsg = "";
+    let verdict = hit ? hit.verdict : "UNKNOWN";
+    if (hit && !isNaN(p)) {
+      const [lo, hi] = hit.price;
+      if (hit.verdict === "AVOID") {
+        priceMsg = `不管標 ¥${p.toLocaleString()} 都不建議，這台過不了皮外套的厚度。`;
+      } else if (p <= lo) {
+        priceMsg = `✅ ¥${p.toLocaleString()} 低於行情下緣（¥${lo.toLocaleString()}），撿到了，直接抱走。`;
+        verdict = "BUY";
+      } else if (p <= hi) {
+        priceMsg = `👌 ¥${p.toLocaleString()} 在合理行情內（¥${lo.toLocaleString()}~¥${hi.toLocaleString()}），狀態 OK 就買。`;
+      } else {
+        priceMsg = `⚠️ ¥${p.toLocaleString()} 高於行情上緣（¥${hi.toLocaleString()}），二手不值這價，觀望。`;
+        verdict = "WATCH";
+      }
+    }
+    setResult({ q, hit, verdict, priceMsg, hint: hintKey ? HINT[hintKey] : "" });
+  };
+
+  const askAi = async () => {
+    const q = (model || "").trim();
+    if (!q) return;
+    setAiLoading(true);
+    setAiText("查詢中...");
+    try {
+      const prompt = `你是二手縫紉機鑑價專家。使用者人在日本二手店（BOOKOFF／ハードオフ）現場，看到一台縫紉機，型號是「${q}」${price ? `，標價 ¥${price}` : ""}。
+他的用途是：更換皮包與外套的拉鍊、縫製收納包 —— 也就是需要強大的「吃厚能力」（穿透多層帆布、合成皮、厚料）。
+請用繁體中文簡潔回答，格式如下，每項一行：
+1. 機種定位（職業用／高階家用／中階／輕便入門）
+2. 吃厚能力（★1~★5）與能不能勝任皮外套拉鍊
+3. 日本二手合理價區間（日圓）
+4. 機身重量（回程托運要算）
+5. 結論：🟢可以下手 ／ 🟡看價格 ／ 🔴避開，並用一句話說明理由
+6. 這台特別要現場檢查的一個重點
+若查無此型號請直說，不要編造。`;
+      const res = await generateGeminiContent(prompt, null, true);
+      setAiText(res);
+    } catch (e) {
+      setAiText("查詢失敗，請確認 API Key。");
+      if (e.message.includes("NO_API_KEY") || e.message === "BAD_API_KEY") openKeyModal(true);
+      else if (e.message.startsWith("QUOTA_EXHAUSTED")) alert("⏳ Gemini 配額用完，請稍後再試");
+    }
+    setAiLoading(false);
+  };
+
+  const V = result ? (SEWING_VERDICT[result.verdict] || SEWING_VERDICT.UNKNOWN) : null;
+
+  return (
+    <div className="space-y-5 animate-in fade-in duration-700 pb-24">
+      <h1 className="text-2xl font-black text-gray-800 flex items-center gap-2">
+        <span className="text-2xl">🧵</span> 二手縫紉機鑑價
+      </h1>
+      <p className="text-sm text-gray-400 -mt-3 leading-relaxed">
+        用途鎖定：換皮包／外套拉鍊、縫收納包。在店裡輸入型號，馬上判斷買或觀望。
+      </p>
+
+      <div className="glass-panel p-5 rounded-3xl bg-white border-gray-100 shadow-lg space-y-3">
+        <input
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") judge(); }}
+          placeholder="輸入品牌型號，例：JUKI HZL-F600"
+          className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 text-base font-bold text-gray-800 focus:border-indigo-400 outline-none"
+        />
+        <div className="flex gap-2">
+          <input
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") judge(); }}
+            inputMode="numeric"
+            placeholder="標價 ¥（可留空）"
+            className="flex-1 px-4 py-3 rounded-2xl border-2 border-gray-200 text-sm font-bold text-gray-800 focus:border-indigo-400 outline-none"
+          />
+          <button
+            onClick={judge}
+            className="px-6 bg-gray-800 text-white rounded-2xl text-sm font-black active:scale-95 transition shadow-md"
+          >
+            判定
+          </button>
+        </div>
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {["JUKI TL-30", "HZL-F600", "JP510", "MP400", "brother PS202"].map((s) => (
+            <button
+              key={s}
+              onClick={() => { setModel(s); setResult(null); setAiText(""); }}
+              className="px-2.5 py-1 rounded-full bg-gray-100 text-[11px] font-bold text-gray-500 active:bg-gray-200"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {result && (
+        <div className={`p-5 rounded-3xl border-2 ${V.bg} ${V.bd} shadow-lg space-y-3`}>
+          <div className="flex items-center gap-2">
+            <span className="text-3xl">{V.emoji}</span>
+            <div className="flex-1 min-w-0">
+              <div className={`text-lg font-black ${V.tx}`}>{V.text}</div>
+              <div className="text-[11px] text-gray-500 truncate">你輸入：{result.q}</div>
+            </div>
+          </div>
+
+          {result.hit ? (
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-2 text-[11px] font-bold">
+                <span className="px-2 py-1 rounded-lg bg-white/70 text-gray-700">📋 {result.hit.label}</span>
+                <span className="px-2 py-1 rounded-lg bg-white/70 text-gray-700">🏷️ {result.hit.tier}</span>
+                <span className="px-2 py-1 rounded-lg bg-white/70 text-gray-700">
+                  吃厚 {"★".repeat(result.hit.thick)}{"☆".repeat(5 - result.hit.thick)}
+                </span>
+                <span className="px-2 py-1 rounded-lg bg-white/70 text-gray-700">⚖️ {result.hit.weight}</span>
+                <span className="px-2 py-1 rounded-lg bg-white/70 text-gray-700">
+                  💴 行情 ¥{result.hit.price[0].toLocaleString()}~¥{result.hit.price[1].toLocaleString()}
+                </span>
+              </div>
+              <p className={`text-sm font-bold leading-relaxed ${V.tx}`}>{result.hit.note}</p>
+              {result.priceMsg && (
+                <p className="text-sm font-black leading-relaxed text-gray-800 bg-white/70 p-3 rounded-xl">
+                  {result.priceMsg}
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-600 leading-relaxed">
+              資料庫裡沒有這個型號。{result.hint && <span className="font-bold">{result.hint}</span>}
+              <br />按下方「AI 現場查詢」讓 Gemini 上網幫你判斷。
+            </p>
+          )}
+
+          <button
+            onClick={askAi}
+            disabled={aiLoading}
+            className="w-full bg-indigo-600 text-white py-3 rounded-2xl text-sm font-black flex items-center justify-center gap-2 active:scale-95 transition shadow-md disabled:opacity-50"
+          >
+            <Icons.Sparkles size={16} /> AI 現場查詢（上網比對）
+          </button>
+
+          {aiText === "查詢中..." ? (
+            <div className="p-4 bg-white/70 rounded-xl flex items-center gap-2 text-sm text-gray-400">
+              <Icons.Loader2 size={14} className="animate-spin" /> AI 查詢中...
+            </div>
+          ) : aiText ? (
+            <div className="p-4 bg-white/80 border border-gray-200 rounded-xl text-sm text-gray-700 leading-relaxed">
+              <MarkdownRenderer content={aiText} />
+            </div>
+          ) : null}
+        </div>
+      )}
+
+      <div className="glass-panel p-5 rounded-3xl bg-white border-gray-100 shadow-lg">
+        <button
+          onClick={() => setShowCheck((v) => !v)}
+          className="w-full flex items-center justify-between text-left"
+        >
+          <span className="text-base font-black text-gray-800">🔍 現場實測檢查清單</span>
+          <span className="text-gray-400 text-sm">{showCheck ? "收合 ▲" : "展開 ▼"}</span>
+        </button>
+        {showCheck && (
+          <div className="mt-4 space-y-3">
+            {CHECK.map((c, i) => (
+              <div key={i} className="flex gap-3">
+                <span className="w-6 h-6 rounded-lg bg-gray-800 text-white text-[11px] font-black flex items-center justify-center shrink-0">
+                  {i + 1}
+                </span>
+                <div className="flex-1">
+                  <div className="text-sm font-black text-gray-800">{c.k}</div>
+                  <div className="text-xs text-gray-500 leading-relaxed">{c.t}</div>
+                </div>
+              </div>
+            ))}
+            <div className="pt-2 border-t border-gray-100">
+              <div className="text-xs font-black text-gray-700 mb-2">🏷️ 標籤看到這些字就加分</div>
+              <div className="flex flex-wrap gap-1.5">
+                {TAGS.map((t) => (
+                  <span key={t} className="px-2 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] font-bold text-emerald-700">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-200 text-xs text-amber-800 leading-relaxed font-bold">
+        ✈️ 吃厚型縫紉機多半 7~12kg。這趟有租車不怕搬，但星宇回程的托運重量與件數要先算好，必要時現場買行李箱裝。
+      </div>
+    </div>
+  );
+};
+
 // ==========================================
 // 4. 主應用程式 (App) - 整合所有邏輯
 // ==========================================
@@ -3521,6 +3742,13 @@ ${JSON.stringify(hotelWithDates)}
             setAiLoading={setAiLoading}
           />
         )}
+        {activeTab === "sewing" && (
+          <SewingTab
+            aiLoading={aiLoading}
+            setAiLoading={setAiLoading}
+            openKeyModal={setIsKeyModalOpen}
+          />
+        )}
         {activeTab === "wishlist" && (
           <WishlistTab
             aiLoading={aiLoading}
@@ -3789,6 +4017,14 @@ ${JSON.stringify(hotelWithDates)}
           }`}
         >
           <Icons.Shield size={26} /> 防雷
+        </button>
+        <button
+          onClick={() => setActiveTab("sewing")}
+          className={`flex flex-col items-center gap-1 p-2 ${
+            activeTab === "sewing" ? "text-indigo-600" : "hover:text-gray-900"
+          }`}
+        >
+          <span className="text-[22px] leading-[26px]">🧵</span> 縫紉機
         </button>
         <button
           onClick={() => setActiveTab("wishlist")}
