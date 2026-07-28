@@ -169,7 +169,12 @@ const generateGeminiContent = async (
             console.log("🔄 已切換到模型:", model);
           }
           const result = await response.json();
-          return result.candidates?.[0]?.content?.parts?.[0]?.text || "無內容生成";
+          const parts = result.candidates?.[0]?.content?.parts || [];
+          const joined = parts.map((pt) => pt && pt.text).filter(Boolean).join("\n").trim();
+          if (joined) return joined;
+          const fr = result.candidates?.[0]?.finishReason;
+          if (fr && fr !== "STOP") return `（回應被中斷：${fr}。請再按一次查詢，或把商品名寫得完整一點。）`;
+          return "無內容生成";
         }
         const code = response.status;
         if (code === 429 && i < 2) {
@@ -2515,6 +2520,7 @@ const PriceCompare = ({ mode, aiLoading, setAiLoading, openKeyModal, twdJpyRate 
   const [ans, setAns] = useState("");
   const [img, setImg] = useState(null);
   const [imgKind, setImgKind] = useState("tag");
+  const [copied, setCopied] = useState(false);
   const fileRef = useRef(null);
 
   const rate = twdJpyRate && twdJpyRate > 0 ? twdJpyRate : 4.6;
@@ -2590,7 +2596,52 @@ ${mode !== "shin" ? "8. 這件二手品現場必檢查的一個重點" : "8. 台
     setAiLoading(false);
   };
 
-  const q = encodeURIComponent((name || "").trim());
+  // 從 AI 回答裡抓出商品正式名稱（第 1 點），沒有就退回使用者輸入
+  const pickName = () => {
+    const typed = (name || "").trim();
+    if (!ans) return typed;
+    const lines = ans.split("\n").map((l) => l.trim()).filter(Boolean);
+    let line =
+      lines.find((l) => /^1[.、)]/.test(l)) ||
+      lines.find((l) => /商品(正式)?名稱/.test(l)) ||
+      lines.find((l) => l.length > 4 && !/^[（(]/.test(l));
+    if (!line) return typed;
+    line = line
+      .replace(/^1[.、)]\s*/, "")
+      .replace(/^商品(正式)?名稱[：:]\s*/, "")
+      .replace(/^商品[：:]\s*/, "")
+      .replace(/[（(][^）)]*[）)]\s*$/, "")
+      .replace(/^此商品為\s*/, "")
+      .replace(/。\s*$/, "")
+      .trim();
+    return line || typed;
+  };
+  const bestName = pickName();
+
+  const copyName = async () => {
+    const t = bestName;
+    if (!t) return;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(t);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = t;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch (e) {
+      alert("複製失敗，請長按文字手動複製：\n" + t);
+    }
+  };
+
+  const q = encodeURIComponent(bestName);
   const links = [
     { t: "momo", u: `https://www.momoshop.com.tw/search/searchShop.jsp?keyword=${q}`, c: "bg-pink-50 border-pink-200 text-pink-700" },
     { t: "PChome", u: `https://24h.pchome.com.tw/search/?q=${q}`, c: "bg-sky-50 border-sky-200 text-sky-700" },
@@ -2678,14 +2729,27 @@ ${mode !== "shin" ? "8. 這件二手品現場必檢查的一個重點" : "8. 台
       </div>
 
       {ans && (
-        <div className="glass-panel p-5 rounded-3xl bg-white border-gray-100 shadow-lg">
+        <div className="glass-panel p-5 rounded-3xl bg-white border-gray-100 shadow-lg space-y-3">
+          {bestName && (
+            <div className="flex items-start gap-2 p-3 rounded-2xl bg-indigo-50 border-2 border-indigo-100">
+              <div className="flex-1 min-w-0 text-sm font-black text-indigo-900 break-words">{bestName}</div>
+              <button
+                onClick={copyName}
+                className={`shrink-0 px-3 py-2 rounded-xl border-2 text-xs font-black ${
+                  copied ? "bg-emerald-500 border-emerald-500 text-white" : "bg-white border-indigo-200 text-indigo-700"
+                }`}
+              >
+                {copied ? "✓ 已複製" : "📋 複製"}
+              </button>
+            </div>
+          )}
           <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{ans}</div>
         </div>
       )}
 
-      {q && (
+      {bestName && (
         <div>
-          <div className="text-xs font-black text-gray-500 mb-2">👀 自己再確認一下（會開新分頁）</div>
+          <div className="text-xs font-black text-gray-500 mb-2">👀 自己再確認一下（已帶入關鍵字，會開新分頁）</div>
           <div className="flex flex-wrap gap-2">
             {links.map((l) => (
               <a key={l.t} href={l.u} target="_blank" rel="noreferrer"
