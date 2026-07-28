@@ -131,7 +131,8 @@ let GEMINI_MODEL = localStorage.getItem("ft-gemini-model") || GEMINI_MODELS[0];
 const generateGeminiContent = async (
   prompt,
   base64Image = null,
-  useSearch = false
+  useSearch = false,
+  opts = {}
 ) => {
   const apiKey = localStorage.getItem("gemini_api_key") || "";
   if (!apiKey) throw new Error("NO_API_KEY");
@@ -148,12 +149,23 @@ const generateGeminiContent = async (
     contents,
     tools: useSearch ? [{ google_search: {} }] : undefined,
   };
+  if (opts.maxTokens) {
+    payload.generationConfig = { maxOutputTokens: opts.maxTokens };
+  }
 
   let lastErr = null;
   for (let mi = 0; mi < GEMINI_MODELS.length; mi++) {
     const model = mi === 0 ? GEMINI_MODEL : GEMINI_MODELS[mi];
     if (mi > 0 && model === GEMINI_MODEL) continue;
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    // Gemini 2.5 預設會先「思考」，現場比價不需要，關掉可省一大段延遲
+    if (opts.noThinking && /2\.5/.test(model)) {
+      payload.generationConfig = Object.assign({}, payload.generationConfig, {
+        thinkingConfig: { thinkingBudget: 0 },
+      });
+    } else if (payload.generationConfig) {
+      delete payload.generationConfig.thinkingConfig;
+    }
 
     for (let i = 0; i < 3; i++) {
       try {
@@ -2521,6 +2533,7 @@ const PriceCompare = ({ mode, aiLoading, setAiLoading, openKeyModal, twdJpyRate 
   const [img, setImg] = useState(null);
   const [imgKind, setImgKind] = useState("tag");
   const [copied, setCopied] = useState(false);
+  const [secs, setSecs] = useState(0);
   const fileRef = useRef(null);
 
   const rate = twdJpyRate && twdJpyRate > 0 ? twdJpyRate : 4.6;
@@ -2535,13 +2548,37 @@ const PriceCompare = ({ mode, aiLoading, setAiLoading, openKeyModal, twdJpyRate 
     if (fileRef.current) fileRef.current.click();
   };
 
-  const readImg = (e) => {
+  // 手機原圖動輒 3~5MB，base64 後更大，上傳就吃掉大半時間。
+  // 縮到長邊 1024px、JPEG 0.75，辨識力幾乎不變但體積剩 5~10%。
+  const shrink = (file) =>
+    new Promise((resolve) => {
+      const r = new FileReader();
+      r.onload = (ev) => {
+        const im = new Image();
+        im.onload = () => {
+          try {
+            const MAX = 1024;
+            const sc = Math.min(1, MAX / Math.max(im.width, im.height));
+            const cv = document.createElement("canvas");
+            cv.width = Math.round(im.width * sc);
+            cv.height = Math.round(im.height * sc);
+            cv.getContext("2d").drawImage(im, 0, 0, cv.width, cv.height);
+            resolve(cv.toDataURL("image/jpeg", 0.75));
+          } catch (err) {
+            resolve(ev.target.result);
+          }
+        };
+        im.onerror = () => resolve(ev.target.result);
+        im.src = ev.target.result;
+      };
+      r.readAsDataURL(file);
+    });
+
+  const readImg = async (e) => {
     const f = e.target.files && e.target.files[0];
-    if (!f) return;
-    const r = new FileReader();
-    r.onload = (ev) => setImg(ev.target.result);
-    r.readAsDataURL(f);
     e.target.value = "";
+    if (!f) return;
+    setImg(await shrink(f));
   };
 
   const modeBrief = {
@@ -2557,7 +2594,10 @@ const PriceCompare = ({ mode, aiLoading, setAiLoading, openKeyModal, twdJpyRate 
     const q = (name || "").trim();
     if (!q && !img) return;
     setAiLoading(true);
-    setAns("查詢中...");
+    setAns("");
+    setSecs(0);
+    const t0 = Date.now();
+    const tick = setInterval(() => setSecs(Math.round((Date.now() - t0) / 1000)), 1000);
     try {
       const hasYen = !isNaN(yenNum);
       const prompt = `你是台日購物比價專家，使用者人在日本店裡現場，需要 30 秒內決定買不買。
@@ -2575,12 +2615,7 @@ ${taxFree && hasYen ? `此店可免税，實付約 ¥${effYen.toLocaleString()}$
 
 【最重要】請務必實際用 Google 搜尋查證「台灣現在的售價」。就算使用者沒給日本標價，台灣售價也一定要查出來給他 —— 那正是他最需要知道的數字。不要因為缺日本價就跳過。
 
-【輸出規則】
-- 直接從「1.」開始寫，不要開場白、不要前言、不要總結。
-- 每一點就是一行：編號、短標題、冒號、答案，全部寫在同一行。
-- 標題只能用我下面給的那幾個字，不要加括號、不要加說明、不要用 ** 粗體。
-- 答案一定要接在冒號後面，絕對不可以只寫標題就換行。
-- 不要複述背景資料，不要重複題目。
+【輸出規則】每點一行，格式為「編號. 短標題：答案」。不要開場白、不要總結、不要 ** 粗體、不要把括號說明寫進答案、不要只寫標題就換行。答案簡短，每點最多 30 字。
 
 【格式】照抄這 8 個標題，冒號後填答案：
 1. 商品名稱：（中文名 ／ 日文名，含型號與容量。這是要拿去台灣購物網搜尋用的，寫成可直接貼進搜尋框的字串）
@@ -2593,13 +2628,17 @@ ${taxFree && hasYen ? `此店可免税，實付約 ¥${effYen.toLocaleString()}$
 8. ${mode !== "shin" ? "現場檢查：（這件二手品最該檢查的一個重點）" : "台灣有貨嗎：（若台灣根本沒進，直接說「台灣買不到，這是加分項」）"}
 
 括號裡是給你的說明，不要寫進答案裡。某一點查不到就寫「查不到」，但不要整段跳過，也不要編造。`;
-      const res = await generateGeminiContent(prompt, img, true);
+      const res = await generateGeminiContent(prompt, img, true, {
+        noThinking: true,
+        maxTokens: 900,
+      });
       setAns(res);
     } catch (e) {
       setAns("查詢失敗，請確認 API Key。");
       if (e.message.includes("NO_API_KEY") || e.message === "BAD_API_KEY") openKeyModal(true);
       else if (e.message.startsWith("QUOTA_EXHAUSTED")) alert("⏳ Gemini 配額用完，請稍後再試");
     }
+    clearInterval(tick);
     setAiLoading(false);
   };
 
@@ -2756,7 +2795,7 @@ ${taxFree && hasYen ? `此店可免税，實付約 ¥${effYen.toLocaleString()}$
           disabled={aiLoading}
           className="w-full py-3 rounded-2xl bg-indigo-600 text-white font-black text-sm disabled:opacity-40"
         >
-          {aiLoading ? "查詢中…" : "🔍 查台灣售價並給建議"}
+          {aiLoading ? `查詢中… ${secs}s` : "🔍 查台灣售價並給建議"}
         </button>
       </div>
 
