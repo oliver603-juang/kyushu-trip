@@ -22,7 +22,7 @@ window.STAY_OPTIONS = ["0 min","30 min","1 hr","1.5 hr","2 hr","2.5 hr","3 hr","
 // 2. 主行程資料
 window.RAW_KML_DATA = [
   {
-    dayId: "day1", date: "8/7 (四)", title: "福岡→北九州", themeColor: "bg-[#E4C2C1]",
+    dayId: "day1", date: "8/7 (五)", title: "福岡→北九州", themeColor: "bg-[#E4C2C1]",
     spots: [
       { sid: "sp001", name: "福岡國際機場", lat: 33.5849988, lon: 130.4490906, desc: "JX840 星宇航空 桃園09:35出發 → 13:05抵達福岡。入境+領行李後前往 ORIX 取車。", mapCode: "", driveTime: "", ticket: { adult: 0, child: 0 } },
       { sid: "sp002", name: "ＯＲＩＸ國際線店", lat: 33.582242, lon: 130.442429, desc: "ORIX 租車福岡機場國際線店，取車出發。", mapCode: "", driveTime: "接駁/步行", ticket: { adult: 0, child: 0 } },
@@ -33,7 +33,7 @@ window.RAW_KML_DATA = [
     ],
   },
   {
-    dayId: "day2", date: "8/8 (五)", title: "小倉→久留米→佐賀", themeColor: "bg-[#A9BFA8]",
+    dayId: "day2", date: "8/8 (六)", title: "小倉→久留米→佐賀", themeColor: "bg-[#A9BFA8]",
     spots: [
       { sid: "sp007", name: "TOTO博物館", lat: 33.8722021, lon: 130.8721104, desc: "TOTO 衛浴品牌博物館。營業 10:00-17:00", mapCode: "16 434 268*63", driveTime: "9分", ticket: { adult: 0, child: 0 } },
       { sid: "sp008", name: "有的有的停車場", lat: 33.8879913, lon: 130.885649, desc: "あるあるCity 停車場，營業 11:00 開始。", mapCode: "16 496 103*00", driveTime: "9分", ticket: { adult: 0, child: 0 } },
@@ -48,7 +48,7 @@ window.RAW_KML_DATA = [
     ],
   },
   {
-    dayId: "day3", date: "8/9 (六)", title: "佐賀→佐世保", themeColor: "bg-[#A2C4C9]",
+    dayId: "day3", date: "8/9 (日)", title: "佐賀→佐世保", themeColor: "bg-[#A2C4C9]",
     spots: [
       { sid: "sp017", name: "佐賀熱氣球博物館", lat: 33.2524136, lon: 130.3004143, desc: "佐賀國際熱氣球節常設展。", mapCode: "87 291 789*40", driveTime: "", ticket: { adult: 0, child: 0 } },
       { sid: "sp018", name: "BOOKOFF PLUS 佐賀南部繞道店", lat: 33.2390376, lon: 130.3007156, desc: "大型 BOOKOFF。", mapCode: "87 261 250*14", driveTime: "6分", ticket: { adult: 0, child: 0 } },
@@ -61,7 +61,7 @@ window.RAW_KML_DATA = [
     ],
   },
   {
-    dayId: "day4", date: "8/10 (日)", title: "佐世保→博多", themeColor: "bg-[#E8D595]",
+    dayId: "day4", date: "8/10 (一)", title: "佐世保→博多", themeColor: "bg-[#E8D595]",
     spots: [
       { sid: "sp025", name: "九十九島水族館 海洋kirara", lat: 33.1614464, lon: 129.6790753, desc: "以水母聞名的九十九島水族館。", mapCode: "307 546 892*73", driveTime: "13分", ticket: { adult: 0, child: 0 } },
       { sid: "sp026", name: "BOOKOFF AcrossPlaza佐世保", lat: 33.1595916, lon: 129.74322, desc: "佐世保大型 BOOKOFF。", mapCode: "307 554 673*13", driveTime: "16分", ticket: { adult: 0, child: 0 } },
@@ -75,7 +75,7 @@ window.RAW_KML_DATA = [
     ],
   },
   {
-    dayId: "day5", date: "8/11 (一)", title: "博多→回家", themeColor: "bg-[#D4A5A5]",
+    dayId: "day5", date: "8/11 (二)", title: "博多→回家", themeColor: "bg-[#D4A5A5]",
     spots: [
       { sid: "sp034", name: "駿河屋 博多丸井店", lat: 33.5888254, lon: 130.4199115, desc: "🧸 市區最後補刀！動漫/模型/玩具地毯式二手店，博多站正對面 OIOI 6F。", mapCode: "", driveTime: "步行", ticket: { adult: 0, child: 0 } },
       { sid: "sp035", name: "福岡國際機場", lat: 33.5849988, lon: 130.4490906, desc: "還車 → JX841 14:25 出發 → 15:45 抵達桃園", mapCode: "", driveTime: "", ticket: { adult: 0, child: 0 } },
@@ -113,7 +113,7 @@ window.FLIGHT_INFO = {
     to: "FUK 福岡 國際航廈",
     dep: "09:35",
     arr: "13:05",
-    date: "8/7 (四)",
+    date: "8/7 (五)",
     duration: "2h30m",
   },
   inbound: {
@@ -124,7 +124,7 @@ window.FLIGHT_INFO = {
     to: "TPE 桃園 T1",
     dep: "14:25",
     arr: "15:45",
-    date: "8/11 (一)",
+    date: "8/11 (二)",
     duration: "2h30m",
   },
   baggage: {
@@ -156,10 +156,10 @@ window.HOTEL_INFO = [
 // 7. 租車資訊
 window.CAR_RENTAL_INFO = {
   company: "ORIX 租車（オリックスレンタカー）",
-  pickupDate: "8/7 (四)",
+  pickupDate: "8/7 (五)",
   pickupTime: "13:30",
   pickupLocation: "ＯＲＩＸ國際線店（福岡機場國際航廈旁）",
-  returnDate: "8/11 (一)",
+  returnDate: "8/11 (二)",
   returnTime: "12:00",
   returnLocation: "ＯＲＩＸ國際線店（福岡機場國際航廈旁）",
   carType: "待確認",
