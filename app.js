@@ -2500,6 +2500,223 @@ const SewingTab = ({ aiLoading, setAiLoading, openKeyModal }) => {
   );
 };
 
+// --- CompareTab (現場比價：文具新品／二手家電3C古著／縫紉機) ---
+const CMP_MODES = [
+  { k: "shin", label: "文具・新品", icon: "🖊️" },
+  { k: "used", label: "二手 3C／家電／古著", icon: "📻" },
+  { k: "sew", label: "縫紉機", icon: "🧵" }
+];
+
+const PriceCompare = ({ mode, aiLoading, setAiLoading, openKeyModal, twdJpyRate }) => {
+  const [name, setName] = useState("");
+  const [yen, setYen] = useState("");
+  const [taxFree, setTaxFree] = useState(false);
+  const [bookoffFee, setBookoffFee] = useState(false);
+  const [ans, setAns] = useState("");
+  const [img, setImg] = useState(null);
+  const fileRef = useRef(null);
+
+  const rate = twdJpyRate && twdJpyRate > 0 ? twdJpyRate : 4.6;
+  const yenNum = parseInt(String(yen).replace(/[^\d]/g, ""), 10);
+  const effYen = isNaN(yenNum)
+    ? null
+    : Math.round(yenNum * (taxFree ? (bookoffFee ? 0.9 + 0.03 : 0.9) : 1));
+  const twd = effYen == null ? null : Math.round(effYen / rate);
+
+  const readImg = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = (ev) => setImg(ev.target.result);
+    r.readAsDataURL(f);
+  };
+
+  const modeBrief = {
+    shin:
+      "這是日本文具店（LOFT／ハンズ／伊東屋／ドンキ）的【全新】商品。台灣比價基準請用 momo／PChome／蝦皮的【全新品】售價。",
+    used:
+      "這是日本二手店（BOOKOFF／ハードオフ／駿河屋）的【二手】商品（家電／3C／古著）。台灣比價基準請優先用【二手行情】（蝦皮二手、旋轉拍賣、Y拍），並另外附上台灣全新價當參考；不可只拿台灣新品價來比。古著請以同品牌同年代的台灣二手成交價為準。",
+    sew:
+      "這是日本二手店的二手縫紉機。用途是換皮包／外套拉鍊、縫收納包，需要吃厚能力。台灣比價請用二手行情。"
+  }[mode];
+
+  const ask = async () => {
+    const q = (name || "").trim();
+    if (!q && !img) return;
+    setAiLoading(true);
+    setAns("查詢中...");
+    try {
+      const prompt = `你是台日購物比價專家，使用者人在日本店裡現場，需要 30 秒內決定買不買。
+${modeBrief}
+
+商品：${q || "（請先從我附上的價格標照片辨識出商品名稱與日圓價格）"}
+日本標價：${!isNaN(yenNum) ? "¥" + yenNum.toLocaleString() : "（請從照片讀出）"}
+${taxFree && !isNaN(yenNum) ? `此店可免税，實付約 ¥${effYen.toLocaleString()}${bookoffFee ? "（已扣 BOOKOFF 3% 手續費）" : ""}。` : ""}
+匯率：1 TWD ≈ ${rate} JPY${twd ? `，日本實付約等於 NT$${twd.toLocaleString()}` : ""}。
+
+請務必用 Google 搜尋查證台灣現在的售價，然後用繁體中文，每項一行回答：
+1. 商品正式名稱（中／日文）
+2. 台灣售價區間（NT$，並註明是 momo／PChome／蝦皮 哪一家，${mode === "shin" ? "全新品" : "二手行情為主、全新價為輔"}）
+3. 資料來源連結（至少一個實際網址；查不到就寫「查不到，以下為推估」，絕對不要編造網址或價格）
+4. 日本 vs 台灣 價差（省多少 NT$、省幾 %）
+5. 結論：🟢現場買 ／ 🟡再想想 ／ 🔴台灣買就好，一句話理由
+6. 「日本標價低於 ¥____ 才值得帶回去」的門檻數字
+${mode !== "shin" ? "7. 這件二手品現場必檢查的一個重點" : "7. 台灣有沒有在賣？若台灣根本買不到，請直接說「台灣買不到，這是加分項」"}
+若資訊不足請直說，不要編造。`;
+      const res = await generateGeminiContent(prompt, img, true);
+      setAns(res);
+    } catch (e) {
+      setAns("查詢失敗，請確認 API Key。");
+      if (e.message.includes("NO_API_KEY") || e.message === "BAD_API_KEY") openKeyModal(true);
+      else if (e.message.startsWith("QUOTA_EXHAUSTED")) alert("⏳ Gemini 配額用完，請稍後再試");
+    }
+    setAiLoading(false);
+  };
+
+  const q = encodeURIComponent((name || "").trim());
+  const links = [
+    { t: "momo", u: `https://www.momoshop.com.tw/search/searchShop.jsp?keyword=${q}`, c: "bg-pink-50 border-pink-200 text-pink-700" },
+    { t: "PChome", u: `https://24h.pchome.com.tw/search/?q=${q}`, c: "bg-sky-50 border-sky-200 text-sky-700" },
+    { t: "蝦皮", u: `https://shopee.tw/search?keyword=${q}`, c: "bg-orange-50 border-orange-200 text-orange-700" },
+    { t: "Google購物", u: `https://www.google.com/search?tbm=shop&q=${q}`, c: "bg-gray-50 border-gray-200 text-gray-700" }
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="glass-panel p-5 rounded-3xl bg-white border-gray-100 shadow-lg space-y-3">
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={mode === "shin" ? "商品名，例：Pentel Ain 替芯 0.5" : mode === "used" ? "商品名／型號，例：SONY WH-1000XM4" : "品牌型號，例：JUKI HZL-F600"}
+          className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 text-base font-bold text-gray-800 focus:border-indigo-400 outline-none"
+        />
+        <div className="flex gap-2">
+          <input
+            value={yen}
+            onChange={(e) => setYen(e.target.value)}
+            inputMode="numeric"
+            placeholder="日本標價（¥，未税）"
+            className="flex-1 px-4 py-3 rounded-2xl border-2 border-gray-200 text-base font-bold text-gray-800 focus:border-indigo-400 outline-none"
+          />
+          <button
+            onClick={() => fileRef.current && fileRef.current.click()}
+            className="px-4 py-3 rounded-2xl border-2 border-indigo-200 bg-indigo-50 text-indigo-700 font-black text-sm"
+          >
+            📷 拍標籤
+          </button>
+          <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={readImg} className="hidden" />
+        </div>
+
+        {img && (
+          <div className="flex items-center gap-2">
+            <img src={img} alt="價格標" className="w-16 h-16 object-cover rounded-xl border-2 border-gray-200" />
+            <span className="text-xs text-gray-500 font-bold">已附上照片，AI 會自動讀出品名與價格</span>
+            <button onClick={() => setImg(null)} className="ml-auto text-xs font-black text-rose-500">移除</button>
+          </div>
+        )}
+
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setTaxFree(!taxFree)}
+            className={`px-3 py-2 rounded-full border-2 text-xs font-black ${taxFree ? "bg-emerald-50 border-emerald-300 text-emerald-700" : "bg-gray-50 border-gray-200 text-gray-500"}`}
+          >
+            {taxFree ? "✅" : "⬜"} 這家可免税（滿 ¥5,000）
+          </button>
+          {taxFree && (
+            <button
+              onClick={() => setBookoffFee(!bookoffFee)}
+              className={`px-3 py-2 rounded-full border-2 text-xs font-black ${bookoffFee ? "bg-amber-50 border-amber-300 text-amber-700" : "bg-gray-50 border-gray-200 text-gray-500"}`}
+            >
+              {bookoffFee ? "✅" : "⬜"} BOOKOFF 扣 3% 手續費
+            </button>
+          )}
+        </div>
+
+        {twd != null && (
+          <div className="p-3 rounded-2xl bg-indigo-50 border-2 border-indigo-100 text-sm font-black text-indigo-800">
+            實付約 ¥{effYen.toLocaleString()} ≈ NT${twd.toLocaleString()}
+            <span className="text-[11px] font-bold text-indigo-400 ml-2">（1 TWD ≈ {rate} JPY）</span>
+          </div>
+        )}
+
+        <button
+          onClick={ask}
+          disabled={aiLoading}
+          className="w-full py-3 rounded-2xl bg-indigo-600 text-white font-black text-sm disabled:opacity-40"
+        >
+          {aiLoading ? "查詢中…" : "🔍 查台灣售價並給建議"}
+        </button>
+      </div>
+
+      {ans && (
+        <div className="glass-panel p-5 rounded-3xl bg-white border-gray-100 shadow-lg">
+          <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{ans}</div>
+        </div>
+      )}
+
+      {q && (
+        <div>
+          <div className="text-xs font-black text-gray-500 mb-2">👀 自己再確認一下（會開新分頁）</div>
+          <div className="flex flex-wrap gap-2">
+            {links.map((l) => (
+              <a key={l.t} href={l.u} target="_blank" rel="noreferrer"
+                className={`px-3 py-2 rounded-full border-2 text-xs font-black ${l.c}`}>
+                {l.t}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-200 text-[11px] text-amber-800 leading-relaxed font-bold">
+        ⚠️ AI 給的台灣價是「查證後的估算」，不是即時報價。金額大的東西，請按下面的連結自己看一眼再決定。
+        {mode === "used" && " 二手品請用台灣二手行情比，不要拿新品價騙自己。"}
+      </div>
+    </div>
+  );
+};
+
+const CompareTab = ({ aiLoading, setAiLoading, openKeyModal, twdJpyRate }) => {
+  const [mode, setMode] = useState("shin");
+  return (
+    <div className="space-y-5 animate-in fade-in duration-700 pb-24">
+      <h1 className="text-2xl font-black text-gray-800 flex items-center gap-2">
+        <span className="text-2xl">💱</span> 現場比價
+      </h1>
+      <p className="text-sm text-gray-400 -mt-3 leading-relaxed">
+        站在架子前輸入品名與日圓標價（或直接拍價格標），馬上算出台灣價差與買不買。
+      </p>
+
+      <div className="flex gap-2">
+        {CMP_MODES.map((m) => (
+          <button
+            key={m.k}
+            onClick={() => setMode(m.k)}
+            className={`flex-1 py-2.5 rounded-2xl border-2 text-xs font-black leading-tight ${
+              mode === m.k ? "bg-indigo-600 border-indigo-600 text-white" : "bg-white border-gray-200 text-gray-500"
+            }`}
+          >
+            <div className="text-base">{m.icon}</div>
+            {m.label}
+          </button>
+        ))}
+      </div>
+
+      {mode === "sew" ? (
+        <SewingTab aiLoading={aiLoading} setAiLoading={setAiLoading} openKeyModal={openKeyModal} />
+      ) : (
+        <PriceCompare
+          mode={mode}
+          aiLoading={aiLoading}
+          setAiLoading={setAiLoading}
+          openKeyModal={openKeyModal}
+          twdJpyRate={twdJpyRate}
+        />
+      )}
+    </div>
+  );
+};
+
 // ==========================================
 // 4. 主應用程式 (App) - 整合所有邏輯
 // ==========================================
@@ -3770,11 +3987,12 @@ ${JSON.stringify(hotelWithDates)}
             setAiLoading={setAiLoading}
           />
         )}
-        {activeTab === "sewing" && (
-          <SewingTab
+        {activeTab === "compare" && (
+          <CompareTab
             aiLoading={aiLoading}
             setAiLoading={setAiLoading}
             openKeyModal={setIsKeyModalOpen}
+            twdJpyRate={twdJpyRate}
           />
         )}
         {activeTab === "wishlist" && (
@@ -4047,12 +4265,12 @@ ${JSON.stringify(hotelWithDates)}
           <Icons.Shield size={26} /> 防雷
         </button>
         <button
-          onClick={() => setActiveTab("sewing")}
+          onClick={() => setActiveTab("compare")}
           className={`flex flex-col items-center gap-1 p-2 ${
-            activeTab === "sewing" ? "text-indigo-600" : "hover:text-gray-900"
+            activeTab === "compare" ? "text-indigo-600" : "hover:text-gray-900"
           }`}
         >
-          <span className="text-[22px] leading-[26px]">🧵</span> 縫紉機
+          <span className="text-[22px] leading-[26px]">💱</span> 比價
         </button>
         <button
           onClick={() => setActiveTab("wishlist")}
