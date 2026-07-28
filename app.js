@@ -2575,17 +2575,24 @@ ${taxFree && hasYen ? `此店可免税，實付約 ¥${effYen.toLocaleString()}$
 
 【最重要】請務必實際用 Google 搜尋查證「台灣現在的售價」。就算使用者沒給日本標價，台灣售價也一定要查出來給他 —— 那正是他最需要知道的數字。不要因為缺日本價就跳過。
 
-請用繁體中文，直接從第 1 點開始寫，每點一行，不要有開場白，不要複述上面的背景資料：
-1. 商品正式名稱（中／日文，含型號容量）
-2. 台灣售價區間（NT$，註明是 momo／PChome／蝦皮 哪一家，${mode === "shin" ? "全新品" : "以二手行情為主、全新價為輔"}）
-3. 資料來源（至少一個實際網址；真的查不到就寫「查不到，以下為推估」，絕對不要編造網址或價格）
-4. 日本行情價（若使用者沒給標價，就查這件商品在日本一般賣多少，日圓）
-5. 價差（在日本買省多少 NT$、省幾 %）
-6. 結論：🟢現場買 ／ 🟡再想想 ／ 🔴台灣買就好，一句話理由
-7. 「日本標價低於 ¥____ 才值得帶回去」的門檻數字
-${mode !== "shin" ? "8. 這件二手品現場必檢查的一個重點" : "8. 台灣買不買得到？若台灣根本沒進，請直接說「台灣買不到，這是加分項」"}
+【輸出規則】
+- 直接從「1.」開始寫，不要開場白、不要前言、不要總結。
+- 每一點就是一行：編號、短標題、冒號、答案，全部寫在同一行。
+- 標題只能用我下面給的那幾個字，不要加括號、不要加說明、不要用 ** 粗體。
+- 答案一定要接在冒號後面，絕對不可以只寫標題就換行。
+- 不要複述背景資料，不要重複題目。
 
-若某一點資訊不足請直說「查不到」，但不要整段跳過，也不要編造。`;
+【格式】照抄這 8 個標題，冒號後填答案：
+1. 商品名稱：（中文名 ／ 日文名，含型號與容量。這是要拿去台灣購物網搜尋用的，寫成可直接貼進搜尋框的字串）
+2. 台灣售價：（NT$ 區間，並註明 momo／PChome／蝦皮 哪一家。${mode === "shin" ? "查全新品" : "以二手行情為主、全新價為輔"}）
+3. 資料來源：（至少一個實際網址。真的查不到就寫「查不到，以下為推估」，絕對不要編造）
+4. 日本行情：（日圓。使用者沒給標價時，查這件商品在日本一般賣多少）
+5. 價差：（在日本買省多少 NT$、省幾 %）
+6. 結論：（🟢現場買 ／ 🟡再想想 ／ 🔴台灣買就好，加一句話理由）
+7. 門檻：（日本標價低於 ¥____ 才值得帶回去）
+8. ${mode !== "shin" ? "現場檢查：（這件二手品最該檢查的一個重點）" : "台灣有貨嗎：（若台灣根本沒進，直接說「台灣買不到，這是加分項」）"}
+
+括號裡是給你的說明，不要寫進答案裡。某一點查不到就寫「查不到」，但不要整段跳過，也不要編造。`;
       const res = await generateGeminiContent(prompt, img, true);
       setAns(res);
     } catch (e) {
@@ -2596,26 +2603,51 @@ ${mode !== "shin" ? "8. 這件二手品現場必檢查的一個重點" : "8. 台
     setAiLoading(false);
   };
 
-  // 從 AI 回答裡抓出商品正式名稱（第 1 點），沒有就退回使用者輸入
+  // 從 AI 回答裡抓出商品名稱（第 1 點），沒有就退回使用者輸入
+  const stripMd = (t) =>
+    (t || "").replace(/\*\*/g, "").replace(/^[*\-•]\s*/, "").trim();
+
   const pickName = () => {
     const typed = (name || "").trim();
     if (!ans) return typed;
-    const lines = ans.split("\n").map((l) => l.trim()).filter(Boolean);
-    let line =
-      lines.find((l) => /^1[.、)]/.test(l)) ||
-      lines.find((l) => /商品(正式)?名稱/.test(l)) ||
-      lines.find((l) => l.length > 4 && !/^[（(]/.test(l));
-    if (!line) return typed;
-    line = line
-      .replace(/^1[.、)]\s*/, "")
-      .replace(/^商品(正式)?名稱[：:]\s*/, "")
-      .replace(/^商品[：:]\s*/, "")
-      .replace(/[（(][^）)]*[）)]\s*$/, "")
-      .replace(/^此商品為\s*/, "")
-      .replace(/。\s*$/, "")
-      .trim();
-    return line || typed;
+    const lines = ans.split("\n").map(stripMd).filter(Boolean);
+
+    let idx = lines.findIndex((l) => /^1[.、)]/.test(l));
+    if (idx < 0) idx = lines.findIndex((l) => /商品(正式)?名稱/.test(l));
+    if (idx < 0) return typed;
+
+    const clean = (t) =>
+      stripMd(t)
+        .replace(/^1[.、)]\s*/, "")
+        .replace(/^商品(正式)?名稱\s*[：:]?\s*/, "")
+        .replace(/^(中文|日文)\s*[：:]\s*/, "")
+        .replace(/^[（(][^）)]*[）)]\s*[：:]?\s*/, "")
+        .replace(/^此商品為\s*/, "")
+        .replace(/[。，,]\s*$/, "")
+        .trim();
+
+    // 候選：第 1 點該行，以及它後面兩行（AI 常把標題和答案拆開）
+    const cands = [];
+    for (let i = idx; i < Math.min(idx + 3, lines.length); i++) {
+      if (i > idx && /^[2-8][.、)]/.test(lines[i])) break;
+      const c = clean(lines[i]);
+      // 只剩標題字樣、或整行都是說明括號的，不算答案
+      if (!c) continue;
+      if (/^[（(].*[）)]$/.test(c)) continue;
+      if (/^(含型號容量|中／日文|中\/日文)$/.test(c)) continue;
+      cands.push({ raw: lines[i], txt: c });
+    }
+    if (!cands.length) return typed;
+    // 優先拿標了「中文：」的那行，其次拿最長的（資訊最多）
+    const zh = cands.find((c) => /^\s*[*\-•]?\s*中文\s*[：:]/.test(c.raw));
+    const best = zh || cands.sort((a, b) => b.txt.length - a.txt.length)[0];
+    let t = best.txt;
+    // 只取「／」之前的中文段，避免中日文一起貼進搜尋框
+    if (t.includes(" / ")) t = t.split(" / ")[0].trim();
+    else if (t.includes("／")) t = t.split("／")[0].trim();
+    return t || typed;
   };
+
   const bestName = pickName();
 
   const copyName = async () => {
@@ -2743,7 +2775,12 @@ ${mode !== "shin" ? "8. 這件二手品現場必檢查的一個重點" : "8. 台
               </button>
             </div>
           )}
-          <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{ans}</div>
+          <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed break-words">
+            {ans
+              .replace(/\*\*/g, "")
+              .replace(/\[([^\]]+)\]\((https?:\/\/[^)]*vertexaisearch[^)]*)\)/g, "$1")
+              .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, "$1 → $2")}
+          </div>
         </div>
       )}
 
