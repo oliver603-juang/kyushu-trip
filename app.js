@@ -2514,6 +2514,7 @@ const PriceCompare = ({ mode, aiLoading, setAiLoading, openKeyModal, twdJpyRate 
   const [bookoffFee, setBookoffFee] = useState(false);
   const [ans, setAns] = useState("");
   const [img, setImg] = useState(null);
+  const [imgKind, setImgKind] = useState("tag");
   const fileRef = useRef(null);
 
   const rate = twdJpyRate && twdJpyRate > 0 ? twdJpyRate : 4.6;
@@ -2523,12 +2524,18 @@ const PriceCompare = ({ mode, aiLoading, setAiLoading, openKeyModal, twdJpyRate 
     : Math.round(yenNum * (taxFree ? (bookoffFee ? 0.9 + 0.03 : 0.9) : 1));
   const twd = effYen == null ? null : Math.round(effYen / rate);
 
+  const pickImg = (kind) => {
+    setImgKind(kind);
+    if (fileRef.current) fileRef.current.click();
+  };
+
   const readImg = (e) => {
     const f = e.target.files && e.target.files[0];
     if (!f) return;
     const r = new FileReader();
     r.onload = (ev) => setImg(ev.target.result);
     r.readAsDataURL(f);
+    e.target.value = "";
   };
 
   const modeBrief = {
@@ -2549,8 +2556,8 @@ const PriceCompare = ({ mode, aiLoading, setAiLoading, openKeyModal, twdJpyRate 
       const prompt = `你是台日購物比價專家，使用者人在日本店裡現場，需要 30 秒內決定買不買。
 ${modeBrief}
 
-商品：${q || "（請先從我附上的價格標照片辨識出商品名稱與日圓價格）"}
-日本標價：${!isNaN(yenNum) ? "¥" + yenNum.toLocaleString() : "（請從照片讀出）"}
+商品：${q || (img ? (imgKind === "item" ? "（請先從我附上的【商品實物照片】辨識出這是什麼商品：品牌、系列、型號、容量／尺寸都要盡量認出來。認不出來就說認不出來，不要猜一個像的。）" : "（請先從我附上的【店家價格標照片】讀出商品名稱與日圓價格，日文標籤請一併翻成中文。）") : "")}
+日本標價：${!isNaN(yenNum) ? "¥" + yenNum.toLocaleString() : (img ? "（請從照片讀出；照片上若沒有價格就說沒有）" : "（未提供）")}
 ${taxFree && !isNaN(yenNum) ? `此店可免税，實付約 ¥${effYen.toLocaleString()}${bookoffFee ? "（已扣 BOOKOFF 3% 手續費）" : ""}。` : ""}
 匯率：1 TWD ≈ ${rate} JPY${twd ? `，日本實付約等於 NT$${twd.toLocaleString()}` : ""}。
 
@@ -2590,19 +2597,25 @@ ${mode !== "shin" ? "7. 這件二手品現場必檢查的一個重點" : "7. 台
           placeholder={mode === "shin" ? "商品名，例：Pentel Ain 替芯 0.5" : mode === "used" ? "商品名／型號，例：SONY WH-1000XM4" : "品牌型號，例：JUKI HZL-F600"}
           className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 text-base font-bold text-gray-800 focus:border-indigo-400 outline-none"
         />
-        <div className="flex gap-2">
-          <input
-            value={yen}
-            onChange={(e) => setYen(e.target.value)}
-            inputMode="numeric"
-            placeholder="日本標價（¥，未税）"
-            className="flex-1 px-4 py-3 rounded-2xl border-2 border-gray-200 text-base font-bold text-gray-800 focus:border-indigo-400 outline-none"
-          />
+        <input
+          value={yen}
+          onChange={(e) => setYen(e.target.value)}
+          inputMode="numeric"
+          placeholder="日本標價（¥，未税）"
+          className="w-full min-w-0 px-4 py-3 rounded-2xl border-2 border-gray-200 text-base font-bold text-gray-800 focus:border-indigo-400 outline-none"
+        />
+        <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={() => fileRef.current && fileRef.current.click()}
-            className="px-4 py-3 rounded-2xl border-2 border-indigo-200 bg-indigo-50 text-indigo-700 font-black text-sm"
+            onClick={() => pickImg("item")}
+            className="min-w-0 px-3 py-3 rounded-2xl border-2 border-indigo-200 bg-indigo-50 text-indigo-700 font-black text-sm"
           >
-            📷 拍標籤
+            📷 拍實物
+          </button>
+          <button
+            onClick={() => pickImg("tag")}
+            className="min-w-0 px-3 py-3 rounded-2xl border-2 border-indigo-200 bg-indigo-50 text-indigo-700 font-black text-sm"
+          >
+            🏷️ 拍價格標
           </button>
           <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={readImg} className="hidden" />
         </div>
@@ -2610,10 +2623,16 @@ ${mode !== "shin" ? "7. 這件二手品現場必檢查的一個重點" : "7. 台
         {img && (
           <div className="flex items-center gap-2">
             <img src={img} alt="價格標" className="w-16 h-16 object-cover rounded-xl border-2 border-gray-200" />
-            <span className="text-xs text-gray-500 font-bold">已附上照片，AI 會自動讀出品名與價格</span>
+            <span className="text-xs text-gray-500 font-bold">
+              {imgKind === "item" ? "已附商品實物照，AI 會先認出這是什麼" : "已附價格標照，AI 會讀出品名與日圓價"}
+            </span>
             <button onClick={() => setImg(null)} className="ml-auto text-xs font-black text-rose-500">移除</button>
           </div>
         )}
+
+        <div className="text-[11px] text-gray-400 font-bold leading-relaxed">
+          品名／價格可以只填一個，或完全不填直接拍照讓 AI 認。三種都能用：拍實物、拍價格標、手動輸入。
+        </div>
 
         <div className="flex flex-wrap gap-2">
           <button
