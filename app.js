@@ -2886,6 +2886,78 @@ const CompareTab = ({ aiLoading, setAiLoading, openKeyModal, twdJpyRate }) => {
   );
 };
 
+
+// ==========================================
+// 3.9 一次性資料搬遷：位置鍵 dayN-sM -> 穩定 sid（治本）
+// 舊版把景點資料存成「第幾天-第幾個」，只要行程插入/刪除景點，
+// 所有金額就會整段位移。這裡用「已上線版本的景點順序」把舊鍵
+// 對回景點名稱，再換成 config.js 裡每個景點固定的 sid。
+// ==========================================
+(function migrateSpotKeys() {
+  var FLAG = "spot_keys_migrated_v2";
+  try {
+    if (localStorage.getItem(FLAG)) return;
+
+    // 舊版（已上線）各天的景點順序，索引即為舊鍵的 sM
+    var LEGACY_ORDER = {
+      day1: ["福岡國際機場","ＯＲＩＸ國際線店","Yamaya Factory Terrace","BOOKOFF + Hard Off","ハードオフ福岡中間店","ART 新田川小倉酒店"],
+      day2: ["TOTO博物館","有的有的停車場","駿河屋 小倉AruaruCity店","薩莉亞 小倉站前AruaruCity店","BOOKOFF 大野城三笠川店","九州國立博物館","Hard Off & Hobby Off 春日白水店","BOOKOFF上津久留米店","APA酒店 佐賀站南口"],
+      day3: ["佐賀熱氣球博物館","BOOKOFF PLUS 佐賀南部繞道店","BOOKOFF Saga Nabeshima","佐賀縣立宇宙科學館 夢銀河","Hard Off Sasebo","未確認生物UMA展（島瀬美術センター）","佐世保中央飯店","おもちゃのあおき 四ヶ町アーケード本島店"],
+      day4: ["九十九島水族館 海洋kirara","BOOKOFF AcrossPlaza佐世保","すき家 35號佐世保大和店","伊萬里夢Misaki公園（滑草）","BOOKOFF Karatsu Store","Times停車場（BOOKOFF旁）","BOOKOFF SUPER BAZAAR Mina天神","新大谷特約停車場 Grand Parking","博多新大谷飯店"],
+      day5: ["駿河屋 博多丸井店","福岡國際機場"]
+    };
+
+    // 目前 config.js 的 名稱 -> sid（同名優先取同一天）
+    var byDayName = {}, byName = {};
+    (window.RAW_KML_DATA || []).forEach(function (d) {
+      byDayName[d.dayId] = byDayName[d.dayId] || {};
+      (d.spots || []).forEach(function (sp) {
+        if (!sp || !sp.sid) return;
+        if (!byDayName[d.dayId][sp.name]) byDayName[d.dayId][sp.name] = sp.sid;
+        if (!byName[sp.name]) byName[sp.name] = sp.sid;
+      });
+    });
+
+    var resolve = function (key) {
+      var m = /^(day\d+)-s(\d+)$/.exec(key);
+      if (!m) return null;                 // 已經是 sid 或其他格式，原樣保留
+      var names = LEGACY_ORDER[m[1]];
+      if (!names) return null;
+      var nm = names[parseInt(m[2], 10)];
+      if (!nm) return null;
+      return (byDayName[m[1]] && byDayName[m[1]][nm]) || byName[nm] || null;
+    };
+
+    var STORES = ["ticket_overrides","trip_spot_tickets","stays","departures","modes","expenses"];
+    var stamp = String(Date.now());
+    var changed = 0;
+
+    STORES.forEach(function (store) {
+      var raw = localStorage.getItem(store);
+      if (!raw) return;
+      var obj;
+      try { obj = JSON.parse(raw); } catch (e) { return; }
+      if (!obj || typeof obj !== "object" || Array.isArray(obj)) return;
+
+      var out = {}, touched = false;
+      Object.keys(obj).forEach(function (k) {
+        var sid = resolve(k);
+        if (sid && !(sid in obj)) { out[sid] = obj[k]; touched = true; changed++; }
+        else { out[k] = obj[k]; }
+      });
+      if (touched) {
+        try { localStorage.setItem(store + "_backup_" + stamp, raw); } catch (e) {}
+        localStorage.setItem(store, JSON.stringify(out));
+      }
+    });
+
+    localStorage.setItem(FLAG, stamp);
+    if (changed) console.log("[migrate] 已把 " + changed + " 筆位置鍵改為固定 sid");
+  } catch (e) {
+    console.warn("[migrate] 搬遷失敗，維持原資料", e);
+  }
+})();
+
 // ==========================================
 // 4. 主應用程式 (App) - 整合所有邏輯
 // ==========================================
@@ -3274,7 +3346,7 @@ function App() {
         "09:00";
       let currentMinutes = timeToMinutes(dayStartTimes[day.dayId] || resolvedStart);
       const newSpots = day.spots.map((spot, idx) => {
-        const spotId = `${day.dayId}-s${idx}`;
+        const spotId = spot.sid || `${day.dayId}-s${idx}`;
         // 停車場類景點預設停留 0 分鐘（僅停車/取車，不佔行程時間）
         const isParkingSpot = /停車場|駐車場|[Pp]arking/.test(spot.name);
         const stayStr = stays[spotId] || (isParkingSpot ? "0 min" : "1.5 hr");
