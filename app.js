@@ -1960,6 +1960,95 @@ const StatsTab = ({
   );
 };
 
+
+// --- 緊急查核：把災情新聞轉成一段可貼進 Claude 外掛的查核提問 ---
+const EmergencyCheck = ({ tripData, flightInfo, hotelInfo }) => {
+  const [news, setNews] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const days = (tripData || [])
+    .map(function (d) {
+      var date = String(d.date || "").split(" ")[0];
+      var names = (d.spots || []).map(function (sp) { return sp.name; }).join("、");
+      return date + "：" + names;
+    })
+    .join("\n");
+
+  const hotels = (hotelInfo || [])
+    .map(function (h) { return h.name + "（" + (h.location || "") + "）"; })
+    .join("；");
+
+  const ob = (flightInfo && flightInfo.outbound) || {};
+  const ib = (flightInfo && flightInfo.inbound) || {};
+  const flights =
+    "去程 " + (ob.date || "") + " " + (ob.flight || "") + " " + (ob.from || "") + "→" + (ob.to || "") +
+    "；回程 " + (ib.date || "") + " " + (ib.flight || "") + " " + (ib.from || "") + "→" + (ib.to || "");
+
+  const prompt =
+    "我要去九州自駕旅遊，以下是我的行程與剛發生的災情新聞。請你【實際上網查證】，再逐日告訴我哪幾段受阻、哪幾段沒事。不要只複述我的行程。\n\n" +
+    "===== 災情新聞（我貼上的） =====\n" +
+    (news.trim() || "（尚未貼上新聞）") + "\n" +
+    "===== 新聞結束 =====\n\n" +
+    "【我的航班】" + flights + "\n" +
+    "【我的住宿】" + hotels + "\n" +
+    "【每日行程】\n" + days + "\n\n" +
+    "【請查證這五項，每項都要附上你查到的頁面連結與資料時間】\n" +
+    "1. 氣象廳（jma.go.jp）對福岡・佐賀・長崎三縣的警報、特報與颱風路徑預報\n" +
+    "2. 上面那兩班飛機的航空公司運航情報頁，該日是否正常運航\n" +
+    "3. 九州電力停電情報（teiden.kyuden.co.jp），特別是我住宿所在的市町\n" +
+    "4. NEXCO 西日本的高速公路通行止與速度規制\n" +
+    "5. JARTIC（jartic.or.jp）福岡・佐賀・長崎三縣的一般道路通行止\n\n" +
+    "【輸出格式】\n" +
+    "先用一段話講整體影響程度；接著逐日列出「日期｜受影響的景點或路段｜原因｜建議」，沒受影響的日期也要寫一行「無影響」；最後給我一句結論：需不需要調整行程。請用繁體中文。";
+
+  const copy = function () {
+    var done = function () { setCopied(true); setTimeout(function () { setCopied(false); }, 1800); };
+    try {
+      navigator.clipboard.writeText(prompt).then(done, function () {
+        var ta = document.createElement("textarea");
+        ta.value = prompt; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); done(); } catch (e) { alert("複製失敗，請長按下方文字手動複製"); }
+        document.body.removeChild(ta);
+      });
+    } catch (e) {
+      alert("複製失敗，請長按下方文字手動複製");
+    }
+  };
+
+  return (
+    <div className="glass-panel p-6 rounded-3xl bg-white border-2 border-red-200 shadow-lg">
+      <h3 className="font-bold text-red-600 mb-1 flex items-center gap-2">
+        🚨 緊急查核（地震／颱風）
+      </h3>
+      <p className="text-xs text-gray-500 mb-3 leading-relaxed">
+        貼上新聞報導 → 按複製 → 在 Chrome 打開 Claude 外掛貼上，它會實際上網查證並逐日告訴你哪幾段受阻。
+      </p>
+      <textarea
+        value={news}
+        onChange={(e) => setNews(e.target.value)}
+        rows={5}
+        placeholder="在這裡貼上災情的新聞報導全文（地震震度、颱風路徑、停電、停飛等）"
+        className="w-full min-w-0 p-3 border-2 border-gray-200 rounded-xl text-sm leading-relaxed focus:border-red-300 outline-none"
+      />
+      <button
+        onClick={copy}
+        className={`mt-3 w-full py-3 rounded-xl font-black text-white shadow-md ${copied ? "bg-emerald-500" : "bg-red-500 hover:brightness-105"}`}
+      >
+        {copied ? "✅ 已複製，去 Claude 外掛貼上" : "📋 複製查核提問"}
+      </button>
+      {news.trim() && (
+        <details className="mt-3">
+          <summary className="text-xs text-gray-400 cursor-pointer">預覽會複製的內容</summary>
+          <pre className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-xl text-[11px] text-gray-600 whitespace-pre-wrap break-words">
+            {prompt}
+          </pre>
+        </details>
+      )}
+    </div>
+  );
+};
+
 // --- GuardTab ---
 const GuardTab = ({
   tripData,
@@ -2067,6 +2156,7 @@ const GuardTab = ({
       <h1 className="text-2xl font-black text-gray-800 flex items-center gap-2">
         <Icons.Shield className="text-[#A9BFA8]" /> AI 旅遊防雷
       </h1>
+      <EmergencyCheck tripData={tripData} flightInfo={flightInfo} hotelInfo={hotelInfo} />
       <div className="glass-panel p-6 rounded-3xl bg-white border-gray-100 shadow-lg">
         <h3 className="font-bold text-[#A9BFA8] mb-4 flex items-center gap-2">
           <Icons.Plane size={20} /> 交通防雷
