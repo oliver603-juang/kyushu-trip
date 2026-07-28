@@ -35,14 +35,13 @@ window.RAW_KML_DATA = [
   {
     dayId: "day2", date: "8/8 (六)", title: "小倉→久留米→佐賀", themeColor: "bg-[#A9BFA8]",
     spots: [
-      { sid: "sp007", name: "TOTO博物館", lat: 33.8722021, lon: 130.8721104, desc: "TOTO 衛浴品牌博物館。營業 10:00-17:00", mapCode: "16 434 268*63", driveTime: "9分", ticket: { adult: 0, child: 0 } },
-      { sid: "sp008", name: "有的有的停車場", lat: 33.8879913, lon: 130.885649, desc: "あるあるCity 停車場，營業 11:00 開始。", mapCode: "16 496 103*00", driveTime: "9分", ticket: { adult: 0, child: 0 } },
+      { sid: "sp036", name: "小倉城", lat: 33.8853, lon: 130.8735, desc: "🏯 小倉城天守閣。8月開館 9:00-20:00（入場至 19:30），年中無休。停車：勝山公園地下駐車場（16 465 520*08，首小時200円，之後每20分100円）。入場料以現場公告為準（令和8年4月起調整）。", mapCode: "16 465 520*08", driveTime: "5分", ticket: { adult: 500, child: 150 } },
+      { sid: "sp008", name: "有的有的停車場", lat: 33.8879913, lon: 130.885649, desc: "あるあるCity 停車場，營業 11:00 開始。", mapCode: "16 496 103*00", driveTime: "5分", ticket: { adult: 0, child: 0 } },
       { sid: "sp009", name: "駿河屋 小倉AruaruCity店", lat: 33.8876455, lon: 130.884624, desc: "🧸 絕版 LEGO 救星！中古動漫/絕版模型霸主，AruaruCity 2F/4F，小倉站前步行可達。", mapCode: "", driveTime: "步行1分", ticket: { adult: 0, child: 0 } },
       { sid: "sp010", name: "薩莉亞 小倉站前AruaruCity店", lat: 33.8874016, lon: 130.884736, desc: "午餐：Saizeriya 小倉站前 AruaruCity 店。", mapCode: "", driveTime: "同棟", ticket: { adult: 0, child: 0 } },
       { sid: "sp011", name: "BOOKOFF 大野城三笠川店", lat: 33.5468162, lon: 130.4828346, desc: "大野城 BOOKOFF，旁邊有超市。", mapCode: "13 178 249*77", driveTime: "1小時", ticket: { adult: 0, child: 0 } },
       { sid: "sp012", name: "Hard Off & Hobby Off 春日白水店", lat: 33.5092061, lon: 130.4496045, desc: "春日白水 Hard Off + Hobby Off，有樂高！", mapCode: "13 024 636*17", driveTime: "16分", ticket: { adult: 0, child: 0 } },
-      { sid: "sp013", name: "撒隆巴斯藥物博物館", lat: 33.3978309, lon: 130.5111389, desc: "久光製藥歷史博物館。", mapCode: "37 826 318*07", driveTime: "27分", ticket: { adult: 0, child: 0 } },
-      { sid: "sp014", name: "BOOKOFF上津久留米店", lat: 33.2849572, lon: 130.5110566, desc: "久留米 BOOKOFF。", mapCode: "37 406 708*24", driveTime: "25分", ticket: { adult: 0, child: 0 } },
+      { sid: "sp014", name: "BOOKOFF上津久留米店", lat: 33.2849572, lon: 130.5110566, desc: "久留米 BOOKOFF。", mapCode: "37 406 708*24", driveTime: "30分", ticket: { adult: 0, child: 0 } },
       { sid: "sp015", name: "Hard Off 佐賀店", lat: 33.2212552, lon: 130.3077721, desc: "佐賀 Hard Off。", mapCode: "87 202 126*02", driveTime: "37分", ticket: { adult: 0, child: 0 } },
       { sid: "sp016", name: "APA酒店 佐賀站南口", lat: 33.2629778, lon: 130.2996529, desc: "佐賀站旁住宿。旁邊停車場1泊1,000円(41 532 501*11)", mapCode: "87 351 127*20", driveTime: "10分", ticket: { adult: 0, child: 0 } },
     ],
