@@ -1060,12 +1060,39 @@ const RT_GRAY = "#d9dde2";
 const RT_BRANCH = "#a1897a";
 const RT_SPROUT = "#8fae9b";
 
+const RT_ROAD_POLY = [
+  "ge~kEace{WhJr_@aM`MlG}IcmAds@{c@aRkvCuNmK{MoLw]fSsnBcYy`BxSgnBub@otBiJGxHuWkXmAsm@nq@gYjiA|St^ieA~e@`JmLfp@wYdd@dCyCqWy{Ak|Ayl@wtAow@_bAwHqp@syA_cBiXa{BeUee@inBytAyc@e~@cp@kf@e`@kcAiNebCxJwt@i[c`@oBej@nSmcAqFwp@sRgHkIak@cx@qf@e~AaScQiXks@iMoEiZygBt|@esAxVko@ePgK}m@{zAmcA_e@kz@vBak@yUwi@Dg{@ee@iOenBnF}SktDtGmiD}tAstBbGyl@lk@kq@nF}kC{C}c@mh@kA",
+  "k`xmEgty}Wuh@nj@}KkhAjCdFJe@~nDhI~mHt`DnjGwfAnnDjdBxp@cb@`nE{@`pDf`An|Cz_KvKjfIr}BhnFVj_DfoD}YpiBdeAti@p|DtiBlbBhmAbRnBxrAltAhz@de@drCf{@~cAi\\pz@es@|Gbh@|i@n`@h_E}o@bkAmfD~nAgWbUx~CfjFvbByr@uAy|@{vCazDtT{p@|~BoEr_IanE~dBhA~uCay@|yLbPz`B}i@rqAcsA`Fva@lvAxG~_AdaA~o@nwDm|@rg@whBwN{WtbCps@|a@|HhlCvo@dt@|C~{A`}AfbEdtB}ElVrgBrdBz[o`@hkBhKriJafBtq@",
+  "}u_jEochzWnbAaBlsA}BvW_FnMwWteAwIueAvIeNfXiWm@oQ~vC}pCrb@eh@tDx^|yA`]ltDeeE|gD~QdcE~QtVtGlaAkY|sDlVk_@dKlg@naAlqAjq@bsCd_B`dAndC`rCld@nQvVaFxGjNr[sO`a@vSnpAxrBf]gg@r]wKhHnQfYf@|\\wXf[l^xAvoA~VvnAjWfj@xxAhq@x@tn@dZlgA{AtsBkb@ziBu^|h@_Nz_AtHtaGc^foAet@jmAeGzu@hGfi@~a@vv@bIpaApcAhnA`@f|B|Tnw@m^p{AxIt_D{V`m@gt@hAq`Alu@~NaO_EhItwAgbByJgpAfPiXeMk|@",
+  "_gkiEcq_wWvG|fDijAtoC~p@~xBm@jzAl@kzAeq@gzB|H_}@hu@u|@_Ecs@|C_w@|DkvA`fA}jAaVctDadA}mAgv@qnDWd^aj@uz@ekHj\\oqDii@q`Bq|A}eAuFcpA~cBc_ChcAyt@hAun@s~@weBzLtT{NsT{ZghC}Cgk@{]li@aaBqm@{`@gOmy@y`BteAym@iK{[stBw_CahCkFwmAyuA}dC~Os^|ZqyA|i@sWa}@{|H}z@}dAqmB|t@ahCctAgf@hG}|AujIxGooBgw@a{Bw@e{AsdBmeFeq@qi@a`EwqImQ_cAz`@izDnIceJs{B{}Hqf@`MfG`Dzx@sv@`DtE",
+  "wc~kEa||zW~@m@DgGiHc^{Use@?_DoDGIaBq@Ey@AIrFdHBh@iX{LuNaLqKtg@so@aAeC|DaFl@qCwCw@gBeCE{JeCsDGsAh@aA~OwIpBmDlC}BXaCqAwCqa@zV_AMeAl@K~@sCjBsIjDnIsDfC}AViAnAs@t@Nba@kVJc@iByE",
+];
+
+// Google/OSRM encoded polyline 解碼
+const rtDecodePoly = (str) => {
+  let i = 0, lat = 0, lon = 0;
+  const out = [];
+  while (i < str.length) {
+    let r = 0, sh = 0, b;
+    do { b = str.charCodeAt(i++) - 63; r |= (b & 31) << sh; sh += 5; } while (b >= 32);
+    lat += (r & 1) ? ~(r >> 1) : (r >> 1);
+    r = 0; sh = 0;
+    do { b = str.charCodeAt(i++) - 63; r |= (b & 31) << sh; sh += 5; } while (b >= 32);
+    lon += (r & 1) ? ~(r >> 1) : (r >> 1);
+    out.push({ lat: lat / 1e5, lon: lon / 1e5 });
+  }
+  return out;
+};
+
 let _rtCache = null;
 const buildRouteChains = (tripData) => {
   if (_rtCache && _rtCache.src === tripData) return _rtCache.val;
-  const daysPts = (tripData || []).map((d) =>
-    (d.spots || []).filter((s) => typeof s.lat === "number" && typeof s.lon === "number")
-  );
+  // 優先使用實際道路路徑（OSRM 預先算好的行車路線），沒有才退回直線連點
+  const daysPts = (tripData || []).map((d, i) => {
+    const road = RT_ROAD_POLY[i];
+    if (road) return rtDecodePoly(road);
+    return (d.spots || []).filter((s) => typeof s.lat === "number" && typeof s.lon === "number");
+  });
   const all = daysPts.flat();
   let val = null;
   if (all.length >= 2) {
