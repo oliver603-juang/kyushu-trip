@@ -1298,9 +1298,23 @@ const _spotScanCache = (() => {
   }
 })();
 
+// 依名稱關鍵字判斷景點類型，決定要追加哪一組問題
+const SCAN_SHOP_RE =
+  /(BOOK\s*OFF|BOOKOFF|HARD\s*OFF|HARDOFF|ハードオフ|ブックオフ|HOBBY\s*OFF|ホビーオフ|OFF\s*HOUSE|オフハウス|イオン|AEON|モール|MALL|アウトレット|OUTLET|唐吉訶德|ドン・キホーテ|驛|商店|店)/i;
+const SCAN_MUSEUM_RE =
+  /(博物館|美術館|科學館|科学館|水族館|動物園|植物園|資料館|記念館|紀念館|展示館|美術センター|展（|展\(|MUSEUM|AQUARIUM|ZOO|館)/i;
+
+// 先判館所再判商店：館所關鍵字較明確，避免「○○館」被「店」規則搶走
+const scanKindOf = (name) => {
+  if (SCAN_MUSEUM_RE.test(name)) return "museum";
+  if (SCAN_SHOP_RE.test(name)) return "shop";
+  return "spot";
+};
+
 const SpotScanRow = ({ spot, isAccommodation, openKeyModal }) => {
   const Icons = window.Icons;
-  const [result, setResult] = useState(_spotScanCache[spot.id] || "");
+  const scanKey = spot.sid || spot.name;
+  const [result, setResult] = useState(_spotScanCache[scanKey] || "");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -1325,16 +1339,51 @@ const SpotScanRow = ({ spot, isAccommodation, openKeyModal }) => {
 3. 住客常見正面/負面回饋
 4. 入住/退房注意事項
 請用繁體中文回答，標注資訊來源。`
-        : `請查詢景點「${spot.name}」的【最新即時資訊】：
-1. 目前營業狀態（是否正常營業、臨時公告、休館日）
-2. 最新門票價格（成人/兒童/優惠）
-3. 建議停留時間與最佳到訪時段
-4. 雨天備案（若為戶外景點）
-5. 周邊 3 個高評價平價美食推薦（含 Google 評分）
-請用繁體中文回答，標注查詢日期。`;
+        : (() => {
+            // 第一層：所有景點共用的定位資訊與核心問題
+            const kind = scanKindOf(spot.name);
+            const head = `請查詢下列地點的【最新即時資訊】。
+
+地點名稱：${spot.name}
+GPS 座標：${spot.lat}, ${spot.lon}${
+              spot.mapCode ? "\nMapCode：" + spot.mapCode : ""
+            }${spot.desc ? "\n行程備註：" + spot.desc : ""}
+造訪期間：2026 年 8 月 7 日～8 月 11 日（自駕）
+
+※ 重要：若名稱是連鎖品牌或名稱不完整，請「以 GPS 座標為準」判斷是哪一家分店，
+   並先明確寫出該分店的官方全名（含日文）與完整住所、電話。
+   若無法完全確定，請列出座標 500 公尺內最可能的 1～2 家並註明，
+   不要反問我、不要要求我補充地址。
+※ 查不到的項目請直接寫「官網未載明」，不要臆測。
+
+請回答：
+1. 該地點的官方名稱、住所、電話
+2. 目前營業狀態（是否正常營業、臨時公告）
+3. 近期 Google 評價重點（好評 2 條、雷點 2 條）`;
+            const tail =
+              kind === "shop"
+                ? `4. 營業時間與公休日（造訪期間當天是否營業）
+5. 停車場（免費/收費、車位數）
+6. 主打商品線：樂高／玩具／模型／公仔／家電／樂器／服飾，
+   以及是否有 Hobby Off、Off House、BOOKOFF 等同址併設店
+7. 是否可免稅（Tax Free）、是否收信用卡／IC 卡
+8. 步行 5 分鐘內的用餐或便利商店`
+                : kind === "museum"
+                  ? `4. 休館日（日本館所多為週一休；若遇國定假日是否順延至隔天，請明確說明）
+5. 開館時間與【最後入館時間】（常比閉館早 30～60 分鐘）
+6. 最新門票價格（成人/兒童/優惠），以及造訪期間是否有特別展／企劃展影響票價
+7. 是否需要事先線上預約或指定入館時段
+8. 若為水族館／動物園：餵食秀、海豚或動物表演的每日時間表
+9. 建議停留時間與周邊 2 個平價用餐選擇`
+                  : `4. 最新門票價格（成人/兒童/優惠）
+5. 建議停留時間與最佳到訪時段
+6. 雨天備案（若為戶外景點）
+7. 周邊 3 個高評價平價美食推薦（含 Google 評分）`;
+            return head + "\n" + tail + "\n請用繁體中文回答，標注查詢日期與資訊來源。";
+          })();
       const res = await generateGeminiContent(prompt, null, true);
       setResult(res);
-      _spotScanCache[spot.id] = res;
+      _spotScanCache[scanKey] = res;
       try {
         localStorage.setItem("spot_scan_cache", JSON.stringify(_spotScanCache));
       } catch (e) {}
