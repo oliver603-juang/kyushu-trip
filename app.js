@@ -1795,6 +1795,269 @@ const HotelDeskCard = () => {
   );
 };
 
+// --- 颱風距離：把 5 天行程範圍畫在地圖上 ---
+const DAY_COLORS = ["#E4735A", "#E0A94F", "#5FA86E", "#4C86C6", "#8E6BC6"];
+
+const haversineKm = (a, b, c, d) => {
+  const R = 6371;
+  const t = Math.PI / 180;
+  const dLat = (c - a) * t;
+  const dLon = (d - b) * t;
+  const s =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(a * t) * Math.cos(c * t) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
+};
+
+const TyphoonRangeMap = () => {
+  const mapEl = useRef(null);
+  const mapRef = useRef(null);
+  const eyeLayer = useRef(null);
+  const [eye, setEye] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("typhoon_eye") || "null");
+    } catch (e) {
+      return null;
+    }
+  });
+  const [latIn, setLatIn] = useState(eye ? String(eye.lat) : "");
+  const [lonIn, setLonIn] = useState(eye ? String(eye.lon) : "");
+  const [ready, setReady] = useState(false);
+
+  const days = (window.RAW_KML_DATA || []).map((d, i) => ({
+    date: d.date,
+    title: d.title,
+    color: DAY_COLORS[i % DAY_COLORS.length],
+    pts: (d.spots || [])
+      .filter((s) => s.lat && s.lon)
+      .map((s) => ({ lat: s.lat, lon: s.lon, name: s.name })),
+  }));
+
+  // 建立地圖與行程圖層（只做一次）
+  useEffect(() => {
+    if (!window.L || !mapEl.current || mapRef.current) return;
+    const L = window.L;
+    const map = L.map(mapEl.current, { scrollWheelZoom: false });
+    mapRef.current = map;
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap",
+      maxZoom: 18,
+    }).addTo(map);
+
+    const all = [];
+    days.forEach((d) => {
+      const latlngs = d.pts.map((p) => [p.lat, p.lon]);
+      if (!latlngs.length) return;
+      all.push(...latlngs);
+      L.polyline(latlngs, { color: d.color, weight: 4, opacity: 0.85 }).addTo(map);
+      d.pts.forEach((p) => {
+        L.circleMarker([p.lat, p.lon], {
+          radius: 5,
+          color: "#fff",
+          weight: 2,
+          fillColor: d.color,
+          fillOpacity: 1,
+        })
+          .addTo(map)
+          .bindPopup(`<b>${d.date}</b><br>${p.name}`);
+      });
+    });
+    if (all.length) map.fitBounds(all, { padding: [24, 24] });
+    else map.setView([33.2, 130.3], 7);
+
+    map.on("click", (e) => {
+      setLatIn(e.latlng.lat.toFixed(2));
+      setLonIn(e.latlng.lng.toFixed(2));
+      setEyeSafe(e.latlng.lat, e.latlng.lng);
+    });
+    setReady(true);
+    setTimeout(() => map.invalidateSize(), 200);
+  }, []);
+
+  const setEyeSafe = (la, lo) => {
+    const v = { lat: Number(la), lon: Number(lo) };
+    setEye(v);
+    try {
+      localStorage.setItem("typhoon_eye", JSON.stringify(v));
+    } catch (e) {}
+  };
+
+  // 颱風中心圖層
+  useEffect(() => {
+    const L = window.L;
+    const map = mapRef.current;
+    if (!L || !map) return;
+    if (eyeLayer.current) {
+      map.removeLayer(eyeLayer.current);
+      eyeLayer.current = null;
+    }
+    if (!eye || !isFinite(eye.lat) || !isFinite(eye.lon)) return;
+    const g = L.layerGroup().addTo(map);
+    eyeLayer.current = g;
+    [
+      { r: 300000, c: "#f59e0b", label: "300km" },
+      { r: 200000, c: "#f97316", label: "200km" },
+      { r: 100000, c: "#dc2626", label: "100km" },
+    ].forEach((ring) => {
+      L.circle([eye.lat, eye.lon], {
+        radius: ring.r,
+        color: ring.c,
+        weight: 2,
+        dashArray: "6 6",
+        fill: true,
+        fillColor: ring.c,
+        fillOpacity: 0.05,
+      }).addTo(g);
+    });
+    L.circleMarker([eye.lat, eye.lon], {
+      radius: 8,
+      color: "#fff",
+      weight: 3,
+      fillColor: "#dc2626",
+      fillOpacity: 1,
+    })
+      .addTo(g)
+      .bindPopup("颱風中心");
+  }, [eye]);
+
+  // 每天最近距離
+  const dists = eye
+    ? days
+        .map((d) => {
+          let min = Infinity;
+          let near = "";
+          d.pts.forEach((p) => {
+            const km = haversineKm(eye.lat, eye.lon, p.lat, p.lon);
+            if (km < min) {
+              min = km;
+              near = p.name;
+            }
+          });
+          return { ...d, km: min, near };
+        })
+        .filter((d) => isFinite(d.km))
+    : [];
+
+  const riskColor = (km) =>
+    km < 100
+      ? "bg-red-50 border-red-300 text-red-800"
+      : km < 200
+      ? "bg-orange-50 border-orange-300 text-orange-800"
+      : km < 300
+      ? "bg-amber-50 border-amber-300 text-amber-800"
+      : "bg-emerald-50 border-emerald-200 text-emerald-800";
+
+  const riskWord = (km) =>
+    km < 100 ? "極近，會直接影響" : km < 200 ? "很近，風雨明顯" : km < 300 ? "外圍環流可能有雨" : "距離安全";
+
+  return (
+    <div className="glass-panel p-5 rounded-3xl bg-white border-gray-100 shadow-lg space-y-3">
+      <h3 className="font-bold text-lg text-gray-800">📍 颱風離我們多近</h3>
+      <div className="text-[11px] text-gray-400 font-bold leading-relaxed">
+        地圖上五條線就是 8/7–8/11 每天的車程與活動範圍。到氣象廳或 Windy 查到颱風中心的經緯度後填進來
+        （或直接點地圖），就會畫出 100／200／300 公里圈，並算出每天離颱風最近多少公里。
+      </div>
+
+      <div
+        ref={mapEl}
+        className="w-full rounded-2xl overflow-hidden border-2 border-gray-200 bg-gray-100"
+        style={{ height: "320px" }}
+      />
+      {!ready && (
+        <div className="text-[11px] text-gray-400 font-bold">地圖載入中…（需要連網）</div>
+      )}
+
+      <div className="flex flex-wrap gap-2">
+        {days.map((d) => (
+          <div key={d.date} className="flex items-center gap-1 text-[11px] font-black text-gray-600">
+            <span
+              className="inline-block w-3 h-3 rounded-full"
+              style={{ backgroundColor: d.color }}
+            />
+            {d.date}
+          </div>
+        ))}
+      </div>
+
+      <div className="flex gap-2">
+        <input
+          value={latIn}
+          onChange={(e) => setLatIn(e.target.value)}
+          inputMode="decimal"
+          placeholder="颱風緯度 例 30.5"
+          className="flex-1 min-w-0 px-3 py-2 rounded-xl border-2 border-gray-200 text-sm font-bold outline-none focus:border-indigo-400"
+        />
+        <input
+          value={lonIn}
+          onChange={(e) => setLonIn(e.target.value)}
+          inputMode="decimal"
+          placeholder="經度 例 128.0"
+          className="flex-1 min-w-0 px-3 py-2 rounded-xl border-2 border-gray-200 text-sm font-bold outline-none focus:border-indigo-400"
+        />
+        <button
+          onClick={() => {
+            const la = parseFloat(latIn);
+            const lo = parseFloat(lonIn);
+            if (!isFinite(la) || !isFinite(lo)) {
+              alert("請填數字，例如 緯度 30.5、經度 128.0");
+              return;
+            }
+            setEyeSafe(la, lo);
+            if (mapRef.current) mapRef.current.setView([la, lo], 6);
+          }}
+          className="shrink-0 px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-black"
+        >
+          標上去
+        </button>
+      </div>
+
+      {eye && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="text-xs font-black text-gray-600">
+              颱風中心 {eye.lat.toFixed(2)}, {eye.lon.toFixed(2)}
+            </div>
+            <button
+              onClick={() => {
+                setEye(null);
+                setLatIn("");
+                setLonIn("");
+                try {
+                  localStorage.removeItem("typhoon_eye");
+                } catch (e) {}
+              }}
+              className="ml-auto text-[11px] font-black text-rose-400"
+            >
+              清除
+            </button>
+          </div>
+          {dists.map((d) => (
+            <div
+              key={d.date}
+              className={`p-2.5 rounded-xl border-2 text-[12px] font-black ${riskColor(d.km)}`}
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: d.color }}
+                />
+                <span>{d.date} {d.title}</span>
+                <span className="ml-auto">{Math.round(d.km)} km</span>
+              </div>
+              <div className="text-[10px] font-bold opacity-80 mt-0.5">
+                最近點：{d.near}　·　{riskWord(d.km)}
+              </div>
+            </div>
+          ))}
+          <div className="text-[10px] text-gray-400 font-bold">
+            這是「直線距離」，不是暴風圈半徑。實際影響請以氣象廳公布的暴風域／強風域為準。
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // --- 即時天氣 / 颱風 ---
 const WeatherTyphoonCard = () => {
   const [show, setShow] = useState(false);
@@ -1947,6 +2210,7 @@ const InfoTab = () => {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-6 duration-700 pb-20">
       <TripChecklist />
       <WeatherTyphoonCard />
+      <TyphoonRangeMap />
       <HotelDeskCard />
 
       <div className="glass-panel p-6 rounded-3xl bg-white border-gray-100 shadow-lg">
