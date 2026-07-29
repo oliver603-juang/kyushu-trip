@@ -1858,11 +1858,23 @@ const fetchJmaTyphoons = async () => {
   return out;
 };
 
+// 兩張圖共用同一份抓取結果，避免重複請求
+let _tcCache = null;
+const getJmaTyphoons = (force) => {
+  if (force || !_tcCache) _tcCache = fetchJmaTyphoons().catch((e) => {
+    _tcCache = null;
+    throw e;
+  });
+  return _tcCache;
+};
+
 const TyphoonRangeMap = () => {
   const mapEl = useRef(null);
   const mapRef = useRef(null);
   const eyeLayer = useRef(null);
   const tcLayer = useRef(null);
+  const tripBounds = useRef(null);
+  const tcBounds = useRef(null);
   const [tcs, setTcs] = useState([]);
   const [tcState, setTcState] = useState("loading"); // loading | ok | none | error
   const [tcErr, setTcErr] = useState("");
@@ -1916,6 +1928,7 @@ const TyphoonRangeMap = () => {
           .bindPopup(`<b>${d.date}</b><br>${p.name}`);
       });
     });
+    tripBounds.current = all.length ? all : null;
     if (all.length) map.fitBounds(all, { padding: [24, 24] });
     else map.setView([33.2, 130.3], 7);
 
@@ -1929,10 +1942,10 @@ const TyphoonRangeMap = () => {
   }, []);
 
   // 自動向氣象廳抓颱風預報
-  const loadTc = React.useCallback(() => {
+  const loadTc = React.useCallback((force) => {
     setTcState("loading");
     setTcErr("");
-    fetchJmaTyphoons()
+    getJmaTyphoons(force === true)
       .then((arr) => {
         setTcs(arr);
         setTcState(arr.length ? "ok" : "none");
@@ -2049,7 +2062,10 @@ const TyphoonRangeMap = () => {
       map.removeLayer(tcLayer.current);
       tcLayer.current = null;
     }
-    if (!tcs.length) return;
+    if (!tcs.length) {
+      tcBounds.current = null;
+      return;
+    }
     const g = L.layerGroup().addTo(map);
     tcLayer.current = g;
     const tripYmds = {};
@@ -2099,7 +2115,23 @@ const TyphoonRangeMap = () => {
           );
       });
     });
+
+    // 一打開就同時看得到「行程」和「颱風」
+    const tcPts = [];
+    tcs.forEach((tc) => tc.pts.forEach((p) => tcPts.push([p.lat, p.lon])));
+    tcBounds.current = tcPts.length ? tcPts : null;
+    const both = [...(tripBounds.current || []), ...tcPts];
+    if (both.length) map.fitBounds(both, { padding: [30, 30] });
   }, [tcs]);
+
+  const zoomTo = (which) => {
+    const map = mapRef.current;
+    if (!map) return;
+    const t = tripBounds.current || [];
+    const c = tcBounds.current || [];
+    const b = which === "trip" ? t : which === "tc" ? c : [...t, ...c];
+    if (b.length) map.fitBounds(b, { padding: [30, 30] });
+  };
 
   const riskColor = (km) =>
     km < 100
@@ -2118,7 +2150,7 @@ const TyphoonRangeMap = () => {
       <div className="flex items-center gap-2">
         <h3 className="font-bold text-lg text-gray-800">📍 颱風離我們多近</h3>
         <button
-          onClick={loadTc}
+          onClick={() => loadTc(true)}
           className="ml-auto shrink-0 px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-[11px] font-black"
         >
           {tcState === "loading" ? "抓取中…" : "🔄 重新抓取"}
@@ -2136,6 +2168,22 @@ const TyphoonRangeMap = () => {
       {!ready && (
         <div className="text-[11px] text-gray-400 font-bold">地圖載入中…（需要連網）</div>
       )}
+
+      <div className="flex gap-2">
+        {[
+          { k: "both", t: "🔭 全部" },
+          { k: "tc", t: "🌀 對準颱風" },
+          { k: "trip", t: "🗾 對準行程" },
+        ].map((b) => (
+          <button
+            key={b.k}
+            onClick={() => zoomTo(b.k)}
+            className="flex-1 py-2 rounded-xl border-2 border-gray-200 bg-white text-[11px] font-black text-gray-600"
+          >
+            {b.t}
+          </button>
+        ))}
+      </div>
 
       <div className="flex flex-wrap gap-2">
         {days.map((d) => (
@@ -2330,9 +2378,44 @@ const WeatherTyphoonCard = () => {
     { k: "rain", label: "🌧️ 雨勢" },
     { k: "temp", label: "🌡️ 氣溫" },
   ];
+  // 自動抓颱風實況位置，讓這張圖一打開就同時看得到九州與颱風中心
+  const [eyeNow, setEyeNow] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    getJmaTyphoons()
+      .then((arr) => {
+        if (!alive || !arr.length) return;
+        let best = null;
+        arr.forEach((tc) => {
+          const p = tc.pts.find((x) => x.h === 0) || tc.pts[0];
+          if (!p) return;
+          const km = haversineKm(LAT, LON, p.lat, p.lon);
+          if (!best || km < best.km) best = { km, p, tc };
+        });
+        if (best) setEyeNow(best);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // 沒有颱風就維持九州；有颱風就取兩者中點，縮放依距離自動調整
+  const cLat = eyeNow ? (LAT + eyeNow.p.lat) / 2 : LAT;
+  const cLon = eyeNow ? (LON + eyeNow.p.lon) / 2 : LON;
+  const zoom = !eyeNow
+    ? 6
+    : eyeNow.km < 600
+    ? 6
+    : eyeNow.km < 1200
+    ? 5
+    : eyeNow.km < 2600
+    ? 4
+    : 3;
+
   const embedSrc =
-    `https://embed.windy.com/embed2.html?lat=${LAT}&lon=${LON}` +
-    `&detailLat=${LAT}&detailLon=${LON}&width=650&height=450&zoom=6` +
+    `https://embed.windy.com/embed2.html?lat=${cLat.toFixed(2)}&lon=${cLon.toFixed(2)}` +
+    `&detailLat=${LAT}&detailLon=${LON}&width=650&height=450&zoom=${zoom}` +
     `&level=surface&overlay=${layer}&menu=&message=true&marker=` +
     `&calendar=now&pressure=&type=map&location=coordinates&detail=` +
     `&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
@@ -2409,7 +2492,7 @@ const WeatherTyphoonCard = () => {
           </div>
           <div className="rounded-2xl overflow-hidden border-2 border-gray-200">
             <iframe
-              key={layer}
+              key={layer + "_" + zoom + "_" + cLat.toFixed(2)}
               src={embedSrc}
               title="Windy 即時天氣"
               width="100%"
@@ -2419,6 +2502,10 @@ const WeatherTyphoonCard = () => {
             />
           </div>
           <div className="text-[10px] text-gray-400 font-bold">
+            {eyeNow
+              ? `已自動對準：台風${eyeNow.tc.no}号 ${eyeNow.tc.name}（${eyeNow.p.lat.toFixed(1)}N ${eyeNow.p.lon.toFixed(1)}E，距九州約 ${Math.round(eyeNow.km)} km），畫面同時涵蓋九州與颱風中心。`
+              : "目前沒有發布中的颱風，畫面對準九州。"}
+            <br />
             資料來源 Windy.com。離線時這張圖不會載入，其他頁面照常可用。
           </div>
         </div>
