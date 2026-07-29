@@ -1749,6 +1749,11 @@ const HotelDeskCard = () => {
                   {h.tel}
                 </a>
               </div>
+              {h.note && (
+                <div className="mt-2 p-2 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-800 font-bold leading-relaxed">
+                  📌 {h.note}
+                </div>
+              )}
             </div>
             <div className="flex gap-2 mt-3">
               <button
@@ -1786,6 +1791,115 @@ const HotelDeskCard = () => {
         櫃檯還會要求填「台灣的地址與電話」。建議出發前先把中英文住址與手機號碼
         （國際碼寫成 +886-9xx-xxx-xxx）存進手機備忘錄，臨櫃直接抄。
       </div>
+    </div>
+  );
+};
+
+// --- 即時天氣 / 颱風 ---
+const WeatherTyphoonCard = () => {
+  const [show, setShow] = useState(false);
+  const [layer, setLayer] = useState("wind");
+  // 九州中心點
+  const LAT = 33.0;
+  const LON = 130.4;
+  const LAYERS = [
+    { k: "wind", label: "🌬️ 風速" },
+    { k: "rain", label: "🌧️ 雨勢" },
+    { k: "temp", label: "🌡️ 氣溫" },
+  ];
+  const embedSrc =
+    `https://embed.windy.com/embed2.html?lat=${LAT}&lon=${LON}` +
+    `&detailLat=${LAT}&detailLon=${LON}&width=650&height=450&zoom=6` +
+    `&level=surface&overlay=${layer}&menu=&message=true&marker=` +
+    `&calendar=now&pressure=&type=map&location=coordinates&detail=` +
+    `&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
+
+  const OUT_LINKS = [
+    {
+      t: "🌀 Windy 颱風路徑",
+      u: `https://www.windy.com/-Hurricane-tracker-hurricanes?hurricanes,${LAT},${LON},5`,
+      c: "bg-rose-50 border-rose-200 text-rose-700",
+    },
+    {
+      t: "🇯🇵 氣象廳 台風情報",
+      u: "https://www.jma.go.jp/bosai/map.html#contents=typhoon&lang=zh-tw",
+      c: "bg-indigo-50 border-indigo-200 text-indigo-700",
+    },
+    {
+      t: "☔ 氣象廳 雨雲動態",
+      u: "https://www.jma.go.jp/bosai/nowc/#zoom:8/lat:33.0/lon:130.4/colordepth:normal/elements:hrpns",
+      c: "bg-sky-50 border-sky-200 text-sky-700",
+    },
+  ];
+
+  return (
+    <div className="glass-panel p-5 rounded-3xl bg-white border-gray-100 shadow-lg space-y-3">
+      <div className="flex items-center gap-2">
+        <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
+          🌀 即時天氣／颱風
+        </h3>
+        <span className="text-[11px] font-bold text-gray-400">8 月是九州颱風季</span>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {OUT_LINKS.map((l) => (
+          <a
+            key={l.t}
+            href={l.u}
+            target="_blank"
+            rel="noreferrer"
+            className={`px-3 py-2 rounded-full border-2 text-xs font-black ${l.c}`}
+          >
+            {l.t}
+          </a>
+        ))}
+      </div>
+
+      <div className="text-[11px] text-gray-400 font-bold leading-relaxed">
+        颱風路徑線、暴風圈這些要開 Windy 或氣象廳的完整網站才看得到（嵌入版沒有這個圖層）。
+        下面這張是嵌在頁面裡的即時風雨圖，快速看一眼用。
+      </div>
+
+      <button
+        onClick={() => setShow(!show)}
+        className="w-full py-2.5 rounded-2xl border-2 border-gray-200 bg-white text-gray-700 text-xs font-black"
+      >
+        {show ? "▲ 收起即時風雨圖" : "▼ 展開即時風雨圖（需連網）"}
+      </button>
+
+      {show && (
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            {LAYERS.map((l) => (
+              <button
+                key={l.k}
+                onClick={() => setLayer(l.k)}
+                className={`flex-1 py-2 rounded-xl border-2 text-[11px] font-black ${
+                  layer === l.k
+                    ? "bg-indigo-600 border-indigo-600 text-white"
+                    : "bg-white border-gray-200 text-gray-500"
+                }`}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+          <div className="rounded-2xl overflow-hidden border-2 border-gray-200">
+            <iframe
+              key={layer}
+              src={embedSrc}
+              title="Windy 即時天氣"
+              width="100%"
+              height="320"
+              frameBorder="0"
+              loading="lazy"
+            />
+          </div>
+          <div className="text-[10px] text-gray-400 font-bold">
+            資料來源 Windy.com。離線時這張圖不會載入，其他頁面照常可用。
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -1832,6 +1946,7 @@ const InfoTab = () => {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-6 duration-700 pb-20">
       <TripChecklist />
+      <WeatherTyphoonCard />
       <HotelDeskCard />
 
       <div className="glass-panel p-6 rounded-3xl bg-white border-gray-100 shadow-lg">
