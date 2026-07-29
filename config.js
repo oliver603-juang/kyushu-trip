@@ -147,10 +147,83 @@ window.FLIGHT_INFO = {
 
 // 6. 住宿資訊
 window.HOTEL_INFO = [
-  { day: "8/7", name: "ART 新田川小倉酒店", location: "北九州小倉", desc: "小倉站周邊商務飯店", lat: 33.879354, lon: 130.880973, mapCode: "16 466 090*23" },
-  { day: "8/8", name: "APA酒店 佐賀站南口", location: "佐賀市", desc: "佐賀站旁 APA 商務飯店", lat: 33.2629778, lon: 130.2996529, mapCode: "87 351 127*20" },
-  { day: "8/9", name: "佐世保中央飯店", location: "佐世保市", desc: "佐世保市區住宿", lat: 33.1702927, lon: 129.7231849, mapCode: "89 027 031*61" },
-  { day: "8/10", name: "博多新大谷飯店", location: "福岡博多", desc: "博多站旁高級飯店", lat: 33.5830614, lon: 130.4063095, mapCode: "13 289 511*86" },
+  { day: "8/7", name: "ART 新田川小倉酒店", location: "北九州小倉", desc: "小倉站周邊商務飯店", lat: 33.879354, lon: 130.880973, mapCode: "16 466 090*23",
+    jpName: "アートホテル小倉ニュータガワ", zip: "〒802-0082", jpAddress: "福岡県北九州市小倉北区古船場町3-46", tel: "093-521-7000" },
+  { day: "8/8", name: "APA酒店 佐賀站南口", location: "佐賀市", desc: "佐賀站旁 APA 商務飯店", lat: 33.2629778, lon: 130.2996529, mapCode: "87 351 127*20",
+    jpName: "アパホテル〈佐賀駅南口〉", zip: "〒840-0801", jpAddress: "佐賀県佐賀市駅前中央1-164", tel: "0952-25-1111" },
+  { day: "8/9", name: "佐世保中央飯店", location: "佐世保市", desc: "佐世保市區住宿", lat: 33.1702927, lon: 129.7231849, mapCode: "89 027 031*61",
+    jpName: "アートホテル佐世保セントラル（旧セントラルホテル佐世保）", zip: "〒857-0872", jpAddress: "長崎県佐世保市上京町3番2号", tel: "0956-25-0001" },
+  { day: "8/10", name: "博多新大谷飯店", location: "福岡博多", desc: "博多站旁高級飯店", lat: 33.5830614, lon: 130.4063095, mapCode: "13 289 511*86",
+    jpName: "ホテルニューオータニ博多", zip: "〒810-0004", jpAddress: "福岡県福岡市中央区渡辺通1-1-2", tel: "092-714-1111" },
+];
+
+// 6-1. 出發前／臨櫃核對清單
+window.CHECKLIST = [
+  {
+    id: "docs",
+    title: "證件文件（缺一不可，租車櫃檯會逐項檢查）",
+    icon: "🛂",
+    items: [
+      { id: "passport", text: "台灣護照正本（每人一本，效期 6 個月以上）", critical: true },
+      { id: "license", text: "台灣汽車駕照【正本】（主駕與副駕都要帶，確認未過期）", critical: true },
+      { id: "jptrans", text: "駕照【日文譯本】（監理所申請的 A4 紙）※ 國際駕照在日本不通用", critical: true },
+      { id: "creditcard", text: "主駕本人名下信用卡（租車付款用，不可用他人卡）", critical: true },
+      { id: "rentalvoucher", text: "ORIX 租車預約確認憑證（截圖或列印）", critical: true },
+      { id: "eticket", text: "星宇 JX840／JX841 電子機票、訂位代號" },
+      { id: "hotelvoucher", text: "四晚飯店訂房確認信（截圖存離線）" },
+      { id: "insurance", text: "旅遊平安險／不便險保單號碼與客服電話" },
+      { id: "visitjapan", text: "Visit Japan Web 入境／海關 QR Code（先截圖）" },
+      { id: "copies", text: "護照影本或翻拍（與正本分開放）" },
+    ],
+  },
+  {
+    id: "drive",
+    title: "自駕相關",
+    icon: "🚗",
+    items: [
+      { id: "mapcode", text: "本 App 可離線開啟（各景點 MapCode 都在裡面）" },
+      { id: "etc", text: "確認是否加租 ETC 卡（高速公路過路費）" },
+      { id: "childseat", text: "確認兒童安全座椅數量（日本 6 歲以下強制）", critical: true },
+      { id: "phoneholder", text: "手機支架、車用充電線（Type-C／Lightning）" },
+      { id: "parkingcash", text: "停車場零錢（很多機器只吃 100 円硬幣與千円鈔）" },
+    ],
+  },
+  {
+    id: "money",
+    title: "金錢與通訊",
+    icon: "💴",
+    items: [
+      { id: "jpy", text: "日圓現金（BOOKOFF、停車場、小店多為現金）" },
+      { id: "cards", text: "信用卡 2 張以上（分開放，避免單卡被鎖）" },
+      { id: "esim", text: "eSIM／網路吃到飽（出發前先裝好、確認可切換）" },
+      { id: "powerbank", text: "行動電源（須手提上機，不可託運）", critical: true },
+      { id: "plug", text: "日本插座為 A 型 100V，帶延長線／多孔充電器" },
+    ],
+  },
+  {
+    id: "life",
+    title: "生活與孩子",
+    icon: "🧳",
+    items: [
+      { id: "meds", text: "常備藥（暈車、腸胃、退燒、OK繃）" },
+      { id: "raingear", text: "雨具（8 月九州多雷陣雨與颱風）" },
+      { id: "cooling", text: "防曬、涼感巾、補水電解質（8 月非常熱）" },
+      { id: "snacks", text: "孩子的零食與水壺" },
+      { id: "bags", text: "空的摺疊行李袋／購物袋（裝 BOOKOFF 戰利品）" },
+      { id: "luggagescale", text: "行李秤（回程託運 23kg 限重）" },
+    ],
+  },
+  {
+    id: "return",
+    title: "回程當天（8/11）",
+    icon: "✈️",
+    items: [
+      { id: "fuel", text: "還車前加滿油，保留加油收據", critical: true },
+      { id: "carcheck", text: "車內最後巡一次（後車廂、置物箱、椅背袋）" },
+      { id: "returntime", text: "12:00 前抵達 ORIX 國際線店還車" },
+      { id: "taxfree", text: "免稅單據備妥（海關可能查驗）" },
+    ],
+  },
 ];
 
 // 7. 租車資訊

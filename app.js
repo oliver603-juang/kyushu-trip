@@ -1525,6 +1525,271 @@ const ItineraryTab = ({
   );
 };
 
+// --- 出發前核對清單 ---
+const TripChecklist = () => {
+  const Icons = window.Icons;
+  const groups = window.CHECKLIST || [];
+  const [checked, setChecked] = React.useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("checklist_state") || "{}");
+    } catch (e) {
+      return {};
+    }
+  });
+  const [openGroup, setOpenGroup] = React.useState(groups[0] ? groups[0].id : "");
+
+  React.useEffect(() => {
+    localStorage.setItem("checklist_state", JSON.stringify(checked));
+  }, [checked]);
+
+  const toggle = (key) =>
+    setChecked((prev) => {
+      const next = { ...prev };
+      if (next[key]) delete next[key];
+      else next[key] = true;
+      return next;
+    });
+
+  const allItems = groups.reduce((n, g) => n + g.items.length, 0);
+  const doneItems = groups.reduce(
+    (n, g) => n + g.items.filter((it) => checked[g.id + "." + it.id]).length,
+    0
+  );
+  const pct = allItems ? Math.round((doneItems / allItems) * 100) : 0;
+  const missingCritical = groups
+    .flatMap((g) =>
+      g.items
+        .filter((it) => it.critical && !checked[g.id + "." + it.id])
+        .map((it) => it.text)
+    );
+
+  return (
+    <div className="glass-panel p-6 rounded-3xl bg-white border-gray-100 shadow-lg">
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
+          ✅ 出發前核對清單
+        </h3>
+        <span className="text-sm font-black text-gray-700">
+          {doneItems}/{allItems}
+        </span>
+      </div>
+      <div className="h-2 rounded-full bg-gray-100 overflow-hidden mb-3">
+        <div
+          className="h-full bg-[#A9BFA8] transition-all duration-500"
+          style={{ width: pct + "%" }}
+        />
+      </div>
+
+      {missingCritical.length > 0 && (
+        <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-[13px] text-red-700 leading-relaxed">
+          <div className="font-black mb-1">
+            ⚠️ 還有 {missingCritical.length} 項關鍵物品未確認
+          </div>
+          {missingCritical.slice(0, 3).map((t, i) => (
+            <div key={i}>・{t}</div>
+          ))}
+          {missingCritical.length > 3 && (
+            <div className="text-red-500">…等 {missingCritical.length} 項</div>
+          )}
+        </div>
+      )}
+
+      <div className="space-y-2">
+        {groups.map((g) => {
+          const done = g.items.filter((it) => checked[g.id + "." + it.id]).length;
+          const open = openGroup === g.id;
+          return (
+            <div
+              key={g.id}
+              className="border border-gray-200 rounded-2xl overflow-hidden"
+            >
+              <button
+                onClick={() => setOpenGroup(open ? "" : g.id)}
+                className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+              >
+                <span className="font-bold text-[13px] text-gray-800">
+                  {g.icon} {g.title}
+                </span>
+                <span
+                  className={`text-[11px] font-black px-2 py-0.5 rounded-full ${
+                    done === g.items.length
+                      ? "bg-[#A9BFA8] text-white"
+                      : "bg-gray-200 text-gray-600"
+                  }`}
+                >
+                  {done}/{g.items.length}
+                </span>
+              </button>
+              {open && (
+                <div className="p-2 space-y-1">
+                  {g.items.map((it) => {
+                    const key = g.id + "." + it.id;
+                    const on = !!checked[key];
+                    return (
+                      <label
+                        key={it.id}
+                        className={`flex items-start gap-3 p-2.5 rounded-xl cursor-pointer transition-colors ${
+                          on ? "bg-green-50" : "hover:bg-gray-50"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={on}
+                          onChange={() => toggle(key)}
+                          className="mt-0.5 w-5 h-5 accent-[#A9BFA8] shrink-0"
+                        />
+                        <span
+                          className={`text-[13px] leading-relaxed ${
+                            on
+                              ? "line-through text-gray-400"
+                              : it.critical
+                              ? "text-gray-800 font-bold"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          {it.critical && !on && (
+                            <span className="text-red-500 mr-1">必備</span>
+                          )}
+                          {it.text}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <button
+        onClick={() => {
+          if (confirm("確定要清空所有勾選嗎？")) setChecked({});
+        }}
+        className="mt-4 text-[11px] text-gray-400 underline"
+      >
+        清空全部勾選
+      </button>
+    </div>
+  );
+};
+
+// --- 租車臨櫃填寫用：飯店日文資料 ---
+const HotelDeskCard = () => {
+  const hotels = window.HOTEL_INFO || [];
+  const [copiedKey, setCopiedKey] = React.useState("");
+
+  const copyText = (text, key) => {
+    const done = () => {
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(""), 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, () => fallback(text, done));
+    } else fallback(text, done);
+  };
+  const fallback = (text, done) => {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand("copy");
+      done();
+    } catch (e) {}
+    document.body.removeChild(ta);
+  };
+
+  return (
+    <div className="glass-panel p-6 rounded-3xl bg-white border-2 border-[#E4C2C1] shadow-lg">
+      <h3 className="font-bold text-lg mb-1 text-gray-800">
+        🚗 租車櫃檯填表用｜飯店日文資料
+      </h3>
+      <p className="text-[12px] text-gray-500 leading-relaxed mb-4">
+        ORIX 契約書會要求填「日本國內聯絡處」。<b>只要填第一晚（8/7 小倉）即可</b>，
+        其餘備查。日文名稱與住址可直接照抄給櫃檯。
+      </p>
+      <div className="space-y-3">
+        {hotels.map((h, i) => (
+          <div
+            key={i}
+            className={`p-4 rounded-2xl border ${
+              i === 0
+                ? "bg-[#FDF6F5] border-[#E4C2C1]"
+                : "bg-gray-50 border-gray-200"
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span
+                className={`text-[10px] font-black px-2 py-0.5 rounded text-white ${
+                  i === 0 ? "bg-[#D89B99]" : "bg-gray-400"
+                }`}
+              >
+                {h.day}
+                {i === 0 ? "・租車填這個" : ""}
+              </span>
+              <span className="text-[12px] font-bold text-gray-600">
+                {h.name}
+              </span>
+            </div>
+            <div className="space-y-1.5 text-[13px] text-gray-800 leading-relaxed select-all">
+              <div>
+                <span className="text-gray-400 text-[11px] mr-1">ホテル名</span>
+                <b>{h.jpName}</b>
+              </div>
+              <div>
+                <span className="text-gray-400 text-[11px] mr-1">住所</span>
+                {h.zip} {h.jpAddress}
+              </div>
+              <div>
+                <span className="text-gray-400 text-[11px] mr-1">TEL</span>
+                <a href={`tel:${h.tel}`} className="text-blue-600 underline">
+                  {h.tel}
+                </a>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={() =>
+                  copyText(
+                    h.jpName + "\n" + h.zip + " " + h.jpAddress + "\nTEL " + h.tel,
+                    "h" + i
+                  )
+                }
+                className="flex-1 py-2 rounded-xl bg-gray-800 text-white text-[12px] font-bold hover:bg-gray-700 transition-colors"
+              >
+                {copiedKey === "h" + i ? "✓ 已複製" : "複製全部"}
+              </button>
+              <button
+                onClick={() =>
+                  window.open(
+                    `https://www.google.com/maps/search/?api=1&query=${h.lat},${h.lon}`,
+                    "_blank"
+                  )
+                }
+                className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 text-[12px] font-bold hover:bg-gray-200 transition-colors"
+              >
+                地圖
+              </button>
+            </div>
+            {h.mapCode && (
+              <div className="mt-2 text-[11px] text-gray-500">
+                車機 MapCode：<b className="text-gray-700">{h.mapCode}</b>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-[12px] text-amber-800 leading-relaxed">
+        櫃檯還會要求填「台灣的地址與電話」。建議出發前先把中英文住址與手機號碼
+        （國際碼寫成 +886-9xx-xxx-xxx）存進手機備忘錄，臨櫃直接抄。
+      </div>
+    </div>
+  );
+};
+
 // --- InfoTab ---
 const InfoTab = () => {
   const Icons = window.Icons;
@@ -1566,6 +1831,9 @@ const InfoTab = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-6 duration-700 pb-20">
+      <TripChecklist />
+      <HotelDeskCard />
+
       <div className="glass-panel p-6 rounded-3xl bg-white border-gray-100 shadow-lg">
         <h3 className="font-bold text-lg mb-4 text-gray-800 flex items-center gap-2">
           <Icons.Navigation size={20} className="text-[#A9BFA8]" /> 周邊機能
