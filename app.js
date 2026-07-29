@@ -1050,6 +1050,82 @@ const DayProgress = ({ spots }) => {
 };
 
 // ==========================================
+// 路線縮圖（瑪利歐賽車風格的完成度小地圖）
+// 淡灰 = 五天全部路線；莫蘭迪咖啡 = 已完成（樹枝）；莫蘭迪綠 = 本日（新芽）
+// ==========================================
+const RT_W = 72;
+const RT_H = 40;
+const RT_PAD = 6;
+const RT_GRAY = "#d9dde2";
+const RT_BRANCH = "#a1897a";
+const RT_SPROUT = "#8fae9b";
+
+let _rtCache = null;
+const buildRouteChains = (tripData) => {
+  if (_rtCache && _rtCache.src === tripData) return _rtCache.val;
+  const daysPts = (tripData || []).map((d) =>
+    (d.spots || []).filter((s) => typeof s.lat === "number" && typeof s.lon === "number")
+  );
+  const all = daysPts.flat();
+  let val = null;
+  if (all.length >= 2) {
+    const las = all.map((p) => p.lat);
+    const los = all.map((p) => p.lon);
+    const minLa = Math.min(...las), maxLa = Math.max(...las);
+    const minLo = Math.min(...los), maxLo = Math.max(...los);
+    const dLa = maxLa - minLa || 1e-6;
+    const dLo = maxLo - minLo || 1e-6;
+    const sc = Math.min((RT_W - 2 * RT_PAD) / dLo, (RT_H - 2 * RT_PAD) / dLa);
+    const ox = RT_PAD + ((RT_W - 2 * RT_PAD) - dLo * sc) / 2;
+    const oy = RT_PAD + ((RT_H - 2 * RT_PAD) - dLa * sc) / 2;
+    const P = (p) =>
+      (ox + (p.lon - minLo) * sc).toFixed(1) + "," + (oy + (maxLa - p.lat) * sc).toFixed(1);
+    const chains = daysPts.map((pts, i) => {
+      const prev = i > 0 ? daysPts[i - 1] : null;
+      const seq = [...(prev && prev.length ? [prev[prev.length - 1]] : []), ...pts];
+      return seq.length >= 2 ? seq.map(P).join(" ") : "";
+    });
+    val = { chains, allChain: chains.filter(Boolean).join(" ") };
+  }
+  _rtCache = { src: tripData, val };
+  return val;
+};
+
+// idx = -1 代表「全部」（整條淡灰）
+const RouteThumb = ({ tripData, idx }) => {
+  const data = buildRouteChains(tripData);
+  if (!data) return null;
+  const { chains, allChain } = data;
+  const cur = idx >= 0 ? chains[idx] || "" : "";
+  const done = idx > 0 ? chains.slice(0, idx).filter(Boolean).join(" ") : "";
+  let endPt = null;
+  if (cur) {
+    const parts = cur.split(" ");
+    endPt = parts[parts.length - 1].split(",");
+  }
+  return (
+    <svg
+      viewBox={`0 0 ${RT_W} ${RT_H}`}
+      width={RT_W}
+      height={RT_H}
+      className="block mx-auto mb-0.5"
+      aria-hidden="true"
+    >
+      <polyline points={allChain} fill="none" stroke={RT_GRAY} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      {done ? (
+        <polyline points={done} fill="none" stroke={RT_BRANCH} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      ) : null}
+      {cur ? (
+        <polyline points={cur} fill="none" stroke={RT_SPROUT} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+      ) : null}
+      {endPt ? (
+        <circle cx={endPt[0]} cy={endPt[1]} r="2.8" fill="#ffffff" stroke={RT_SPROUT} strokeWidth="1.8" />
+      ) : null}
+    </svg>
+  );
+};
+
+// ==========================================
 // 3. 分頁組件 (Tabs)
 // ==========================================
 
@@ -1086,24 +1162,26 @@ const ItineraryTab = ({
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2 no-scrollbar sticky top-20 z-30 bg-[#F9F7F5]/90 backdrop-blur-sm py-2 -mx-4 px-4">
         <button
           onClick={() => setSelectedDay("all")}
-          className={`px-4 py-2 rounded-xl font-bold text-sm border transition-all ${
+          className={`px-2 pt-1.5 pb-1 rounded-xl font-bold text-sm border transition-all ${
             selectedDay === "all"
               ? "bg-white text-gray-800 border-gray-200 shadow-sm"
               : "bg-transparent text-gray-400 border-transparent hover:bg-white/50"
           }`}
         >
+          <RouteThumb tripData={tripData} idx={-1} />
           全部
         </button>
-        {tripData.map((day) => (
+        {tripData.map((day, di) => (
           <button
             key={day.dayId}
             onClick={() => setSelectedDay(day.dayId)}
-            className={`px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${
+            className={`px-2 pt-1.5 pb-1 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${
               selectedDay === day.dayId
                 ? `bg-white text-gray-800 border-gray-200 shadow-md transform scale-105`
                 : "text-gray-400 border-transparent hover:bg-white/50"
             }`}
           >
+            <RouteThumb tripData={tripData} idx={di} />
             {day.date.split(" ")[0]}
           </button>
         ))}
