@@ -108,6 +108,45 @@ const isHotel = (name) => {
   return false;
 };
 
+// [Helper] 判斷是否為「本來就不用門票」的地點（商店/停車場/餐廳/交通）
+// 這類地點永遠不該有門票金額，也不送去 AI 估價，避免估出天價
+const FREE_SPOT_PATTERNS = [
+  /BOOK\s*OFF/i, /HARD\s*OFF/i, /HOBBY\s*OFF/i, /OFF\s*HOUSE/i,
+  /ハードオフ/, /ブックオフ/, /ホビーオフ/, /オフハウス/,
+  /駿河屋/, /まんだらけ/, /おもちゃ/, /トイザらス/,
+  /停車場/, /駐車場/, /パーキング/, /Parking/i, /Times/i, /タイムズ/,
+  /機場/, /空港/, /Airport/i, /車站/, /駅$/,
+  /レンタカー/, /租車/, /ORIX/i, /ＯＲＩＸ/, /Toyota Rent/i,
+  /すき家/, /薩莉亞/, /サイゼリヤ/, /Saizeriya/i, /松屋/, /吉野家/,
+  /超市/, /スーパー/, /藥妝/, /ドンキ/, /唐吉軻德/, /便利商店/, /ローソン/, /セブン/,
+  /商店街/, /アーケード/, /Mall/i, /百貨/, /丸井/, /AEON/i, /イオン/,
+];
+const isFreeSpot = (name) => {
+  if (!name) return false;
+  return FREE_SPOT_PATTERNS.some((re) => re.test(name));
+};
+
+// [Helper] 門票估價的合理上限（日圓）。超過就視為 AI 估錯，直接丟棄。
+const TICKET_SANITY_MAX = { spot: 6000, hotel: 60000 };
+// 把 AI 回傳的估價過濾成「可信的那幾筆」
+const sanitizeEstimates = (raw, kind, nameOf) => {
+  const max = TICKET_SANITY_MAX[kind] || TICKET_SANITY_MAX.spot;
+  const out = {};
+  Object.keys(raw || {}).forEach((k) => {
+    const v = raw[k];
+    if (!v || typeof v !== "object") return;
+    const name = nameOf ? nameOf(k) : "";
+    if (isFreeSpot(name)) return; // 商店/停車場/餐廳：一律不給門票
+    const a = Number(v.adult),
+      c = Number(v.child || 0);
+    if (!isFinite(a) || a < 0 || a > max) return; // 明顯離譜就丟掉
+    if (!isFinite(c) || c < 0 || c > max) return;
+    if (a === 0 && c === 0) return;
+    out[k] = { adult: Math.round(a), child: Math.round(c), est: true };
+  });
+  return out;
+};
+
 // --- 消費分類（記帳/明細/Email 共用）---
 const CATEGORY_META = {
   food: { label: "餐飲", icon: "🍜" },
@@ -3048,6 +3087,85 @@ const CompareTab = ({ aiLoading, setAiLoading, openKeyModal, twdJpyRate }) => {
   }
 })();
 
+// ------------------------------------------
+// 清掉 AI 估價估錯的門票（商店被估成飯店價、館所被估成天價）
+// 每支手機第一次載入新版時會自動跑一次，並先備份
+// ------------------------------------------
+(function cleanBogusTickets() {
+  var FLAG = "ticket_sanity_v1";
+  try {
+    if (localStorage.getItem(FLAG)) return;
+    var raw = localStorage.getItem("ticket_overrides");
+    if (!raw) {
+      localStorage.setItem(FLAG, "1");
+      return;
+    }
+    var obj;
+    try {
+      obj = JSON.parse(raw);
+    } catch (e) {
+      localStorage.setItem(FLAG, "1");
+      return;
+    }
+    if (!obj || typeof obj !== "object") {
+      localStorage.setItem(FLAG, "1");
+      return;
+    }
+
+    var bySid = {};
+    (window.RAW_KML_DATA || []).forEach(function (d) {
+      (d.spots || []).forEach(function (sp) {
+        if (sp && sp.sid) bySid[sp.sid] = sp;
+      });
+    });
+
+    var out = {},
+      removed = [],
+      fixed = [];
+    Object.keys(obj).forEach(function (k) {
+      var v = obj[k] || {};
+      var sp = bySid[k];
+      var a = Number(v.adult) || 0;
+      if (v.currency && !v.est) {
+        out[k] = v; // 手動輸入的價格一律保留
+        return;
+      }
+      if (sp && isFreeSpot(sp.name)) {
+        removed.push(sp.name + " ¥" + a); // 商店/停車場/餐廳不該有門票
+        return;
+      }
+      var base = sp && sp.ticket ? Number(sp.ticket.adult) || 0 : 0;
+      if (base > 0 && a > base * 1.5) {
+        // config 是查證過的公告票價，AI 估得離譜就拉回公告價
+        fixed.push(sp.name + " ¥" + a + "→¥" + base);
+        out[k] = {
+          adult: base,
+          child: Number(sp.ticket.child) || 0,
+          currency: "JPY",
+        };
+        return;
+      }
+      var isHtl = sp ? isHotel(sp.name) : false;
+      if (a > (isHtl ? 60000 : 6000)) {
+        removed.push((sp ? sp.name : k) + " ¥" + a);
+        return;
+      }
+      out[k] = v;
+    });
+
+    if (removed.length || fixed.length) {
+      try {
+        localStorage.setItem("ticket_overrides_bogus_backup", raw);
+      } catch (e) {}
+      localStorage.setItem("ticket_overrides", JSON.stringify(out));
+      console.log("[ticket-sanity] 移除:", removed, " 修正:", fixed);
+    }
+    localStorage.setItem(FLAG, "1");
+  } catch (e) {
+    console.warn("[ticket-sanity] 清理失敗，維持原資料", e);
+  }
+})();
+
 // ==========================================
 // 4. 主應用程式 (App) - 整合所有邏輯
 // ==========================================
@@ -4087,6 +4205,8 @@ function App() {
     tripData.forEach((day) => {
       day.spots.forEach((spot) => {
         if (spot.ticket && spot.ticket.locked) return; // 確定價（免費/已查證）不估
+        if (isFreeSpot(spot.name)) return; // 商店/停車場/餐廳：本來就沒門票，不送估價
+        if (spot.ticket && Number(spot.ticket.adult) > 0) return; // config 已有查證票價，不覆寫
         if (isHotel(spot.name)) {
           hotelList.push({ id: spot.id, name: spot.name });
         } else {
@@ -4116,7 +4236,16 @@ ${JSON.stringify(spotList)}
         const jsonMatch = result.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const estimates = JSON.parse(jsonMatch[0]);
-          setTicketOverrides((prev) => ({ ...prev, ...estimates }));
+          const nameMap = {};
+          spotList.forEach((s) => {
+            nameMap[s.id] = s.name;
+          });
+          const safe = sanitizeEstimates(
+            estimates,
+            "spot",
+            (k) => nameMap[k] || ""
+          );
+          setTicketOverrides((prev) => ({ ...prev, ...safe }));
         }
       }
 
@@ -4151,7 +4280,16 @@ ${JSON.stringify(hotelWithDates)}
         const hotelMatch = hotelResult.match(/\{[\s\S]*\}/);
         if (hotelMatch) {
           const hotelEstimates = JSON.parse(hotelMatch[0]);
-          setTicketOverrides((prev) => ({ ...prev, ...hotelEstimates }));
+          const hotelNameMap = {};
+          hotelWithDates.forEach((s) => {
+            hotelNameMap[s.id] = s.name;
+          });
+          const safeHotels = sanitizeEstimates(
+            hotelEstimates,
+            "hotel",
+            (k) => hotelNameMap[k] || ""
+          );
+          setTicketOverrides((prev) => ({ ...prev, ...safeHotels }));
         }
       }
 
