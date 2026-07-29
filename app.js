@@ -1809,10 +1809,64 @@ const haversineKm = (a, b, c, d) => {
   return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
 };
 
+// 氣象廳 台風情報 JSON（官方 bosai API，允許跨網域讀取）
+const JMA_TC_BASE = "https://www.jma.go.jp/bosai/typhoon/data/";
+const TRIP_YEAR = 2026;
+
+// "8/7 (五)" -> "2026-08-07"
+const ymdOfTripDate = (s) => {
+  const m = String(s || "").match(/(\d{1,2})\s*\/\s*(\d{1,2})/);
+  if (!m) return null;
+  return `${TRIP_YEAR}-${String(m[1]).padStart(2, "0")}-${String(m[2]).padStart(2, "0")}`;
+};
+
+const fetchJmaTyphoons = async () => {
+  const listRes = await fetch(JMA_TC_BASE + "targetTc.json", { cache: "no-store" });
+  if (!listRes.ok) throw new Error("targetTc " + listRes.status);
+  const list = await listRes.json();
+  const out = [];
+  for (const t of (list || []).slice(0, 4)) {
+    try {
+      const r = await fetch(JMA_TC_BASE + t.tropicalCyclone + "/forecast.json", {
+        cache: "no-store",
+      });
+      if (!r.ok) continue;
+      const j = await r.json();
+      const title = j.find((p) => p.part === "title") || {};
+      const pts = j
+        .filter((p) => Array.isArray(p.center) && p.validtime && p.validtime.JST)
+        .map((p) => ({
+          jst: p.validtime.JST,
+          ymd: p.validtime.JST.slice(0, 10),
+          hh: p.validtime.JST.slice(11, 13),
+          lat: p.center[0],
+          lon: p.center[1],
+          h: p.advancedHours || 0,
+          prKm: p.probabilityCircle ? Math.round(p.probabilityCircle.radius / 1000) : null,
+        }));
+      if (!pts.length) continue;
+      const no = String(title.typhoonNumber || t.typhoonNumber || "").slice(-2);
+      out.push({
+        id: t.tropicalCyclone,
+        no: no.replace(/^0/, ""),
+        name: (title.name && (title.name.jp || title.name.en)) || "",
+        issue: (title.issue && title.issue.JST) || t.issue || "",
+        pts,
+      });
+    } catch (e) {}
+  }
+  return out;
+};
+
 const TyphoonRangeMap = () => {
   const mapEl = useRef(null);
   const mapRef = useRef(null);
   const eyeLayer = useRef(null);
+  const tcLayer = useRef(null);
+  const [tcs, setTcs] = useState([]);
+  const [tcState, setTcState] = useState("loading"); // loading | ok | none | error
+  const [tcErr, setTcErr] = useState("");
+  const [manual, setManual] = useState(false);
   const [eye, setEye] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("typhoon_eye") || "null");
@@ -1873,6 +1927,25 @@ const TyphoonRangeMap = () => {
     setReady(true);
     setTimeout(() => map.invalidateSize(), 200);
   }, []);
+
+  // 自動向氣象廳抓颱風預報
+  const loadTc = React.useCallback(() => {
+    setTcState("loading");
+    setTcErr("");
+    fetchJmaTyphoons()
+      .then((arr) => {
+        setTcs(arr);
+        setTcState(arr.length ? "ok" : "none");
+      })
+      .catch((e) => {
+        setTcErr(String((e && e.message) || e));
+        setTcState("error");
+      });
+  }, []);
+
+  useEffect(() => {
+    loadTc();
+  }, [loadTc]);
 
   const setEyeSafe = (la, lo) => {
     const v = { lat: Number(la), lon: Number(lo) };
@@ -1938,6 +2011,96 @@ const TyphoonRangeMap = () => {
         .filter((d) => isFinite(d.km))
     : [];
 
+  // 每一天：從氣象廳預報裡找出當天的颱風預估中心，再算距離
+  const autoRows = days.map((d) => {
+    const ymd = ymdOfTripDate(d.date);
+    let best = null;
+    tcs.forEach((tc) => {
+      tc.pts
+        .filter((p) => p.ymd === ymd)
+        .forEach((p) => {
+          let min = Infinity;
+          let near = "";
+          d.pts.forEach((s) => {
+            const km = haversineKm(p.lat, p.lon, s.lat, s.lon);
+            if (km < min) {
+              min = km;
+              near = s.name;
+            }
+          });
+          if (isFinite(min) && (!best || min < best.km)) best = { km: min, near, p, tc };
+        });
+    });
+    return { ...d, ymd, best };
+  });
+
+  const horizon = tcs.reduce((mx, tc) => {
+    const m = tc.pts.reduce((a, p) => (p.ymd > a ? p.ymd : a), "");
+    return m > mx ? m : mx;
+  }, "");
+  const horizonTxt = horizon ? `${Number(horizon.slice(5, 7))}/${Number(horizon.slice(8, 10))}` : "";
+
+  // 颱風預報路徑圖層
+  useEffect(() => {
+    const L = window.L;
+    const map = mapRef.current;
+    if (!L || !map) return;
+    if (tcLayer.current) {
+      map.removeLayer(tcLayer.current);
+      tcLayer.current = null;
+    }
+    if (!tcs.length) return;
+    const g = L.layerGroup().addTo(map);
+    tcLayer.current = g;
+    const tripYmds = {};
+    days.forEach((d) => {
+      tripYmds[ymdOfTripDate(d.date)] = true;
+    });
+    const RING = [
+      { r: 300000, c: "#f59e0b" },
+      { r: 200000, c: "#f97316" },
+      { r: 100000, c: "#dc2626" },
+    ];
+    tcs.forEach((tc) => {
+      const line = tc.pts.map((p) => [p.lat, p.lon]);
+      if (line.length > 1)
+        L.polyline(line, {
+          color: "#dc2626",
+          weight: 3,
+          opacity: 0.7,
+          dashArray: "5 7",
+        }).addTo(g);
+      tc.pts.forEach((p) => {
+        L.circleMarker([p.lat, p.lon], {
+          radius: p.h === 0 ? 8 : 6,
+          color: "#fff",
+          weight: 2,
+          fillColor: p.h === 0 ? "#dc2626" : "#fb923c",
+          fillOpacity: 1,
+        })
+          .addTo(g)
+          .bindPopup(
+            `<b>台風${tc.no}号 ${tc.name}</b><br>` +
+              `${p.jst.slice(5, 16).replace("T", " ")}（${p.h === 0 ? "實況" : p.h + "小時後"}）<br>` +
+              `${p.lat.toFixed(1)}N ${p.lon.toFixed(1)}E` +
+              (p.prKm ? `<br>預報圓半徑 ${p.prKm} km` : "")
+          );
+        if (tripYmds[p.ymd])
+          RING.forEach((ring) =>
+            L.circle([p.lat, p.lon], {
+              radius: ring.r,
+              color: ring.c,
+              weight: 2,
+              dashArray: "6 6",
+              fill: true,
+              fillColor: ring.c,
+              fillOpacity: 0.05,
+            }).addTo(g)
+          );
+      });
+    });
+  }, [tcs]);
+
   const riskColor = (km) =>
     km < 100
       ? "bg-red-50 border-red-300 text-red-800"
@@ -1952,10 +2115,17 @@ const TyphoonRangeMap = () => {
 
   return (
     <div className="glass-panel p-5 rounded-3xl bg-white border-gray-100 shadow-lg space-y-3">
-      <h3 className="font-bold text-lg text-gray-800">📍 颱風離我們多近</h3>
+      <div className="flex items-center gap-2">
+        <h3 className="font-bold text-lg text-gray-800">📍 颱風離我們多近</h3>
+        <button
+          onClick={loadTc}
+          className="ml-auto shrink-0 px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-[11px] font-black"
+        >
+          {tcState === "loading" ? "抓取中…" : "🔄 重新抓取"}
+        </button>
+      </div>
       <div className="text-[11px] text-gray-400 font-bold leading-relaxed">
-        地圖上五條線就是 8/7–8/11 每天的車程與活動範圍。到氣象廳或 Windy 查到颱風中心的經緯度後填進來
-        （或直接點地圖），就會畫出 100／200／300 公里圈，並算出每天離颱風最近多少公里。
+        自動向日本氣象廳抓取現在所有颱風的官方預報位置，逐日比對 8/7–8/11 的行程範圍，算出每天離颱風中心最近多少公里。
       </div>
 
       <div
@@ -1979,6 +2149,95 @@ const TyphoonRangeMap = () => {
         ))}
       </div>
 
+      {/* --- 氣象廳自動預報 --- */}
+      {tcState === "loading" && (
+        <div className="p-3 rounded-xl bg-gray-50 border-2 border-gray-200 text-xs font-black text-gray-500">
+          正在向氣象廳抓取颱風預報…
+        </div>
+      )}
+      {tcState === "error" && (
+        <div className="p-3 rounded-xl bg-rose-50 border-2 border-rose-200 text-xs font-black text-rose-700 leading-relaxed">
+          抓不到氣象廳資料（{tcErr}）。可能是離線或網路擋住，請按「重新抓取」，或改用下面的手動輸入。
+        </div>
+      )}
+      {tcState === "none" && (
+        <div className="p-3 rounded-xl bg-emerald-50 border-2 border-emerald-200 text-xs font-black text-emerald-800">
+          ✅ 氣象廳目前沒有發布中的颱風，這趟行程暫時沒有颱風要盯。
+        </div>
+      )}
+
+      {tcState === "ok" && (
+        <div className="space-y-2">
+          <div className="text-[11px] font-black text-gray-600 leading-relaxed">
+            {tcs.map((tc) => (
+              <div key={tc.id}>
+                🌀 台風{tc.no}号 {tc.name}　·　發表 {tc.issue.slice(5, 16).replace("T", " ")}
+              </div>
+            ))}
+            <div className="text-gray-400 mt-0.5">
+              氣象廳路徑預報只做到 {horizonTxt}（發表後 5 天）。更後面的日子要等接近時才會有預報。
+            </div>
+          </div>
+
+          {autoRows.map((d) =>
+            d.best ? (
+              <div
+                key={d.date}
+                className={`p-2.5 rounded-xl border-2 text-[12px] font-black ${riskColor(d.best.km)}`}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: d.color }}
+                  />
+                  <span>
+                    {d.date} {d.title}
+                  </span>
+                  <span className="ml-auto">{Math.round(d.best.km)} km</span>
+                </div>
+                <div className="text-[10px] font-bold opacity-80 mt-0.5 leading-relaxed">
+                  台風{d.best.tc.no}号 預估中心 {d.best.p.lat.toFixed(1)}N {d.best.p.lon.toFixed(1)}E
+                  （{d.best.p.jst.slice(11, 16)}）
+                  {d.best.p.prKm ? `　·　預報圓 ±${d.best.p.prKm} km` : ""}
+                  <br />
+                  最近點：{d.best.near}　·　{riskWord(d.best.km)}
+                </div>
+              </div>
+            ) : (
+              <div
+                key={d.date}
+                className="p-2.5 rounded-xl border-2 border-gray-200 bg-gray-50 text-[12px] font-black text-gray-500"
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: d.color }}
+                  />
+                  <span>
+                    {d.date} {d.title}
+                  </span>
+                  <span className="ml-auto text-[10px]">尚無預報</span>
+                </div>
+                <div className="text-[10px] font-bold opacity-80 mt-0.5">
+                  氣象廳預報只到 {horizonTxt || "目前"}，這天還沒進入預報範圍
+                </div>
+              </div>
+            )
+          )}
+          <div className="text-[10px] text-gray-400 font-bold leading-relaxed">
+            這是「直線距離」，不是暴風圈半徑。預報圓 ± 是氣象廳給的誤差範圍，實際影響請以暴風域／強風域為準。
+          </div>
+        </div>
+      )}
+
+      <button
+        onClick={() => setManual((v) => !v)}
+        className="w-full py-2 rounded-xl border-2 border-gray-200 bg-white text-[11px] font-black text-gray-500"
+      >
+        {manual ? "收起手動輸入" : "✏️ 手動輸入颱風中心（自己指定位置試算）"}
+      </button>
+
+      {manual && (
       <div className="flex gap-2">
         <input
           value={latIn}
@@ -2010,8 +2269,9 @@ const TyphoonRangeMap = () => {
           標上去
         </button>
       </div>
+      )}
 
-      {eye && (
+      {manual && eye && (
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="text-xs font-black text-gray-600">
