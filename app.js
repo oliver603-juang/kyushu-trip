@@ -1287,6 +1287,116 @@ const SpotRouteThumb = ({ dayIdx, spotIdx }) => {
 // 3. 分頁組件 (Tabs)
 // ==========================================
 
+// ------------------------------------------
+// 景點／住宿 AI 掃雷（原本在「防雷」頁的住宿防雷＋每日景點防雷，合併成景點名稱右邊的一顆按鈕）
+// ------------------------------------------
+const _spotScanCache = (() => {
+  try {
+    return JSON.parse(localStorage.getItem("spot_scan_cache") || "{}");
+  } catch (e) {
+    return {};
+  }
+})();
+
+const SpotScanRow = ({ spot, isAccommodation, openKeyModal }) => {
+  const Icons = window.Icons;
+  const [result, setResult] = useState(_spotScanCache[spot.id] || "");
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const run = async () => {
+    if (loading) return;
+    setLoading(true);
+    setOpen(true);
+    try {
+      const hotels = window.HOTEL_INFO || [];
+      const h = isAccommodation
+        ? hotels.find(
+            (x) =>
+              x.name === spot.name ||
+              spot.name.indexOf(x.name) >= 0 ||
+              x.name.indexOf(spot.name) >= 0
+          )
+        : null;
+      const prompt = isAccommodation
+        ? `請查詢「${spot.name}」${h && h.location ? "(" + h.location + ")" : ""} 的【最新資訊】：
+1. Google Maps 最新評分與近期評價摘要（1個月內）
+2. 周邊治安與機能（便利商店、餐廳、停車場）
+3. 住客常見正面/負面回饋
+4. 入住/退房注意事項
+請用繁體中文回答，標注資訊來源。`
+        : `請查詢景點「${spot.name}」的【最新即時資訊】：
+1. 目前營業狀態（是否正常營業、臨時公告、休館日）
+2. 最新門票價格（成人/兒童/優惠）
+3. 建議停留時間與最佳到訪時段
+4. 雨天備案（若為戶外景點）
+5. 周邊 3 個高評價平價美食推薦（含 Google 評分）
+請用繁體中文回答，標注查詢日期。`;
+      const res = await generateGeminiContent(prompt, null, true);
+      setResult(res);
+      _spotScanCache[spot.id] = res;
+      try {
+        localStorage.setItem("spot_scan_cache", JSON.stringify(_spotScanCache));
+      } catch (e) {}
+    } catch (e) {
+      setResult("分析失敗");
+      if (e.message.indexOf("NO_API_KEY") >= 0 || e.message === "BAD_API_KEY") {
+        if (openKeyModal) openKeyModal(true);
+      } else if (e.message.indexOf("QUOTA_EXHAUSTED") === 0) {
+        alert("⏳ Gemini 配額用完，請稍後再試或明天 16:00 重置");
+      }
+    }
+    setLoading(false);
+  };
+
+  const accent = isAccommodation ? "#E4C2C1" : "#E8D595";
+
+  return (
+    <div className="mb-2">
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-2xl font-black text-gray-900">{spot.name}</h3>
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={run}
+            disabled={loading}
+            title={isAccommodation ? "AI 住宿防雷" : "AI 景點防雷"}
+            className="flex items-center gap-1 bg-white border border-gray-200 px-2.5 py-1.5 rounded-lg font-bold text-[11px] shadow-sm transition-all hover:text-white"
+            style={{ color: accent, borderColor: accent + "88" }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = accent)}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
+          >
+            {loading ? (
+              <Icons.Loader2 size={12} className="animate-spin" />
+            ) : (
+              <Icons.Shield size={12} />
+            )}
+            AI 掃雷
+          </button>
+          {result && !loading ? (
+            <button
+              onClick={() => setOpen((v) => !v)}
+              className="text-[11px] font-bold text-gray-400 px-1.5 py-1.5"
+            >
+              {open ? "收合" : "展開"}
+            </button>
+          ) : null}
+        </div>
+      </div>
+      {open && (loading || result) ? (
+        <div className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-600 leading-relaxed">
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <Icons.Loader2 size={12} className="animate-spin" /> 分析中...
+            </span>
+          ) : (
+            <MarkdownRenderer content={result} />
+          )}
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
 const ItineraryTab = ({
   tripData,
   selectedDay,
@@ -1308,6 +1418,7 @@ const ItineraryTab = ({
   ticketOverrides,
   handleManualTicketEdit,
   isTicketEstimating,
+  openKeyModal,
 }) => {
   const Icons = window.Icons;
   const filteredTripData =
@@ -1465,10 +1576,12 @@ const ItineraryTab = ({
                       </div>
 
                       <div>
-                        {/* 景點名稱 - 加大加粗 */}
-                        <h3 className="text-2xl font-black text-gray-900 mb-2">
-                          {spot.name}
-                        </h3>
+                        {/* 景點名稱 - 加大加粗 + AI 掃雷 */}
+                        <SpotScanRow
+                          spot={spot}
+                          isAccommodation={isAccommodation}
+                          openKeyModal={openKeyModal}
+                        />
                         <div className="flex items-center gap-4 text-sm font-bold text-gray-600 mb-4">
                           <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg border border-gray-200">
                             <Icons.Clock size={12} />
@@ -3454,77 +3567,11 @@ const GuardTab = ({
           </div>
         )}
       </div>
-      <div className="glass-panel p-6 rounded-3xl bg-white border-gray-100 shadow-lg">
-        <h3 className="font-bold text-[#E4C2C1] mb-4 flex items-center gap-2">
-          <Icons.Hotel size={20} /> 住宿防雷
-        </h3>
-        <div className="space-y-4">
-          {hotelInfo.map((h, i) => (
-            <div
-              key={i}
-              className="mb-4 last:mb-0 bg-gray-50 border border-gray-200 p-4 rounded-xl"
-            >
-              <div className="flex justify-between items-start mb-2">
-                <h4 className="font-bold text-gray-800 text-sm">{h.name}</h4>
-                <button
-                  onClick={() => checkHotel(h)}
-                  disabled={aiLoading}
-                  className="bg-white border border-gray-200 p-2 rounded-full text-gray-400 hover:text-[#E4C2C1] shadow-sm"
-                >
-                  <Icons.Search size={14} />
-                </button>
-              </div>
-              {hotelAnalysis[h.name] && (
-                <div className="mt-2 p-3 bg-white border border-gray-200 rounded-lg text-xs text-gray-500 leading-relaxed">
-                  {hotelAnalysis[h.name] === "分析中..." ? (
-                    <Icons.Loader2 size={12} className="animate-spin" />
-                  ) : (
-                    <MarkdownRenderer content={hotelAnalysis[h.name]} />
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+      <div className="glass-panel p-5 rounded-3xl bg-white border-gray-100 shadow-lg text-sm text-gray-500 leading-relaxed">
+        <div className="font-bold text-gray-700 mb-1 flex items-center gap-2">
+          <Icons.MapPin size={18} className="text-[#E8D595]" /> 住宿防雷 · 每日景點防雷
         </div>
-      </div>
-      <div className="space-y-4">
-        <h3 className="font-bold text-gray-800 flex items-center gap-2 px-1">
-          <Icons.MapPin size={20} className="text-[#E8D595]" /> 每日景點防雷
-        </h3>
-        {allSpots.map((spot) => (
-          <div
-            key={spot.id}
-            className="glass-panel p-5 rounded-3xl bg-white border-gray-100 shadow-lg flex flex-col gap-3"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-[#E8D595] text-white flex flex-col items-center justify-center shadow-md">
-                <span className="text-xs font-bold">
-                  {spot.dayDate.split("/")[0]}
-                </span>
-                <span className="text-sm font-black">
-                  {spot.dayDate.split("/")[1]}
-                </span>
-              </div>
-              <div className="flex-1 font-bold text-gray-800">{spot.name}</div>
-            </div>
-            {spotAnalysis[spot.id] && (
-              <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-600">
-                {spotAnalysis[spot.id] === "分析中..." ? (
-                  <Icons.Loader2 className="animate-spin" size={14} />
-                ) : (
-                  <MarkdownRenderer content={spotAnalysis[spot.id]} />
-                )}
-              </div>
-            )}
-            <button
-              onClick={() => checkSpot(spot)}
-              disabled={aiLoading}
-              className="w-full bg-white border border-gray-200 text-[#E8D595] hover:text-white hover:bg-[#E8D595] py-2 rounded-lg font-bold text-xs transition-all shadow-sm"
-            >
-              AI 掃雷 (Plan B)
-            </button>
-          </div>
-        ))}
+        已移到「行程」頁：每個景點／飯店名稱右邊的「AI 掃雷」按鈕，點一下就會查該地點的最新狀況。
       </div>
       <div className="glass-panel p-6 rounded-3xl bg-white border-gray-100 shadow-lg">
         <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -5873,6 +5920,7 @@ ${JSON.stringify(hotelWithDates)}
             getMatchingItems={getMatchingItems}
             scanSpotNearby={scanSpotNearby}
             openChainFinder={openChainFinder}
+            openKeyModal={setIsKeyModalOpen}
           />
         )}
         {activeTab === "info" && <InfoTab />}
