@@ -2932,6 +2932,15 @@ const PriceCompare = ({ mode, aiLoading, setAiLoading, openKeyModal, twdJpyRate 
   const [copied, setCopied] = useState(false);
   const [secs, setSecs] = useState(0);
   const fileRef = useRef(null);
+  const galleryRef = useRef(null);
+  const [saved, setSaved] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("compare_saved") || "[]");
+    } catch (e) {
+      return [];
+    }
+  });
+  const [justSaved, setJustSaved] = useState(false);
 
   const rate = twdJpyRate && twdJpyRate > 0 ? twdJpyRate : 4.6;
   const yenNum = parseInt(String(yen).replace(/[^\d]/g, ""), 10);
@@ -2940,9 +2949,11 @@ const PriceCompare = ({ mode, aiLoading, setAiLoading, openKeyModal, twdJpyRate 
     : Math.round(yenNum * (taxFree ? (bookoffFee ? 0.9 + 0.03 : 0.9) : 1));
   const twd = effYen == null ? null : Math.round(effYen / rate);
 
-  const pickImg = (kind) => {
+  // src: "camera" 直接開相機（手機）／"gallery" 開圖庫或檔案（手機、筆電都可）
+  const pickImg = (kind, src) => {
     setImgKind(kind);
-    if (fileRef.current) fileRef.current.click();
+    const ref = src === "gallery" ? galleryRef : fileRef;
+    if (ref.current) ref.current.click();
   };
 
   // 手機原圖動輒 3~5MB，base64 後更大，上傳就吃掉大半時間。
@@ -3109,6 +3120,77 @@ ${taxFree && hasYen ? `此店可免税，實付約 ¥${effYen.toLocaleString()}$
     }
   };
 
+  // 從 AI 回答裡抓第 N 點的答案（例：2 台灣售價、6 結論、7 門檻）
+  const pickPoint = (n) => {
+    if (!ans) return "";
+    const lines = ans.split("\n").map(stripMd).filter(Boolean);
+    const i = lines.findIndex((l) => new RegExp("^" + n + "[.、)]").test(l));
+    if (i < 0) return "";
+    let t = lines[i].replace(new RegExp("^" + n + "[.、)]\\s*"), "");
+    const c = t.indexOf("：") >= 0 ? t.indexOf("：") : t.indexOf(":");
+    if (c >= 0) t = t.slice(c + 1);
+    t = t.trim();
+    // 標題與答案被拆成兩行時，往下抓一行
+    if (!t && lines[i + 1] && !/^[1-8][.、)]/.test(lines[i + 1]))
+      t = stripMd(lines[i + 1]);
+    return t.trim();
+  };
+
+  const persistSaved = (list) => {
+    setSaved(list);
+    try {
+      localStorage.setItem("compare_saved", JSON.stringify(list));
+    } catch (e) {
+      alert("儲存空間已滿，請先刪掉幾筆舊紀錄。");
+    }
+  };
+
+  const saveItem = () => {
+    if (!bestName) return;
+    const d = new Date();
+    const item = {
+      id: String(d.getTime()),
+      name: bestName,
+      mode,
+      yen: isNaN(yenNum) ? null : yenNum,
+      effYen: effYen,
+      twd: twd,
+      tw: pickPoint(2),
+      verdict: pickPoint(6),
+      threshold: pickPoint(7),
+      bought: false,
+      date: `${d.getMonth() + 1}/${d.getDate()}`,
+    };
+    persistSaved([item, ...saved.filter((s) => s.name !== item.name)]);
+    setJustSaved(true);
+    setTimeout(() => setJustSaved(false), 1800);
+  };
+
+  const toggleBought = (id) =>
+    persistSaved(
+      saved.map((s) => (s.id === id ? { ...s, bought: !s.bought } : s))
+    );
+  const removeItem = (id) => persistSaved(saved.filter((s) => s.id !== id));
+
+  const copyAllSaved = () => {
+    const txt = saved
+      .map(
+        (s, i) =>
+          `${i + 1}. ${s.name}${s.bought ? "（已買）" : ""}\n   日本 ${
+            s.yen ? "¥" + s.yen.toLocaleString() : "—"
+          }${s.twd ? " ≈ NT$" + s.twd.toLocaleString() : ""}\n   台灣 ${
+            s.tw || "—"
+          }\n   ${s.verdict || ""}`
+      )
+      .join("\n\n");
+    const done = () => alert("清單已複製，可以貼到 LINE 或備忘錄。");
+    if (navigator.clipboard && navigator.clipboard.writeText)
+      navigator.clipboard.writeText(txt).then(done, () => alert(txt));
+    else alert(txt);
+  };
+
+  const modeIcon = { shin: "🖊️", used: "📻", sew: "🧵" };
+
   const q = encodeURIComponent(bestName);
   const links = [
     { t: "momo", u: `https://www.momoshop.com.tw/search/searchShop.jsp?keyword=${q}`, c: "bg-pink-50 border-pink-200 text-pink-700" },
@@ -3135,18 +3217,31 @@ ${taxFree && hasYen ? `此店可免税，實付約 ¥${effYen.toLocaleString()}$
         />
         <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={() => pickImg("item")}
+            onClick={() => pickImg("item", "camera")}
             className="min-w-0 px-3 py-3 rounded-2xl border-2 border-indigo-200 bg-indigo-50 text-indigo-700 font-black text-sm"
           >
             📷 拍實物
           </button>
           <button
-            onClick={() => pickImg("tag")}
+            onClick={() => pickImg("tag", "camera")}
             className="min-w-0 px-3 py-3 rounded-2xl border-2 border-indigo-200 bg-indigo-50 text-indigo-700 font-black text-sm"
           >
             🏷️ 拍價格標
           </button>
+          <button
+            onClick={() => pickImg("item", "gallery")}
+            className="min-w-0 px-3 py-2.5 rounded-2xl border-2 border-gray-200 bg-white text-gray-600 font-black text-[13px]"
+          >
+            🖼️ 選實物圖
+          </button>
+          <button
+            onClick={() => pickImg("tag", "gallery")}
+            className="min-w-0 px-3 py-2.5 rounded-2xl border-2 border-gray-200 bg-white text-gray-600 font-black text-[13px]"
+          >
+            🖼️ 選價格標圖
+          </button>
           <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={readImg} className="hidden" />
+          <input ref={galleryRef} type="file" accept="image/*" onChange={readImg} className="hidden" />
         </div>
 
         {img && (
@@ -3160,7 +3255,7 @@ ${taxFree && hasYen ? `此店可免税，實付約 ¥${effYen.toLocaleString()}$
         )}
 
         <div className="text-[11px] text-gray-400 font-bold leading-relaxed">
-          品名／價格可以只填一個，或完全不填直接拍照讓 AI 認。三種都能用：拍實物、拍價格標、手動輸入。
+          品名／價格可以只填一個，或完全不填直接拍照讓 AI 認。上排開相機（手機現場用），下排從圖庫／檔案選圖（筆電也能用）。
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -3217,6 +3312,18 @@ ${taxFree && hasYen ? `此店可免税，實付約 ¥${effYen.toLocaleString()}$
               .replace(/\[([^\]]+)\]\((https?:\/\/[^)]*vertexaisearch[^)]*)\)/g, "$1")
               .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, "$1 → $2")}
           </div>
+          {bestName && (
+            <button
+              onClick={saveItem}
+              className={`w-full py-3 rounded-2xl border-2 font-black text-sm ${
+                justSaved
+                  ? "bg-emerald-500 border-emerald-500 text-white"
+                  : "bg-white border-indigo-300 text-indigo-700"
+              }`}
+            >
+              {justSaved ? "✓ 已存入待買清單" : "💾 存進待買清單（回台灣繼續買）"}
+            </button>
+          )}
         </div>
       )}
 
@@ -3230,6 +3337,109 @@ ${taxFree && hasYen ? `此店可免税，實付約 ¥${effYen.toLocaleString()}$
                 {l.t}
               </a>
             ))}
+          </div>
+        </div>
+      )}
+
+      {saved.length > 0 && (
+        <div className="glass-panel p-5 rounded-3xl bg-white border-gray-100 shadow-lg space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="text-sm font-black text-gray-800">
+              🛒 待買清單
+              <span className="ml-2 text-[11px] font-bold text-gray-400">
+                {saved.filter((s) => !s.bought).length} 待買 / {saved.length} 筆
+              </span>
+            </div>
+            <button
+              onClick={copyAllSaved}
+              className="ml-auto shrink-0 px-3 py-1.5 rounded-xl border-2 border-gray-200 bg-white text-gray-600 text-[11px] font-black"
+            >
+              📋 複製整份
+            </button>
+          </div>
+
+          <div className="space-y-2">
+            {saved.map((s) => {
+              const sq = encodeURIComponent(s.name);
+              return (
+                <div
+                  key={s.id}
+                  className={`p-3 rounded-2xl border-2 ${
+                    s.bought ? "bg-gray-50 border-gray-150 opacity-60" : "bg-white border-gray-200"
+                  }`}
+                >
+                  <div className="flex items-start gap-2">
+                    <button
+                      onClick={() => toggleBought(s.id)}
+                      className="shrink-0 text-lg leading-none pt-0.5"
+                    >
+                      {s.bought ? "✅" : "⬜"}
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <div
+                        className={`text-sm font-black text-gray-800 break-words ${
+                          s.bought ? "line-through" : ""
+                        }`}
+                      >
+                        <span className="mr-1">{modeIcon[s.mode] || "🛍️"}</span>
+                        {s.name}
+                      </div>
+                      <div className="text-[11px] font-bold text-gray-500 mt-0.5">
+                        日本 {s.yen ? "¥" + s.yen.toLocaleString() : "—"}
+                        {s.twd ? ` ≈ NT$${s.twd.toLocaleString()}` : ""}
+                        <span className="text-gray-300 mx-1">·</span>
+                        {s.date}
+                      </div>
+                      {s.tw && (
+                        <div className="text-[11px] font-bold text-gray-500 break-words">
+                          台灣 {s.tw}
+                        </div>
+                      )}
+                      {s.verdict && (
+                        <div className="text-[11px] font-black text-indigo-600 break-words mt-0.5">
+                          {s.verdict}
+                        </div>
+                      )}
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        <a
+                          href={`https://www.momoshop.com.tw/search/searchShop.jsp?keyword=${sq}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2.5 py-1 rounded-full border-2 border-pink-200 bg-pink-50 text-pink-700 text-[10px] font-black"
+                        >
+                          momo
+                        </a>
+                        <a
+                          href={`https://shopee.tw/search?keyword=${sq}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2.5 py-1 rounded-full border-2 border-orange-200 bg-orange-50 text-orange-700 text-[10px] font-black"
+                        >
+                          蝦皮
+                        </a>
+                        <a
+                          href={`https://www.google.com/search?tbm=shop&q=${sq}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2.5 py-1 rounded-full border-2 border-gray-200 bg-gray-50 text-gray-600 text-[10px] font-black"
+                        >
+                          Google購物
+                        </a>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => removeItem(s.id)}
+                      className="shrink-0 text-[11px] font-black text-rose-400 pt-0.5"
+                    >
+                      刪除
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="text-[10px] text-gray-400 font-bold">
+            清單存在這支手機／這台電腦的瀏覽器裡，換裝置不會同步。要帶走請按「複製整份」貼到 LINE。
           </div>
         </div>
       )}
