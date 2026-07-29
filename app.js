@@ -1068,6 +1068,54 @@ const RT_ROAD_POLY = [
   "wc~kEa||zW~@m@DgGiHc^{Use@?_DoDGIaBq@Ey@AIrFdHBh@iX{LuNaLqKtg@so@aAeC|DaFl@qCwCw@gBeCE{JeCsDGsAh@aA~OwIpBmDlC}BXaCqAwCqa@zV_AMeAl@K~@sCjBsIjDnIsDfC}AViAnAs@t@Nba@kVJc@iByE",
 ];
 
+// 每一段（景點到景點）的實際道路路線，供各景點縮圖使用
+const RT_ROAD_LEGS = [
+  [
+    "ge~kEace{WFCfBtE?b@JFdAnCMnABF\\\\d@@\\JVT\\t@?lAOf@{@vAAVHh@t@vANl@V^aM`Mk@eAxFeF~@q@",
+    "q_~kEi_d{WrDcBoYpWcYzCc^zX{c@aRkvCuNmK{MoLw]xQktAl@gYsCmUgQqm@gBy[jAuQfP}w@d@sb@mEkg@e[io@a@y[iJGnHuDH_R",
+    "czglEsjs{WaA_E{FjA_AqBmLvC]hKoLn@wNfTQzI{NpCFvJaCzQmUvj@F~AnS~VDtCoKJeDxBwGnKgLbHs]dLbKwDa@uF",
+    "ubllE}vm{W`@tFbPkF`^aZdd@dCyCqWmf@wq@kt@si@{Pcg@sXcWiAoTow@_bA?g^wHiQob@ok@g[kLiAwMqWkZiXa{BeUee@inBytAyc@e~@cp@kf@e`@kcA_L_x@iAeiAxJwt@i[c`@oBej@nSmcAqFwp@sRgHkIak@cx@qf@e~AaScQiXks@iMoEiZq|@hYgj@jb@go@fS}b@pBko@ePyRak@pF{A",
+    "yalmEuny|WqFzAgJ{Pgd@ec@yb@gP_e@kz@{@wPrDiYoCmQiQiWDg{@wSwAmPqLcQnEa|A^{Awu@}Jix@jBs]oHue@jBqfA|Ign@kD}ZGuVwM{PwFcOaw@m~@kFeSn@u[rEcPdRy\\fXqSnF}kC{C}c@yR{@mXbHyAwArE{E",
+  ],
+  [
+    "k`xmEgty}W_EbE`B`Ac@bAkLlA?`Aw@~GmA|QkCzJ{Lu@_Ca@@iBbAaD",
+    "ajymEwhx}WcA`DAhBoJsDxGq\\oOeAQIc@}CWeFLoGbBeMzBcMvE|AG`@_AS^VMn@s@W",
+    "_wymEcrz}WjCbALRXLg@~B",
+    "srymE}jz}WJe@",
+    "grymEclz}W{FzXhf@~IpoCqY~mHt`DnjGwfAnnDjdBxp@cb@`nE{@`pDf`An|Cz_KvKjfIr}BhnFVj_DfoD}YpiBdeAti@p|DtiBlbBhmAbRnBxrAltAhz@de@drCf{@~cAi\\pz@es@|Gbh@|i@",
+    "ekqkEexv{WC~CtBdCpAe@dAcEhBLoDlXMjWpMdHpBfFf@l`AvMrAJxa@uEzS}o@bkAiF`Bq[iAuFl@e}@hu@kJdDab@jH{XnRWc@jJmH",
+    "abwkEw{k{W`T{Kdb@mHzIoFrLoLtOx_@tJxJbE`NjVpf@~ElC~Q{AdGvB`KbRdDxNpi@pn@fC`KdBz^mBvQi@[",
+    "wvokEene{WuAy|@yz@oqAea@iD{x@gbBtT{p@~}@lK|_A}QlmBupArrC_gAp}@kt@~dBhA~uCay@frAdOprF{SbsBxTz`B}i@rqAcsA`Fva@lvAxG~_AdaA~o@nwD",
+    "c~cjE}mq{WFgEiAdKcq@tDgH~[e`ANqg@gOU|bAeWv~@~g@zRpJ`N|HhlCrLfWbb@|[|C~{A|`@ns@b{@vmCdtB}ElFh}@~Nhi@xm@cExu@~a@cKtaAkTrh@bFhrBgCtc@tKhPqI`dAhFf{BicBvYjA~QcD|C",
+  ],
+  [
+    "}u_jEochzWr@bHti@oHdD?~Di@~Jk@",
+    "mr}iEqfhzW~TkApNaBhRyDbOq@dJ\\F|F",
+    "_~ziEojhzWG}FtRvAhDy@vAuBdEaOpD_Dps@sBtUf@UuF{BU",
+    "apwiE_uizWzBTTtFuUg@qs@rBaD`CuE~OmBdCsCh@uRwAkF~`CsC~LoE~FmFtCkQlEcwBnW",
+    "ub`jEyvbzWeh@tDzC`^|Yzz@`]ltDk}DbxCyFxN~QdcE~QtVqAhSfJbm@gKdsAp@nh@uNfv@zGuBpMu[_C~DdOla@naAlqAlYlcB|Vtn@n^h^t_Avd@`h@vq@pr@fj@zg@`t@ld@nQvVaFxGjNr[sO`a@vSnpAxrBdToP`HwUr]wKhHnQnMyFvJ`H",
+    "akoiEiltxW|FbC|AsT`RgGf[l^vE|TwGrSxCde@|MlZ`Hhs@jWfj@xxAhq@x@tn@hUzi@zCp\\{H`j@~ErhAiWjl@aJn|@u^|h@_Nz_AsEvy@tHzu@kAhu@zJfu@{Anc@c^foAc]d_@aVdm@eGzu@hGfi@~a@vv@Ldh@tHjXpQt\\hc@pVtL`YwDpu@xEteA|Tnw@m^p{AxIt_D{V`m@{Tw@eWlIeFkEq`Alu@",
+    "}`niEe`wvWi@B]o@fQuM",
+    "}pmiEgpwvWjBsALTqJbHv@bB",
+    "}vmiE}ewvWcAyB~NqKnG_@tDcC~HkG`MsMhX_b@vAl@nGeT}@sKGoMu@yHHeLyD_KI_KcAcFTkE`KyFhAqAl@wAVyDm@eEkGcIuEmOMuGvA}R",
+  ],
+  [
+    "_gkiEcq_wWwA|RLtGtElO|FfHv@dDaAlIkMjIUjEbAbFClIfEpLIdLzB|c@oGdTz@`@yBhGR~CsHzJg@hFwHvDuKtPuJtIiKdQeGrd@jIzl@`J~HrClLEfFyClJB`FbM`UnK`AdAxARxEyBzHj@le@{CtO~B|@OpGxFnFaEp@",
+    "_ykiEccovW_AwHV{F_C}@pCiMmAie@vCqIEsGeAyAoKaAcMaUCaFxCmJDgFsCmLaJ_IqIcn@bDi^`JaRgEsJ~[uYhX_b@t@{O_DyQkFsPtCd@",
+    "ookiEqi{vWsA[aAIqGwRMoA?kARuAh@{BpDmL\\m@~@_AvGuDQa@",
+    "qjkiEqa}vWrPwN{Ood@dDca@tIwTjn@gM~K}f@cUwt@]k~BadA}mAgIuaAgc@}y@wG}p@Wd^aj@uz@co@wOaz@lVm`DTq^~ToqDii@sz@{_@qAkWkb@ic@}eAuFcpA~cBc_ApM__Avt@yt@hAun@s~@sz@|LmT}NuTzN",
+    "mapjEimpwWmBgFbXsGsT{ZmL`DyzB_I{VgEqCgSyNkC|Rs^tAwj@xRuUqWs\\_UgCgOmy@oRaC_f@`YySte@oQ~HuPmIc\\{@gBmz@cPcVMqKuF~EzCaIgDmRwe@_ScAkVuFiEaDrG}Wc\\kQmr@y^mNkFwmAcV}PkHk]s\\a_@qGe`@cOkS~Os^",
+    "ufbkE{sfxW|ZqyA|i@sWgh@irCySqiD_Yms@}`@oPqmB|t@ahCctAgf@hGaTstAiZam@tB{q@gp@ctCxGooBma@ciByT}Pw@e{AsdBmeFeq@qi@gcAiqC}aAqsA{x@{jBmQ_cAhOgs@yCiuAjUwo@nIceJ}_@wkBq~@ikBc[ydBqf@`M",
+    "}j`lEep{zW]LaA|AhClC|EwA",
+    "ub`lEck{zWlA[bAsArLsD~@k@be@ga@h@i@aCcGhAm@",
+    "yh~kEwb}zWiAl@`CbGhB{A",
+  ],
+  [
+    "wc~kEa||zW~@m@DgGiHc^cTgc@w@kA?_DoDGOED{Aq@E",
+    "ci_lE_t_{WpFEXmP{LuNaLqKtg@so@aAeC|DaFl@qCwCw@gBeCE{JeCsDGsAh@aA~OwIpBmDlC}BXaCqAwCqa@zV_AMeAl@K~@sCjBsIjDnIsDfC}AViAnAs@t@Nba@kVJc@iByE",
+  ],
+];
+
 // Google/OSRM encoded polyline 解碼
 const rtDecodePoly = (str) => {
   let i = 0, lat = 0, lon = 0;
@@ -1147,6 +1195,89 @@ const RouteThumb = ({ tripData, idx }) => {
       ) : null}
       {endPt ? (
         <circle cx={endPt[0]} cy={endPt[1]} r="2.8" fill="#ffffff" stroke={RT_SPROUT} strokeWidth="1.8" />
+      ) : null}
+    </svg>
+  );
+};
+
+// ------------------------------------------
+// 單一景點的路線縮圖
+// 淡灰 = 本日所有路線；樹枝咖啡 = 本日已完成路線；新芽綠 = 本景點路線
+// ------------------------------------------
+const SRT_W = 44;
+const SRT_H = 28;
+const SRT_PAD = 4;
+
+const _srtCache = {};
+const buildSpotRoute = (dayIdx) => {
+  if (_srtCache[dayIdx] !== undefined) return _srtCache[dayIdx];
+  const raw = RT_ROAD_LEGS[dayIdx];
+  let val = null;
+  if (raw && raw.length) {
+    const legs = raw.map((s) => (s ? rtDecodePoly(s) : []));
+    const all = legs.reduce(
+      (acc, p, k) => acc.concat(k ? p.slice(1) : p),
+      []
+    );
+    if (all.length >= 2) {
+      const las = all.map((p) => p.lat);
+      const los = all.map((p) => p.lon);
+      const minLa = Math.min(...las), maxLa = Math.max(...las);
+      const minLo = Math.min(...los), maxLo = Math.max(...los);
+      const dLa = maxLa - minLa || 1e-6;
+      const dLo = maxLo - minLo || 1e-6;
+      const sc = Math.min((SRT_W - 2 * SRT_PAD) / dLo, (SRT_H - 2 * SRT_PAD) / dLa);
+      const ox = SRT_PAD + ((SRT_W - 2 * SRT_PAD) - dLo * sc) / 2;
+      const oy = SRT_PAD + ((SRT_H - 2 * SRT_PAD) - dLa * sc) / 2;
+      const P = (p) =>
+        (ox + (p.lon - minLo) * sc).toFixed(1) + "," + (oy + (maxLa - p.lat) * sc).toFixed(1);
+      val = {
+        allChain: all.map(P).join(" "),
+        legChains: legs.map((p) => (p.length >= 2 ? p.map(P).join(" ") : "")),
+        legPts: legs.map((p) => p.map(P)),
+      };
+    }
+  }
+  _srtCache[dayIdx] = val;
+  return val;
+};
+
+// dayIdx = 第幾天（0 起算）；spotIdx = 當天第幾個景點（0 起算）
+const SpotRouteThumb = ({ dayIdx, spotIdx }) => {
+  const data = buildSpotRoute(dayIdx);
+  if (!data) return null;
+  // 第一天沒有「前一天最後一站」當起點，所以第 1 個景點沒有抵達路段
+  const li = dayIdx === 0 ? spotIdx - 1 : spotIdx;
+  const cur = li >= 0 ? data.legChains[li] || "" : "";
+  const done =
+    li > 0
+      ? data.legPts
+          .slice(0, li)
+          .reduce((acc, p, k) => acc.concat(k ? p.slice(1) : p), [])
+          .join(" ")
+      : "";
+  let endPt = null;
+  if (cur) {
+    const parts = cur.split(" ");
+    endPt = parts[parts.length - 1].split(",");
+  }
+  return (
+    <svg
+      viewBox={`0 0 ${SRT_W} ${SRT_H}`}
+      width={SRT_W}
+      height={SRT_H}
+      className="block shrink-0"
+      aria-hidden="true"
+    >
+      <polyline points={data.allChain} fill="none" stroke={RT_GRAY} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+      {done ? (
+        <polyline points={done} fill="none" stroke={RT_BRANCH} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+      ) : null}
+      {cur ? (
+        <polyline points={cur} fill="none" stroke={RT_SPROUT} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      ) : null}
+      {endPt ? (
+        <circle cx={endPt[0]} cy={endPt[1]} r="2.6" fill="#ffffff" stroke={RT_SPROUT} strokeWidth="1.6" />
       ) : null}
     </svg>
   );
@@ -1303,6 +1434,11 @@ const ItineraryTab = ({
                             </span>
                           )}
                         </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                        <SpotRouteThumb
+                          dayIdx={parseInt(day.dayId.replace("day", ""), 10) - 1}
+                          spotIdx={index}
+                        />
                         <div
                           className={`text-right shrink-0 px-3 py-1.5 rounded-xl border-2 ${
                             dayRemaining === 0
@@ -1324,6 +1460,7 @@ const ItineraryTab = ({
                               ? "✅ 今日完成"
                               : `已完成 ${dayDone} · 還剩 ${dayRemaining} 站`}
                           </div>
+                        </div>
                         </div>
                       </div>
 
