@@ -1,10 +1,10 @@
-const APP_VERSION = '44'; // 與 index.html 的 ?v= 保持一致
+const APP_VERSION = '45'; // 與 index.html 的 ?v= 保持一致
 const CACHE_NAME = 'trip-2026-kyushu-v' + APP_VERSION;
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './app.js?v=44',
-  './config.js?v=44',
+  './app.js?v=45',
+  './config.js?v=45',
   './manifest.json',
   './logo.jpg',
   './icon-192.png',
