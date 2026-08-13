@@ -4835,34 +4835,37 @@ function App() {
   // --- Chain Store Finder ---
   const [showChainPanel, setShowChainPanel] = useState(false);
   const [chainMidpoint, setChainMidpoint] = useState(null);
-  const [chainStores, setChainStores] = useState([]);
   const chains = window.CHAIN_STORES || [];
 
+  // v6：不再預計算繞路距離。點品牌 → 複製關鍵字 → 開 Maps 導航（目前位置→下一景點），
+  //     使用者在 Maps 按「新增停靠站」貼上關鍵字，用 Google 即時沿路線搜尋自選分店。
   const openChainFinder = (spotA, spotB) => {
-    const midLat = ((spotA.lat || 0) + (spotB.lat || 0)) / 2;
-    const midLon = ((spotA.lon || 0) + (spotB.lon || 0)) / 2;
-    const routeKey = spotA.name + "→" + spotB.name;
-    const preCalc = window.CHAIN_ROUTES?.[routeKey];
-    const d1 = preCalc?.d1 || null;
-    const d1km = d1 ? (d1 / 1000).toFixed(1) : parseFloat(getDistanceFromLatLonInKm(spotA.lat, spotA.lon, spotB.lat, spotB.lon));
-    // v5：估算通過時刻（實際出發時間優先，否則抵達＋停留），供營業時間警示
+    const d1km = parseFloat(getDistanceFromLatLonInKm(spotA.lat, spotA.lon, spotB.lat, spotB.lon));
+    // 估算通過時刻（實際出發時間優先，否則抵達＋停留）
     let passMinutes = null;
     if (spotA.actualDepTime) {
       passMinutes = timeToMinutes(spotA.actualDepTime);
     } else if (spotA.time) {
       passMinutes = timeToMinutes(spotA.time) + parseStayDuration(spotA.stay || "1.5 hr");
     }
-    setChainMidpoint({ midLat, midLon, fromName: spotA.name, toName: spotB.name, fromLat: spotA.lat, fromLon: spotA.lon, toLat: spotB.lat, toLon: spotB.lon, d1km, d1min: preCalc?.min ?? null, passMinutes, hasPreCalc: !!preCalc });
-    // Use pre-calculated stores if available, filter out huge detours (>30km = not in area)
-    const preStores = preCalc?.stores?.filter(s => s.detour != null && s.detour < 30000) || [];
-    // v5：有真實繞路分鐘就用它排序
-    preStores.sort((a, b) => (a.detourMin ?? a.detour / 1000) - (b.detourMin ?? b.detour / 1000));
-    setChainStores(preStores);
+    setChainMidpoint({ fromName: spotA.name, toName: spotB.name, toLat: spotB.lat, toLon: spotB.lon, d1km, passMinutes });
+    setCopiedChain(null);
     setShowChainPanel(true);
   };
 
-  const chainNavUrl = (storeName, mp, storeLat, storeLng) =>
-    "https://www.google.com/maps/dir/?api=1&origin=" + mp.fromLat + "," + mp.fromLon + "&destination=" + mp.toLat + "," + mp.toLon + "&waypoints=" + (storeLat ? storeLat + "," + storeLng : encodeURIComponent(storeName)) + "&travelmode=driving";
+  // 起點省略 = Google Maps 自動用目前位置
+  const chainNavUrl = (mp) =>
+    "https://www.google.com/maps/dir/?api=1&destination=" + mp.toLat + "," + mp.toLon + "&travelmode=driving";
+
+  const [copiedChain, setCopiedChain] = useState(null);
+  const launchChain = (c, mp) => {
+    const kw = c.query || c.name;
+    try {
+      navigator.clipboard.writeText(kw);
+    } catch (e) {}
+    setCopiedChain(c.name);
+    setTimeout(() => window.open(chainNavUrl(mp), "_blank"), 350);
+  };
 
   useEffect(() => {
     localStorage.setItem("shopping_list", JSON.stringify(shoppingList));
@@ -6117,89 +6120,40 @@ ${JSON.stringify(hotelWithDates)}
               )}
             </div>
 
-            {chainStores.length > 0 ? (
-              <div className="space-y-2">
-                {chainStores.map((store, i) => {
-                  // v5：有 detourMin（真實繞路分鐘）優先顯示與分級，否則沿用公尺
-                  const hasMin = store.detourMin != null;
-                  const detourKm = store.detour >= 1000 ? (store.detour / 1000).toFixed(1) + "km" : store.detour + "m";
-                  const level = hasMin
-                    ? (store.detourMin <= 3 ? 0 : store.detourMin <= 8 ? 1 : 2)
-                    : (store.detour <= 2000 ? 0 : store.detour <= 5000 ? 1 : 2);
-                  const colorClass = level === 0 ? "bg-green-50 border-green-300 text-green-800" : level === 1 ? "bg-amber-50 border-amber-200 text-amber-800" : "bg-red-50 border-red-200 text-red-800";
-                  const badgeClass = level === 0 ? "bg-green-100 text-green-700" : level === 1 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700";
-                  const noDetour = hasMin ? store.detourMin <= 1 : store.detour <= 500;
-                  const detourLabel = noDetour ? "✅ 不繞路" : "🔄 +" + (hasMin ? store.detourMin + "分" : detourKm);
-                  const catIcon = store.cat === "丼飯" ? "🍚" : store.cat === "文具" ? "✏️" : store.cat === "家電" ? "🔌" : "🛒";
-                  // v5：營業時間警示（預計通過時刻 vs 該日營業區間）
-                  const pm = chainMidpoint.passMinutes;
-                  const hasHours = store.open && store.close;
-                  const isClosedAtPass =
-                    hasHours && pm != null &&
-                    (pm < timeToMinutes(store.open) || pm >= timeToMinutes(store.close));
-                  const hoursLabel = store.open === "00:00" && store.close === "24:00" ? "24h" : store.open + "–" + store.close;
-                  return (
-                    <a key={i} href={chainNavUrl(store.branch && store.branch.match(/[\u3000-\u9fff]/) ? store.branch : store.name + " " + (store.branch || ""), chainMidpoint, store.lat, store.lng)} target="_blank" rel="noreferrer"
-                      className={`block p-3 rounded-xl border-2 ${colorClass} active:scale-[0.98] transition`}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-sm">{store.icon} {store.name}</span>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${badgeClass}`}>
-                          {detourLabel}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500">{catIcon} {store.branch || store.name}</span>
-                        <span className="text-xs font-bold">🚗 導航</span>
-                      </div>
-                      {hasHours && (
-                        <div className={`text-[11px] mt-1 font-bold ${isClosedAtPass ? "text-red-600" : "text-gray-400"}`}>
-                          {isClosedAtPass ? "⚠️ 預計通過時未營業　" : "🕐 "}營業 {hoursLabel}
-                        </div>
-                      )}
-                    </a>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="text-xs font-bold text-orange-600 mb-2">🍚 丼飯連鎖</div>
-                <div className="grid grid-cols-2 gap-2 mb-4">
-                  {chains.filter(c => c.cat === "丼飯").map((c, i) => (
-                    <a key={i} href={chainNavUrl(c.name, chainMidpoint)} target="_blank" rel="noreferrer"
-                      className="flex items-center gap-2 p-3 bg-orange-50 rounded-xl border-2 border-orange-200 text-sm font-bold text-orange-800 active:scale-95 transition">
-                      <span className="text-lg">{c.icon}</span><span className="flex-1">{c.name}</span><span className="text-xs">🚗</span>
-                    </a>
-                  ))}
-                </div>
-                <div className="text-xs font-bold text-green-600 mb-2">🛒 超市連鎖</div>
-                <div className="grid grid-cols-2 gap-2 mb-4">
-                  {chains.filter(c => c.cat === "超市").map((c, i) => (
-                    <a key={i} href={chainNavUrl(c.name, chainMidpoint)} target="_blank" rel="noreferrer"
-                      className="flex items-center gap-2 p-3 bg-green-50 rounded-xl border-2 border-green-200 text-sm font-bold text-green-800 active:scale-95 transition">
-                      <span className="text-lg">{c.icon}</span><span className="flex-1">{c.name}</span><span className="text-xs">🚗</span>
-                    </a>
-                  ))}
-                </div>
-                <div className="text-xs font-bold text-blue-600 mb-2">✏️ 文具／生活雜貨（クルトガ等）</div>
-                <div className="grid grid-cols-2 gap-2 mb-4">
-                  {chains.filter(c => c.cat === "文具").map((c, i) => (
-                    <a key={i} href={chainNavUrl(c.name, chainMidpoint)} target="_blank" rel="noreferrer"
-                      className="flex items-center gap-2 p-3 bg-blue-50 rounded-xl border-2 border-blue-200 text-sm font-bold text-blue-800 active:scale-95 transition">
-                      <span className="text-lg">{c.icon}</span><span className="flex-1">{c.name}</span><span className="text-xs">🚗</span>
-                    </a>
-                  ))}
-                </div>
-                <div className="text-xs font-bold text-purple-600 mb-2">🔌 家電量販／健康家電（ドクターエア等）</div>
-                <div className="grid grid-cols-2 gap-2">
-                  {chains.filter(c => c.cat === "家電").map((c, i) => (
-                    <a key={i} href={chainNavUrl(c.name, chainMidpoint)} target="_blank" rel="noreferrer"
-                      className="flex items-center gap-2 p-3 bg-purple-50 rounded-xl border-2 border-purple-200 text-sm font-bold text-purple-800 active:scale-95 transition">
-                      <span className="text-lg">{c.icon}</span><span className="flex-1">{c.name}</span><span className="text-xs">🚗</span>
-                    </a>
-                  ))}
-                </div>
+            <div className="text-[11px] text-gray-500 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3 leading-relaxed">
+              點品牌後會<b>自動複製關鍵字</b>並開啟 Google Maps 導航（目前位置 → {chainMidpoint.toName}）。
+              在 Maps 按「<b>⋮ 新增停靠站</b>」→ 長按<b>貼上</b>關鍵字，即可沿路線即時搜尋、自選分店。
+            </div>
+            {copiedChain && (
+              <div className="text-xs font-bold text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2 mb-3">
+                ✅ 已複製「{copiedChain}」，到 Maps 新增停靠站貼上即可
               </div>
             )}
+            <div className="space-y-2">
+              {[
+                { cat: "丼飯", label: "🍚 丼飯連鎖", box: "bg-orange-50 border-orange-200 text-orange-800", head: "text-orange-600" },
+                { cat: "超市", label: "🛒 超市", box: "bg-green-50 border-green-200 text-green-800", head: "text-green-600" },
+                { cat: "挖寶", label: "🎁 挖寶（二手）", box: "bg-purple-50 border-purple-200 text-purple-800", head: "text-purple-600" },
+                { cat: "文具", label: "✏️ 文具／生活雜貨", box: "bg-blue-50 border-blue-200 text-blue-800", head: "text-blue-600" },
+                { cat: "家電", label: "🔌 家電量販", box: "bg-purple-50 border-purple-200 text-purple-800", head: "text-purple-600" },
+              ].map((g) => {
+                const items = chains.filter((c) => c.cat === g.cat);
+                if (items.length === 0) return null;
+                return (
+                  <div key={g.cat}>
+                    <div className={`text-xs font-bold mb-2 ${g.head}`}>{g.label}</div>
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      {items.map((c, i) => (
+                        <button key={i} onClick={() => launchChain(c, chainMidpoint)}
+                          className={`flex items-center gap-2 p-3 rounded-xl border-2 text-sm font-bold text-left active:scale-95 transition ${g.box}`}>
+                          <span className="text-lg">{c.icon}</span><span className="flex-1 min-w-0 truncate">{c.name}</span><span className="text-xs">🚗</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
