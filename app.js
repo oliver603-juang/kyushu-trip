@@ -390,6 +390,7 @@ const ExpenseModal = ({
     key: "date",
     direction: "desc",
   });
+  const [detailRec, setDetailRec] = useState(null); // 點紀錄卡片 → 彈出完整明細
 
   if (!isOpen || !currentEditingSpot) return null;
   const safePendingReceipts = pendingReceipts || [];
@@ -633,7 +634,8 @@ const ExpenseModal = ({
               {sortedExpenses.map((r) => (
                 <div
                   key={r.id}
-                  className="flex justify-between text-sm bg-gray-50 p-3 rounded-xl border border-gray-100"
+                  onClick={() => setDetailRec(r)}
+                  className="flex justify-between text-sm bg-gray-50 p-3 rounded-xl border border-gray-100 cursor-pointer active:bg-gray-100"
                 >
                   <div className="flex flex-col">
                     <span className="text-gray-700 font-medium">
@@ -641,6 +643,11 @@ const ExpenseModal = ({
                     </span>
                     <span className="text-[10px] text-gray-400">
                       {formatTime(r.timestamp || r.id)}
+                      {r.itemsFull && r.itemsFull.length > 0 && (
+                        <span className="ml-1 text-[#A9BFA8] font-bold">
+                          📋 {r.itemsFull.length} 項
+                        </span>
+                      )}
                     </span>
                   </div>
                   <div className="flex gap-3 items-center">
@@ -653,7 +660,10 @@ const ExpenseModal = ({
                       )}
                     </span>
                     <button
-                      onClick={() => deleteExpense(currentEditingSpot.id, r.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteExpense(currentEditingSpot.id, r.id);
+                      }}
                       className="text-gray-400 hover:text-red-400"
                     >
                       <Icons.X size={14} />
@@ -677,6 +687,71 @@ const ExpenseModal = ({
           >
             儲存
           </button>
+        </div>
+        {/* 消費明細彈窗 */}
+        {detailRec && (
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[150] p-4"
+            onClick={() => setDetailRec(null)}
+          >
+            <div
+              className="bg-white rounded-3xl p-5 w-full max-w-sm max-h-[75vh] flex flex-col shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-start mb-1">
+                <h4 className="font-bold text-gray-800 text-base leading-snug pr-2">
+                  {detailRec.note || "消費"}
+                </h4>
+                <button
+                  onClick={() => setDetailRec(null)}
+                  className="text-gray-400 hover:text-gray-600 shrink-0"
+                >
+                  <Icons.X size={18} />
+                </button>
+              </div>
+              <div className="text-[11px] text-gray-400 mb-3">
+                {formatTime(detailRec.timestamp || detailRec.id)}
+              </div>
+              <div className="overflow-y-auto no-scrollbar flex-1">
+                {detailRec.itemsFull && detailRec.itemsFull.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {detailRec.itemsFull.map((it, i) => (
+                      <div
+                        key={i}
+                        className="flex justify-between gap-3 text-sm py-1.5 border-b border-dashed border-gray-100"
+                      >
+                        <span className="text-gray-700">{it.name}</span>
+                        <span className="font-mono text-gray-800 shrink-0">
+                          ¥{(it.price || 0).toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-xs text-gray-400 leading-relaxed">
+                    這筆紀錄沒有逐項明細（舊紀錄或手動記帳）。
+                    之後用「AI 掃收據」入帳的消費，會自動保留完整品項。
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-between items-center pt-3 mt-2 border-t border-gray-200">
+                <span className="text-xs font-bold text-gray-500">
+                  合計（實付為準）
+                </span>
+                <span className="font-mono font-black text-lg text-gray-900">
+                  ¥{(detailRec.amount || 0).toLocaleString()}
+                  {detailRec.currency === "TWD" &&
+                    detailRec.origAmount != null && (
+                      <span className="block text-[10px] text-gray-400 text-right font-normal">
+                        NT${detailRec.origAmount.toLocaleString()}
+                      </span>
+                    )}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="hidden">
         </div>
       </div>
     </div>
@@ -5454,6 +5529,7 @@ function App() {
           timestamp: recordTime,
           note: p.note,
           category: p.category || "other",
+          ...(p.itemsFull && p.itemsFull.length ? { itemsFull: p.itemsFull } : {}),
           ...conv,
         });
       }
@@ -5683,7 +5759,13 @@ function App() {
 4. category：消費分類，從以下擇一：food(餐飲/超商食品)、shopping(購物/藥妝/玩具/雜貨)、transport(加油/過路費/交通票)、parking(停車費)、other(其他)
 5. items：主要品項摘要，最多列 3 項、共 15 字內（例如「牛丼×2、味噌湯」），超過加「等」；看不清楚回傳 null
 6. currency：幣別判斷。日本收據（円、税込、日文格式）回傳 "JPY"；台灣收據（NT$、新台幣、統一發票、台灣門市如超商/LOUISA/路易莎）回傳 "TWD"；其他國家回傳 ISO 代碼
-只回傳純 JSON：{amount, store, date, category, items, currency}`,
+7. itemsFull：完整逐項明細陣列 [{"name":"品名","price":淨價數字}, ...]，規則：
+   - 「免税5%引き」「値引」「割引」等折扣行不是獨立品項，要併入前一項算成折後淨價
+   - ¥0 的行（如付款方式、VISA免税優待、袋代0円）與「小計」「合計」「お預り」「お釣り」行都排除
+   - 品名保留收據原文即可；同品項×N 就寫「品名×N」價格寫合計
+   - 自我驗算：所有 price 加總應等於 amount，不一致時仍以「合計」為 amount
+   - 收據品項超過 30 項或看不清楚時回傳 null
+只回傳純 JSON：{amount, store, date, category, items, currency, itemsFull}`,
               reader.result
             );
             const jsonMatch = res.match(/\{[\s\S]*\}/);
@@ -5703,6 +5785,7 @@ function App() {
                   amount: json.amount,
                   currency: cur,
                   note: displayNote,
+                  itemsFull: Array.isArray(json.itemsFull) ? json.itemsFull : null,
                   category: json.category || "other",
                   timestamp: json.date
                     ? new Date(json.date).getTime()
